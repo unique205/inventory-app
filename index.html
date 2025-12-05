@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📦 Inventory System</title>
     <style>
-        /* SIMPLE STYLES */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f5f5f5; }
         .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
@@ -15,17 +14,11 @@
         .header h1 { color: #2c3e50; margin-bottom: 10px; }
         
         /* SETUP SCREEN */
-        .setup-screen { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .setup-screen h2 { color: #2c3e50; margin-bottom: 20px; }
-        .setup-steps { background: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
-        .setup-steps ol { margin-left: 20px; }
-        .setup-steps li { margin-bottom: 10px; }
+        .setup-screen { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
         
         /* TOKEN INPUT */
-        .token-input { margin: 20px 0; }
-        .token-input label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .token-input input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 5px; font-size: 16px; }
-        .token-input input:focus { border-color: #3498db; outline: none; }
+        .token-box { background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        .token-box input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 5px; font-size: 16px; }
         
         /* BUTTONS */
         .btn { padding: 12px 24px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin: 5px; }
@@ -36,8 +29,8 @@
         
         /* LOGIN SCREEN */
         .login-screen { text-align: center; padding: 40px; }
-        .login-buttons { display: flex; flex-direction: column; gap: 15px; max-width: 300px; margin: 30px auto; }
-        .login-btn { padding: 15px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }
+        .login-buttons { display: flex; flex-direction: column; gap: 15px; max-width: 400px; margin: 30px auto; }
+        .login-btn { padding: 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; text-align: left; }
         .staff-btn { background: #3498db; color: white; }
         .admin-btn { background: #2c3e50; color: white; }
         
@@ -54,21 +47,20 @@
         .suggestion { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; }
         .suggestion:hover { background: #f5f5f5; }
         
-        /* SUCCESS MESSAGE */
+        /* SUCCESS */
         .success { background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-top: 15px; text-align: center; }
         
         /* ADMIN INTERFACE */
         .inventory-table { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 20px; }
-        .table-header { display: grid; grid-template-columns: 3fr 1fr 1fr 2fr 1fr; background: #34495e; color: white; padding: 15px; font-weight: bold; }
-        .table-row { display: grid; grid-template-columns: 3fr 1fr 1fr 2fr 1fr; padding: 12px 15px; border-bottom: 1px solid #eee; align-items: center; }
+        .table-header { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr 1fr; background: #34495e; color: white; padding: 15px; font-weight: bold; }
+        .table-row { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr 1fr; padding: 12px 15px; border-bottom: 1px solid #eee; align-items: center; }
         .table-row:hover { background: #f9f9f9; }
         
-        /* ADMIN CONTROLS */
+        /* CONTROLS */
         .admin-controls { display: flex; gap: 10px; margin: 20px 0; }
         
-        /* STATUS MESSAGES */
+        /* MESSAGES */
         .error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin: 10px 0; }
-        .info { background: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 5px; margin: 10px 0; }
         
         /* HIDDEN */
         .hidden { display: none; }
@@ -76,64 +68,65 @@
 </head>
 <body>
     <div class="container">
-        <!-- SETUP SCREEN (First time only) -->
-        <div id="setupScreen" class="setup-screen hidden">
-            <h2>🔧 Initial Setup Required</h2>
+        <!-- SETUP SCREEN -->
+        <div id="setupScreen" class="setup-screen">
+            <h2>🔐 One-Time Setup</h2>
+            <p><strong>Important:</strong> Only the ADMIN needs to setup the token.</p>
             
-            <div class="setup-steps">
-                <p><strong>Step 1: Create GitHub Token</strong></p>
-                <ol>
+            <div class="token-box">
+                <p><strong>Step 1: Generate Token (Admin Only)</strong></p>
+                <ol style="text-align: left; margin: 15px auto; max-width: 500px;">
                     <li>Go to: <a href="https://github.com/settings/tokens" target="_blank">GitHub Tokens</a></li>
                     <li>Click "Generate new token" → "Generate new token (classic)"</li>
                     <li>Token name: <code>inventory-system</code></li>
-                    <li>Expiration: <strong>No expiration</strong> (select this!)</li>
-                    <li>Select scopes: Check <strong>ONLY "repo"</strong></li>
+                    <li>Expiration: <strong>No expiration</strong></li>
+                    <li>Select scopes: <strong>ONLY "repo"</strong></li>
                     <li>Click "Generate token"</li>
                     <li><strong>COPY THE TOKEN</strong> (starts with ghp_)</li>
                 </ol>
-            </div>
-            
-            <div class="token-input">
-                <label>Paste your GitHub token here:</label>
+                
+                <p><strong>Step 2: Enter Token Here</strong></p>
                 <input type="text" id="githubToken" placeholder="Paste token starting with ghp_...">
-                <p style="font-size: 14px; color: #666; margin-top: 5px;">
-                    Token is stored ONLY in your browser. Never shared with anyone.
+                
+                <p style="font-size: 14px; color: #666; margin-top: 10px;">
+                    This token will be shared with all staff. It's stored securely.
                 </p>
             </div>
             
-            <div style="text-align: center; margin-top: 20px;">
+            <div>
                 <button class="btn btn-primary" onclick="saveToken()">✅ Save Token & Continue</button>
-                <button class="btn btn-secondary" onclick="skipForNow()">⏭️ Skip for now (Offline Mode)</button>
+                <br>
+                <button class="btn btn-secondary" onclick="skipSetup()" style="margin-top: 10px;">Already setup? Click here</button>
             </div>
         </div>
 
         <!-- LOGIN SCREEN -->
         <div id="loginScreen" class="login-screen hidden">
             <h1>📦 Inventory System</h1>
-            <p>Select user type:</p>
+            <p>Select your role:</p>
             
             <div class="login-buttons">
                 <button class="login-btn staff-btn" onclick="loginAsStaff()">
                     <h3>👷 STAFF USER</h3>
-                    <p>• Add new items only<br>• Cannot view inventory<br>• Simple interface</p>
+                    <p>• Add new items only<br>• Cannot view or delete<br>• Simple interface</p>
                 </button>
                 
                 <button class="login-btn admin-btn" onclick="loginAsAdmin()">
                     <h3>👑 ADMIN USER</h3>
-                    <p>• Full access to all data<br>• View/Edit/Delete items<br>• Password protected</p>
+                    <p>• View ALL inventory<br>• Add/Edit/Delete items<br>• Full control</p>
                 </button>
             </div>
             
-            <div style="margin-top: 30px;">
-                <button class="btn btn-secondary" onclick="changeToken()">🔑 Change GitHub Token</button>
-            </div>
+            <p style="margin-top: 30px; color: #7f8c8d;">
+                All data stored in: <strong>unique205/inventory-data</strong>
+            </p>
         </div>
 
         <!-- STAFF INTERFACE -->
         <div id="staffInterface" class="hidden">
             <div class="header">
                 <h1>➕ Add Inventory Item</h1>
-                <p>Staff Mode: You can only add items. Admin can view/edit inventory.</p>
+                <p>Staff Mode: You can only add items. Admin reviews inventory.</p>
             </div>
             
             <div id="staffError" class="error hidden"></div>
@@ -185,16 +178,16 @@
         <!-- ADMIN INTERFACE -->
         <div id="adminInterface" class="hidden">
             <div class="header">
-                <h1>📋 Inventory Management</h1>
-                <p>Admin Mode: Full access to all inventory data</p>
+                <h1>📋 Full Inventory</h1>
+                <p>Admin Mode: Viewing all items added by staff and admin.</p>
             </div>
             
             <div id="adminError" class="error hidden"></div>
             
             <div class="admin-controls">
-                <button class="btn btn-primary" onclick="loadInventory()">🔄 Refresh Data</button>
+                <button class="btn btn-primary" onclick="loadInventory()">🔄 Refresh Inventory</button>
                 <button class="btn btn-secondary" onclick="exportData()">📥 Export Data</button>
-                <button class="btn btn-danger" onclick="showDeleteAll()">🗑️ Delete All</button>
+                <button class="btn btn-danger" onclick="deleteAllConfirm()">🗑️ Delete All</button>
                 <button class="btn btn-secondary" onclick="logout()" style="margin-left: auto;">← Logout</button>
             </div>
             
@@ -208,19 +201,21 @@
                 </div>
                 <div id="inventoryList">
                     <div style="text-align: center; padding: 40px; color: #7f8c8d;">
-                        <p>Click "Refresh Data" to load inventory...</p>
+                        <p>Loading inventory from GitHub...</p>
                     </div>
                 </div>
             </div>
-            
-            <!-- DELETE CONFIRMATION -->
-            <div id="deleteConfirm" class="hidden" style="background: #fee; padding: 20px; border-radius: 5px; margin-top: 20px;">
+        </div>
+        
+        <!-- DELETE CONFIRM MODAL -->
+        <div id="deleteModal" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+            <div style="background: white; padding: 30px; border-radius: 10px; max-width: 400px; width: 90%;">
                 <h3 style="color: #c0392b;">⚠️ Delete All Items?</h3>
                 <p>This will delete ALL inventory items permanently.</p>
                 <p>Type <strong>DELETE ALL</strong> to confirm:</p>
                 <input type="text" id="confirmDelete" placeholder="Type DELETE ALL" style="width: 100%; padding: 10px; margin: 10px 0;">
                 <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-danger" onclick="confirmDeleteAll()" disabled>Delete Everything</button>
+                    <button class="btn btn-danger" onclick="deleteAllItems()" disabled>Delete Everything</button>
                     <button class="btn btn-secondary" onclick="cancelDelete()">Cancel</button>
                 </div>
             </div>
@@ -238,7 +233,7 @@
         // Repository name
         const REPO_NAME = 'inventory-data';
         
-        // Data file path
+        // Data file
         const DATA_FILE = 'data/inventory.json';
         
         // Admin password (change this!)
@@ -249,23 +244,23 @@
         // ============================================
         let currentUser = null; // 'staff' or 'admin'
         let githubToken = null;
-        let allItems = [];
+        let allItems = []; // For suggestions
         
         // ============================================
         // INITIALIZATION
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Inventory System Starting...');
+            console.log('Starting inventory system...');
             
-            // Check if token exists in localStorage
-            githubToken = localStorage.getItem('inventory_github_token');
+            // Check if token is already saved
+            const savedToken = localStorage.getItem('inventory_shared_token');
             
-            if (!githubToken) {
-                // Show setup screen
-                showScreen('setupScreen');
-            } else {
-                // Show login screen
+            if (savedToken) {
+                githubToken = savedToken;
                 showScreen('loginScreen');
+                showMessage('info', '✅ Using shared token. Select your role.');
+            } else {
+                showScreen('setupScreen');
             }
         });
         
@@ -273,61 +268,50 @@
         // SCREEN MANAGEMENT
         // ============================================
         function showScreen(screenId) {
-            // Hide all screens
-            document.getElementById('setupScreen').classList.add('hidden');
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('staffInterface').classList.add('hidden');
-            document.getElementById('adminInterface').classList.add('hidden');
-            
-            // Show requested screen
+            ['setupScreen', 'loginScreen', 'staffInterface', 'adminInterface'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
             document.getElementById(screenId).classList.remove('hidden');
-            
-            // Clear errors
-            document.getElementById('staffError').classList.add('hidden');
-            document.getElementById('adminError').classList.add('hidden');
-            document.getElementById('successMessage').classList.add('hidden');
         }
         
         // ============================================
-        // TOKEN MANAGEMENT
+        // TOKEN SETUP
         // ============================================
         function saveToken() {
             const tokenInput = document.getElementById('githubToken');
             const token = tokenInput.value.trim();
             
             if (!token) {
-                alert('Please enter a GitHub token');
+                alert('Please enter a token');
                 return;
             }
             
             if (!token.startsWith('ghp_')) {
-                if (!confirm('Token should start with "ghp_". Are you sure this is correct?')) {
+                if (!confirm('Token should start with "ghp_". Is this correct?')) {
                     return;
                 }
             }
             
-            // Save to localStorage
-            localStorage.setItem('inventory_github_token', token);
+            // Save token to localStorage
+            localStorage.setItem('inventory_shared_token', token);
             githubToken = token;
             
             // Test the token
-            testGitHubToken();
+            testToken();
         }
         
-        function skipForNow() {
-            // Use offline mode
-            githubToken = null;
-            showScreen('loginScreen');
-            showMessage('info', 'Using offline mode. Data will be saved locally only.');
+        function skipSetup() {
+            // Check if token was already saved
+            const savedToken = localStorage.getItem('inventory_shared_token');
+            if (savedToken) {
+                githubToken = savedToken;
+                showScreen('loginScreen');
+            } else {
+                alert('No token found. Please setup first.');
+            }
         }
         
-        function changeToken() {
-            localStorage.removeItem('inventory_github_token');
-            githubToken = null;
-            showScreen('setupScreen');
-        }
-        
-        async function testGitHubToken() {
+        async function testToken() {
             try {
                 const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}`;
                 const response = await fetch(url, {
@@ -339,15 +323,12 @@
                 
                 if (response.ok) {
                     showScreen('loginScreen');
-                    showMessage('info', '✅ GitHub connection successful!');
-                } else if (response.status === 401 || response.status === 403) {
-                    alert('Invalid token. Please generate a new one.');
-                    changeToken();
-                } else if (response.status === 404) {
-                    alert(`Repository not found: ${GITHUB_USERNAME}/${REPO_NAME}\n\nPlease create this repository first.`);
+                    showMessage('info', '✅ Connected to GitHub!');
+                } else {
+                    alert('Invalid token or repository not found. Please check:\n1. Token is correct\n2. Repository exists: unique205/inventory-data');
                 }
             } catch (error) {
-                alert('Connection failed. Please check your internet and try again.');
+                alert('Connection failed. Check internet.');
             }
         }
         
@@ -357,8 +338,6 @@
         function loginAsStaff() {
             currentUser = 'staff';
             showScreen('staffInterface');
-            
-            // Load items for suggestions
             loadItemsForSuggestions();
         }
         
@@ -367,6 +346,7 @@
             if (password === ADMIN_PASSWORD) {
                 currentUser = 'admin';
                 showScreen('adminInterface');
+                loadInventory();
             } else {
                 alert('Incorrect password');
             }
@@ -381,7 +361,6 @@
         // STAFF FUNCTIONS
         // ============================================
         async function addItem() {
-            // Get form values
             const name = document.getElementById('itemName').value.trim().toUpperCase();
             const quantity = parseInt(document.getElementById('itemQuantity').value) || 0;
             const group = document.getElementById('itemGroup').value;
@@ -390,17 +369,14 @@
             // Validate
             if (!name) {
                 showMessage('error', 'Please enter item name');
-                document.getElementById('itemName').focus();
                 return;
             }
             if (!quantity || quantity < 0) {
                 showMessage('error', 'Please enter valid quantity');
-                document.getElementById('itemQuantity').focus();
                 return;
             }
             if (!group) {
                 showMessage('error', 'Please select a group');
-                document.getElementById('itemGroup').focus();
                 return;
             }
             
@@ -412,19 +388,16 @@
                 group: group,
                 details: details,
                 addedBy: 'staff',
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                location: navigator.geolocation ? 'Location unknown' : 'Unknown'
             };
             
             try {
-                if (githubToken) {
-                    // Save to GitHub
-                    await saveItemToGitHub(newItem);
-                    showMessage('success', `✅ ${name} added to inventory!`);
-                } else {
-                    // Save locally (offline mode)
-                    saveItemLocally(newItem);
-                    showMessage('success', `✅ ${name} saved locally (offline mode)`);
-                }
+                // Save to GitHub
+                await saveItemToGitHub(newItem);
+                
+                // Success
+                showMessage('success', `✅ ${name} added to inventory!`);
                 
                 // Clear form
                 document.getElementById('itemName').value = '';
@@ -436,23 +409,17 @@
                 
             } catch (error) {
                 console.error('Error:', error);
-                showMessage('error', 'Failed to save item. Please try again.');
+                showMessage('error', 'Failed to save. Please try again.');
             }
         }
         
         // ============================================
-        // SUGGESTIONS SYSTEM
+        // SUGGESTIONS
         // ============================================
         async function loadItemsForSuggestions() {
             try {
-                if (githubToken) {
-                    const data = await readFromGitHub();
-                    allItems = data;
-                } else {
-                    // Try to load from local storage
-                    const localData = localStorage.getItem('inventory_local_data');
-                    allItems = localData ? JSON.parse(localData) : [];
-                }
+                const data = await readFromGitHub();
+                allItems = data;
             } catch (error) {
                 allItems = [];
             }
@@ -499,19 +466,12 @@
         // ============================================
         async function loadInventory() {
             try {
-                let data;
-                if (githubToken) {
-                    data = await readFromGitHub();
-                } else {
-                    const localData = localStorage.getItem('inventory_local_data');
-                    data = localData ? JSON.parse(localData) : [];
-                }
-                
+                const data = await readFromGitHub();
                 displayInventory(data);
                 showMessage('info', `✅ Loaded ${data.length} items`);
             } catch (error) {
                 console.error('Error:', error);
-                showMessage('error', 'Failed to load inventory. Please check your connection.');
+                showMessage('error', 'Failed to load inventory.');
             }
         }
         
@@ -521,21 +481,31 @@
             if (items.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 40px; color: #7f8c8d;">
-                        <p>No inventory items found.</p>
+                        <p>No inventory items yet.</p>
                         <p>Staff can add items using Staff Mode.</p>
                     </div>
                 `;
                 return;
             }
             
-            container.innerHTML = items.map(item => `
+            // Sort by newest first
+            const sortedItems = [...items].sort((a, b) => 
+                new Date(b.timestamp) - new Date(a.timestamp)
+            );
+            
+            container.innerHTML = sortedItems.map(item => `
                 <div class="table-row">
-                    <div><strong>${item.name}</strong></div>
-                    <div>${item.quantity}</div>
+                    <div>
+                        <strong>${item.name}</strong><br>
+                        <small style="color: #666;">
+                            ${formatDate(item.timestamp)} • ${item.addedBy || 'unknown'}
+                        </small>
+                    </div>
+                    <div><strong>${item.quantity}</strong></div>
                     <div>${item.group}</div>
                     <div>${item.details || '-'}</div>
                     <div>
-                        <button onclick="deleteItem('${item.id}')" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+                        <button onclick="deleteSingleItem('${item.id}')" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
                             Delete
                         </button>
                     </div>
@@ -543,89 +513,73 @@
             `).join('');
         }
         
-        async function deleteItem(itemId) {
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+        
+        async function deleteSingleItem(itemId) {
             if (!confirm('Delete this item?')) return;
             
             try {
-                if (githubToken) {
-                    const allData = await readFromGitHub();
-                    const newData = allData.filter(item => item.id !== itemId);
-                    await writeToGitHub(newData);
-                } else {
-                    const localData = localStorage.getItem('inventory_local_data');
-                    const allData = localData ? JSON.parse(localData) : [];
-                    const newData = allData.filter(item => item.id !== itemId);
-                    localStorage.setItem('inventory_local_data', JSON.stringify(newData));
-                }
-                
+                const allData = await readFromGitHub();
+                const newData = allData.filter(item => item.id !== itemId);
+                await writeToGitHub(newData);
                 loadInventory();
                 showMessage('info', '✅ Item deleted');
             } catch (error) {
-                showMessage('error', '❌ Failed to delete item');
+                showMessage('error', '❌ Failed to delete');
             }
         }
         
-        function showDeleteAll() {
-            document.getElementById('deleteConfirm').classList.remove('hidden');
+        function deleteAllConfirm() {
+            document.getElementById('deleteModal').classList.remove('hidden');
             document.getElementById('confirmDelete').value = '';
             document.getElementById('confirmDelete').focus();
             
             document.getElementById('confirmDelete').addEventListener('input', function() {
-                const deleteBtn = document.querySelector('#deleteConfirm .btn-danger');
+                const deleteBtn = document.querySelector('#deleteModal .btn-danger');
                 deleteBtn.disabled = this.value !== 'DELETE ALL';
             });
         }
         
         function cancelDelete() {
-            document.getElementById('deleteConfirm').classList.add('hidden');
+            document.getElementById('deleteModal').classList.add('hidden');
         }
         
-        async function confirmDeleteAll() {
+        async function deleteAllItems() {
             try {
-                if (githubToken) {
-                    await writeToGitHub([]);
-                } else {
-                    localStorage.setItem('inventory_local_data', '[]');
-                }
-                
+                await writeToGitHub([]);
                 loadInventory();
-                document.getElementById('deleteConfirm').classList.add('hidden');
+                document.getElementById('deleteModal').classList.add('hidden');
                 showMessage('info', '✅ All items deleted');
             } catch (error) {
-                showMessage('error', '❌ Failed to delete items');
+                showMessage('error', '❌ Failed to delete');
             }
         }
         
         function exportData() {
+            // Simple export
             try {
-                let data;
-                if (githubToken) {
-                    // In real implementation, this would fetch and export
-                    data = { message: "Export feature requires GitHub connection" };
-                } else {
-                    const localData = localStorage.getItem('inventory_local_data');
-                    data = localData ? JSON.parse(localData) : [];
-                }
-                
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const data = JSON.stringify(allItems, null, 2);
+                const blob = new Blob([data], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `inventory-${new Date().toISOString().split('T')[0]}.json`;
+                a.download = `inventory-export-${new Date().toISOString().split('T')[0]}.json`;
                 a.click();
                 URL.revokeObjectURL(url);
-                
-                showMessage('info', '✅ Data exported as JSON file');
+                showMessage('info', '✅ Data exported');
             } catch (error) {
-                showMessage('error', '❌ Failed to export data');
+                showMessage('error', '❌ Export failed');
             }
         }
         
         // ============================================
-        // DATA STORAGE FUNCTIONS
+        // GITHUB FUNCTIONS (SHARED TOKEN)
         // ============================================
         async function readFromGitHub() {
-            if (!githubToken) throw new Error('No GitHub token');
+            if (!githubToken) throw new Error('No token');
             
             const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${DATA_FILE}`;
             
@@ -650,7 +604,7 @@
         }
         
         async function writeToGitHub(data) {
-            if (!githubToken) throw new Error('No GitHub token');
+            if (!githubToken) throw new Error('No token');
             
             // Get current SHA
             let sha = null;
@@ -674,7 +628,7 @@
             const content = btoa(JSON.stringify(data, null, 2));
             
             const body = {
-                message: `Inventory update: ${currentUser} ${new Date().toLocaleString()}`,
+                message: `Inventory ${currentUser} update ${new Date().toLocaleString()}`,
                 content: content,
                 branch: 'main'
             };
@@ -694,12 +648,12 @@
             });
             
             if (!response.ok) {
-                throw new Error(`GitHub write error: ${response.status}`);
+                throw new Error(`Write error: ${response.status}`);
             }
         }
         
         async function saveItemToGitHub(newItem) {
-            // Read existing
+            // Read existing data
             let existingData = [];
             try {
                 existingData = await readFromGitHub();
@@ -707,7 +661,7 @@
                 existingData = [];
             }
             
-            // Check if exists
+            // Check if item exists
             const existingIndex = existingData.findIndex(item => 
                 item.name === newItem.name && item.group === newItem.group
             );
@@ -717,7 +671,7 @@
                 existingData[existingIndex].quantity += newItem.quantity;
                 existingData[existingIndex].updatedAt = new Date().toISOString();
             } else {
-                // Add new
+                // Add new item at the beginning
                 existingData.unshift(newItem);
             }
             
@@ -725,28 +679,8 @@
             await writeToGitHub(existingData);
         }
         
-        function saveItemLocally(newItem) {
-            // Read local data
-            const localData = localStorage.getItem('inventory_local_data');
-            let existingData = localData ? JSON.parse(localData) : [];
-            
-            // Check if exists
-            const existingIndex = existingData.findIndex(item => 
-                item.name === newItem.name && item.group === newItem.group
-            );
-            
-            if (existingIndex !== -1) {
-                existingData[existingIndex].quantity += newItem.quantity;
-            } else {
-                existingData.unshift(newItem);
-            }
-            
-            // Save back
-            localStorage.setItem('inventory_local_data', JSON.stringify(existingData));
-        }
-        
         // ============================================
-        // UTILITY FUNCTIONS
+        // MESSAGE SYSTEM
         // ============================================
         function showMessage(type, message) {
             const staffError = document.getElementById('staffError');
@@ -773,7 +707,6 @@
                     adminError.classList.remove('hidden');
                 }
             } else if (type === 'info') {
-                // Simple alert for info
                 alert(message);
             }
         }
