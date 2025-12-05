@@ -9,7 +9,7 @@ const GITHUB_CONFIG = {
     USERNAME: 'unique205',
     
     // The token you generated in Step 4
-    TOKEN: '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',
+    TOKEN: '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',
     
     // Repository names (exactly as you created)
     DATA_REPO: 'inventory-data',      // Repository for storing data
