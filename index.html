@@ -4,203 +4,1402 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📦 Inventory System</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+    
+    <style>
+        /* ===== RESET & BASE STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --background: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 12px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* ===== COMPACT ADD FORM ===== */
+        .add-form {
+            background: white;
+            border-radius: var(--radius);
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        #nameInput, #detailsInput {
+            text-transform: uppercase;
+            font-size: 0.875rem;
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+        }
+
+        .icon-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        /* ===== SUGGESTIONS ===== */
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: var(--shadow);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .suggestion-item:hover {
+            background: var(--background);
+        }
+
+        .suggestion-item strong {
+            color: var(--primary-color);
+        }
+
+        .suggestion-item small {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+
+        /* ===== STATUS BAR ===== */
+        .status-bar {
+            background: var(--background);
+            padding: 8px 15px;
+            border-radius: var(--radius);
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .status-online {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-offline {
+            background: #ef4444;
+            color: white;
+        }
+
+        .status-syncing {
+            background: #f59e0b;
+            color: white;
+        }
+
+        /* ===== TABULAR INVENTORY LIST ===== */
+        .inventory-table {
+            background: white;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr;
+            background: #f1f5f9;
+            padding: 12px 15px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .table-row:hover {
+            background: #f8fafc;
+        }
+
+        .table-row:last-child {
+            border-bottom: none;
+        }
+
+        .table-row.pending {
+            background: #fff7ed;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            font-size: 0.875rem;
+        }
+
+        .item-quantity {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 0.875rem;
+        }
+
+        .item-group {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .item-details {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 5px;
+            justify-content: flex-end;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        /* ===== MODAL ===== */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+            display: none;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-content h3 {
+            color: var(--danger-color);
+            margin-bottom: 15px;
+            font-size: 1.25rem;
+        }
+
+        .modal-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* ===== ADMIN PANEL ===== */
+        .admin-panel {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: var(--radius);
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .admin-panel.show {
+            display: block;
+        }
+
+        .admin-section {
+            margin-bottom: 15px;
+        }
+
+        .admin-section h4 {
+            font-size: 0.875rem;
+            color: #92400e;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .danger-zone {
+            background: #fee2e2;
+            padding: 15px;
+            border-radius: 4px;
+            border: 2px dashed var(--danger-color);
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 768px) {
+            .container {
+                padding: 8px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .table-header,
+            .table-row {
+                grid-template-columns: 2fr 1fr 1fr 0.5fr;
+            }
+            
+            .item-details {
+                display: none;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+            
+            .header-controls {
+                justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .table-header,
+            .table-row {
+                grid-template-columns: 2fr 1fr 0.5fr;
+            }
+            
+            .item-group {
+                display: none;
+            }
+        }
+
+        /* ===== UTILITY CLASSES ===== */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <!-- HEADER -->
-        <header>
-            <h1>📦 INVENTORY SYSTEM</h1>
-            <div class="subtitle">Pusad • Nanded • London • Everywhere</div>
-        </header>
-
-        <!-- SYNC STATUS -->
-        <div class="sync-banner" id="syncStatus">
-            <span>🔵 Checking connection...</span>
+        <div class="header">
+            <h1>
+                <span>📦</span>
+                <span>Inventory System</span>
+            </h1>
+            <div class="header-controls">
+                <button id="syncBtn" class="btn btn-primary btn-small">
+                    <span>🔄</span>
+                    <span>Sync</span>
+                </button>
+                <button id="adminBtn" class="btn btn-small">
+                    <span>⚙️</span>
+                    <span>Admin</span>
+                </button>
+            </div>
         </div>
 
-        <!-- ADD ITEM FORM -->
-        <div class="card form-card">
-            <h2>➕ ADD NEW ITEM</h2>
-            
-            <div class="form-group">
-                <label>ITEM NAME (Start typing to search)</label>
-                <input type="text" id="nameInput" placeholder="e.g., CEMENT, STEEL, PAINT" 
-                       autocapitalize="characters" autocomplete="off">
-                <div id="suggestions" class="suggestions"></div>
+        <!-- STATUS BAR -->
+        <div class="status-bar">
+            <div class="stats">
+                <span id="totalCount">0 items</span>
+                <span id="pendingCount" class="hidden">• <span id="pendingNum">0</span> pending</span>
             </div>
+            <div id="connectionStatus" class="status-badge status-online">
+                Online
+            </div>
+        </div>
 
+        <!-- COMPACT ADD FORM -->
+        <div class="add-form">
             <div class="form-row">
                 <div class="form-group">
-                    <label>QUANTITY</label>
+                    <label class="form-label">Item Name</label>
+                    <input type="text" id="nameInput" placeholder="Type name to search..." 
+                           autocapitalize="characters" autocomplete="off">
+                    <div id="suggestions" class="suggestions"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Quantity</label>
                     <input type="number" id="quantityInput" placeholder="0" min="0">
                 </div>
+                
                 <div class="form-group">
-                    <label>GROUP</label>
+                    <label class="form-label">Group</label>
                     <select id="groupInput">
                         <option value="">Select Group</option>
-                        <option value="RAW MATERIAL">RAW MATERIAL</option>
-                        <option value="FINISHED GOODS">FINISHED GOODS</option>
-                        <option value="TOOLS & EQUIPMENT">TOOLS & EQUIPMENT</option>
-                        <option value="CONSUMABLES">CONSUMABLES</option>
-                        <option value="PACKAGING">PACKAGING</option>
-                        <option value="SPARE PARTS">SPARE PARTS</option>
+                        <!-- Groups will be loaded from config -->
                     </select>
                 </div>
-            </div>
-
-            <div class="form-group">
-                <label>ITEM DETAILS (Optional)</label>
-                <textarea id="detailsInput" placeholder="Brand, size, specifications..." 
-                         rows="2" autocapitalize="characters"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>LOCATION</label>
-                <div class="location-buttons">
-                    <button class="location-btn active" data-location="PUSAD">PUSAD</button>
-                    <button class="location-btn" data-location="NANDED">NANDED</button>
-                    <button class="location-btn" data-location="LONDON">LONDON</button>
-                    <button class="location-btn" data-location="OTHER">OTHER</button>
+                
+                <div class="form-group">
+                    <label class="form-label">Details</label>
+                    <input type="text" id="detailsInput" placeholder="Details..." 
+                           autocapitalize="characters">
                 </div>
-                <input type="hidden" id="locationInput" value="PUSAD">
             </div>
-
-            <button id="addBtn" class="btn-primary">
-                <span>➕ ADD TO INVENTORY</span>
+            <button id="addBtn" class="btn btn-primary" style="width: 100%;">
+                <span>➕</span>
+                <span>Add Item</span>
             </button>
         </div>
 
-        <!-- FILTERS -->
-        <div class="filters-card card">
-            <div class="filters-row">
-                <select id="filterLocation">
-                    <option value="">📍 ALL LOCATIONS</option>
-                    <option value="PUSAD">📍 PUSAD</option>
-                    <option value="NANDED">📍 NANDED</option>
-                    <option value="LONDON">📍 LONDON</option>
-                    <option value="OTHER">📍 OTHER</option>
-                </select>
-                
-                <select id="filterGroup">
-                    <option value="">📦 ALL GROUPS</option>
-                    <option value="RAW MATERIAL">🏭 RAW MATERIAL</option>
-                    <option value="FINISHED GOODS">📦 FINISHED GOODS</option>
-                    <option value="TOOLS & EQUIPMENT">🔧 TOOLS</option>
-                    <option value="CONSUMABLES">🧴 CONSUMABLES</option>
-                    <option value="PACKAGING">📦 PACKAGING</option>
-                    <option value="SPARE PARTS">⚙️ SPARE PARTS</option>
-                </select>
-                
-                <input type="text" id="searchInput" placeholder="🔍 Search items...">
-            </div>
-            <div class="stats">
-                <span id="totalCount">0 items</span>
-                <span id="pendingCount" class="pending-badge">0 pending sync</span>
-            </div>
-        </div>
-
-        <!-- INVENTORY LIST -->
-        <div class="card">
-            <div class="list-header">
-                <h2>📋 INVENTORY LIST</h2>
-                <button id="refreshBtn" class="icon-btn">🔄</button>
-            </div>
-            
-            <div id="inventoryList" class="inventory-list">
-                <div class="empty-state">
-                    <div class="empty-icon">📭</div>
-                    <p>No inventory items yet</p>
-                    <p class="empty-hint">Add your first item above!</p>
-                </div>
-            </div>
-            
-            <div class="list-footer">
-                <div id="lastSync">Last sync: Never</div>
-            </div>
-        </div>
-
-        <!-- ADMIN PANEL (Hidden) -->
-        <div id="adminPanel" class="card admin-card hidden">
-            <h2>👑 ADMIN CONTROLS</h2>
-            
+        <!-- ADMIN PANEL -->
+        <div id="adminPanel" class="admin-panel">
             <div class="admin-section">
-                <h3>⚠️ DANGER ZONE</h3>
-                <div class="danger-actions">
-                    <button id="deleteAllBtn" class="btn-danger">
-                        🗑️ DELETE ALL ENTRIES EVERYWHERE
-                    </button>
-                    <p class="warning-text">This will delete data from GitHub and all devices!</p>
+                <h4>Manage Groups</h4>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" id="newGroupInput" placeholder="New group name" style="flex: 1;">
+                    <button id="addGroupBtn" class="btn btn-small">Add</button>
+                </div>
+                <div id="groupsList" style="display: flex; flex-wrap: wrap; gap: 5px;">
+                    <!-- Groups will be listed here -->
                 </div>
             </div>
             
             <div class="admin-section">
-                <h3>🔧 DATA MANAGEMENT</h3>
-                <div class="admin-actions">
-                    <button id="exportBtn" class="btn-secondary">📥 Export Data (JSON)</button>
-                    <button id="importBtn" class="btn-secondary">📤 Import Data</button>
+                <h4>Data Management</h4>
+                <div style="display: flex; gap: 10px;">
+                    <button id="exportBtn" class="btn btn-small">📥 Export</button>
+                    <button id="importBtn" class="btn btn-small">📤 Import</button>
                     <input type="file" id="importFile" accept=".json" class="hidden">
                 </div>
             </div>
             
             <div class="admin-section">
-                <h3>⚙️ SETTINGS</h3>
-                <div class="form-group">
-                    <label>Admin Password</label>
-                    <input type="password" id="adminPassword" placeholder="Current: admin123">
-                    <button id="changePasswordBtn" class="btn-small">Change</button>
+                <div class="danger-zone">
+                    <h4>Danger Zone</h4>
+                    <button id="deleteAllBtn" class="btn btn-danger btn-small">
+                        🗑️ Delete All Data
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- FOOTER -->
-        <footer>
-            <div class="footer-buttons">
-                <button id="toggleAdminBtn" class="footer-btn">
-                    <span class="icon">👑</span>
-                    <span>Admin</span>
-                </button>
-                <button id="offlineBtn" class="footer-btn">
-                    <span class="icon" id="offlineIcon">📶</span>
-                    <span id="offlineText">Online</span>
-                </button>
-                <button id="installBtn" class="footer-btn hidden">
-                    <span class="icon">📱</span>
-                    <span>Install App</span>
-                </button>
+        <!-- TABULAR INVENTORY LIST -->
+        <div class="inventory-table">
+            <div class="table-header">
+                <div>ITEM NAME</div>
+                <div class="text-center">QUANTITY</div>
+                <div class="text-center">GROUP</div>
+                <div>DETAILS</div>
+                <div class="text-right">ACTIONS</div>
             </div>
-            <div class="footer-info">
-                <p>Data stored on GitHub • Works offline • Auto-syncs</p>
+            
+            <div id="inventoryList">
+                <!-- Items will be loaded here -->
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <p>No inventory items yet</p>
+                    <p>Add your first item above</p>
+                </div>
             </div>
-        </footer>
+        </div>
     </div>
 
-    <!-- MODAL FOR DELETE CONFIRMATION -->
-    <div id="deleteModal" class="modal hidden">
+    <!-- DELETE CONFIRMATION MODAL -->
+    <div id="deleteModal" class="modal">
         <div class="modal-content">
-            <h3>⚠️ CONFIRM DELETE ALL</h3>
-            <p>This will PERMANENTLY delete ALL inventory data from:</p>
-            <ul>
-                <li>📱 This device</li>
-                <li>☁️ GitHub database</li>
-                <li>📶 All other devices (on next sync)</li>
-            </ul>
-            <p><strong>This action cannot be undone!</strong></p>
+            <h3>⚠️ Delete All Data?</h3>
+            <p>This will permanently delete ALL inventory data from GitHub and all devices.</p>
+            <p><strong>This cannot be undone!</strong></p>
+            
+            <div style="margin: 15px 0;">
+                <input type="text" id="confirmDeleteInput" 
+                       placeholder="Type 'DELETE ALL' to confirm" 
+                       style="width: 100%; padding: 8px;">
+            </div>
             
             <div class="modal-actions">
-                <input type="text" id="confirmDeleteInput" 
-                       placeholder="Type 'DELETE ALL' to confirm">
-                <div class="modal-buttons">
-                    <button id="cancelDeleteBtn" class="btn-secondary">Cancel</button>
-                    <button id="confirmDeleteBtn" class="btn-danger" disabled>DELETE EVERYTHING</button>
-                </div>
+                <button id="cancelDeleteBtn" class="btn btn-small">Cancel</button>
+                <button id="confirmDeleteBtn" class="btn btn-danger btn-small" disabled>
+                    Delete Everything
+                </button>
             </div>
         </div>
     </div>
 
-    <script src="github-db.js"></script>
-    <script src="app.js"></script>
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const CONFIG = {
+            GITHUB_USERNAME: 'YOUR_GITHUB_USERNAME_HERE',
+            GITHUB_TOKEN: 'YOUR_GITHUB_TOKEN_HERE',
+            DATA_REPO: 'inventory-data',
+            DATA_FILE: 'data/inventory.json',
+            BRANCH: 'main',
+            ADMIN_PASSWORD: 'admin123'
+        };
+
+        // Default groups (user can add more in admin panel)
+        let GROUPS = ['RAW MATERIAL', 'FINISHED GOODS', 'TOOLS', 'CONSUMABLES', 'PACKAGING'];
+
+        // ============================================
+        // APPLICATION STATE
+        // ============================================
+        let inventory = [];
+        let offlineQueue = [];
+        let isOnline = navigator.onLine;
+        let syncInProgress = false;
+        let adminMode = false;
+
+        // ============================================
+        // GITHUB DATABASE FUNCTIONS
+        // ============================================
+        class GitHubDB {
+            constructor() {
+                this.baseURL = 'https://api.github.com';
+                this.currentSHA = null;
+                this.headers = {
+                    'Authorization': `token ${CONFIG.GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                };
+            }
+
+            async getFileSHA() {
+                const url = `${this.baseURL}/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/${CONFIG.DATA_FILE}?ref=${CONFIG.BRANCH}`;
+                
+                try {
+                    const response = await fetch(url, { headers: this.headers });
+                    if (response.status === 404) return null;
+                    if (!response.ok) throw new Error(`GitHub API error: ${response.status}`);
+                    
+                    const data = await response.json();
+                    this.currentSHA = data.sha;
+                    return data.sha;
+                } catch (error) {
+                    console.error('Failed to get file SHA:', error);
+                    return null;
+                }
+            }
+
+            async readAll() {
+                const url = `${this.baseURL}/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/${CONFIG.DATA_FILE}?ref=${CONFIG.BRANCH}`;
+                
+                try {
+                    const response = await fetch(url, { headers: this.headers });
+                    if (response.status === 404) return [];
+                    if (!response.ok) throw new Error(`GitHub API error: ${response.status}`);
+                    
+                    const data = await response.json();
+                    this.currentSHA = data.sha;
+                    
+                    const content = atob(data.content.replace(/\n/g, ''));
+                    return JSON.parse(content);
+                } catch (error) {
+                    console.error('Failed to read data:', error);
+                    throw error;
+                }
+            }
+
+            async writeAll(data) {
+                const sha = this.currentSHA || await this.getFileSHA();
+                const url = `${this.baseURL}/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/${CONFIG.DATA_FILE}`;
+                
+                const jsonString = JSON.stringify(data, null, 2);
+                const content = btoa(unescape(encodeURIComponent(jsonString)));
+                
+                const body = {
+                    message: `Inventory update ${new Date().toLocaleString()}`,
+                    content: content,
+                    branch: CONFIG.BRANCH
+                };
+                
+                if (sha) body.sha = sha;
+                
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: this.headers,
+                    body: JSON.stringify(body)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`GitHub API error: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                this.currentSHA = result.content.sha;
+                return result;
+            }
+
+            async deleteAll() {
+                return this.writeAll([]);
+            }
+        }
+
+        const gitHubDB = new GitHubDB();
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load groups from localStorage
+            const savedGroups = localStorage.getItem('inventory_groups');
+            if (savedGroups) {
+                GROUPS = JSON.parse(savedGroups);
+            }
+            updateGroupSelect();
+            renderGroupsList();
+
+            // Load inventory from localStorage
+            loadLocalData();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Update UI
+            updateUI();
+            
+            // Try to sync if online
+            if (isOnline) {
+                await syncWithGitHub();
+            } else {
+                updateConnectionStatus();
+            }
+            
+            // Auto-sync every 2 minutes if online
+            setInterval(async () => {
+                if (isOnline && !syncInProgress && offlineQueue.length > 0) {
+                    await syncWithGitHub();
+                }
+            }, 2 * 60 * 1000);
+        });
+
+        // ============================================
+        // DATA MANAGEMENT
+        // ============================================
+        function loadLocalData() {
+            const saved = localStorage.getItem('inventory_data');
+            if (saved) {
+                try {
+                    inventory = JSON.parse(saved);
+                } catch (error) {
+                    inventory = [];
+                }
+            }
+            
+            const queue = localStorage.getItem('inventory_queue');
+            if (queue) {
+                try {
+                    offlineQueue = JSON.parse(queue);
+                } catch (error) {
+                    offlineQueue = [];
+                }
+            }
+        }
+
+        function saveLocalData() {
+            localStorage.setItem('inventory_data', JSON.stringify(inventory));
+            localStorage.setItem('inventory_queue', JSON.stringify(offlineQueue));
+        }
+
+        function saveGroups() {
+            localStorage.setItem('inventory_groups', JSON.stringify(GROUPS));
+        }
+
+        // ============================================
+        // SYNC FUNCTIONS
+        // ============================================
+        async function syncWithGitHub() {
+            if (syncInProgress || !isOnline) return;
+            
+            syncInProgress = true;
+            updateConnectionStatus('syncing');
+            
+            try {
+                // Push offline changes
+                if (offlineQueue.length > 0) {
+                    const remoteData = await gitHubDB.readAll();
+                    
+                    // Merge data
+                    offlineQueue.forEach(item => {
+                        if (item._delete) {
+                            const index = remoteData.findIndex(i => i.id === item.id);
+                            if (index !== -1) remoteData.splice(index, 1);
+                        } else {
+                            const existingIndex = remoteData.findIndex(i => i.id === item.id);
+                            if (existingIndex === -1) {
+                                remoteData.unshift(item); // Add to beginning
+                            } else {
+                                remoteData[existingIndex] = item;
+                            }
+                        }
+                    });
+                    
+                    await gitHubDB.writeAll(remoteData);
+                    offlineQueue = [];
+                    inventory = remoteData;
+                    saveLocalData();
+                }
+                
+                // Pull latest data
+                const remoteData = await gitHubDB.readAll();
+                inventory = remoteData;
+                saveLocalData();
+                
+                updateUI();
+                updateConnectionStatus('online');
+                
+                // Show success message
+                showMessage('✅ Synced with GitHub');
+                
+            } catch (error) {
+                console.error('Sync failed:', error);
+                updateConnectionStatus('offline');
+                showMessage('❌ Sync failed - Using local data');
+            } finally {
+                syncInProgress = false;
+            }
+        }
+
+        // ============================================
+        // CORE FUNCTIONS
+        // ============================================
+        function addItem() {
+            const name = document.getElementById('nameInput').value.trim().toUpperCase();
+            const quantity = parseInt(document.getElementById('quantityInput').value) || 0;
+            const group = document.getElementById('groupInput').value;
+            const details = document.getElementById('detailsInput').value.trim().toUpperCase();
+            
+            // Validation
+            if (!name) {
+                showMessage('Please enter item name');
+                document.getElementById('nameInput').focus();
+                return;
+            }
+            
+            if (!quantity || quantity < 0) {
+                showMessage('Please enter valid quantity');
+                document.getElementById('quantityInput').focus();
+                return;
+            }
+            
+            if (!group) {
+                showMessage('Please select a group');
+                document.getElementById('groupInput').focus();
+                return;
+            }
+            
+            // Create item (NEWEST ITEMS ON TOP)
+            const newItem = {
+                id: 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                name: name,
+                quantity: quantity,
+                group: group,
+                details: details,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                synced: !isOnline, // false if online (will sync), true if offline
+                pending: !isOnline
+            };
+            
+            // Add to BEGINNING of array (newest on top)
+            inventory.unshift(newItem);
+            
+            // Clear form
+            document.getElementById('nameInput').value = '';
+            document.getElementById('quantityInput').value = '';
+            document.getElementById('detailsInput').value = '';
+            document.getElementById('nameInput').focus();
+            
+            // Hide suggestions
+            document.getElementById('suggestions').style.display = 'none';
+            
+            // Handle sync
+            if (isOnline) {
+                try {
+                    // Try immediate sync
+                    offlineQueue.push(newItem);
+                    syncWithGitHub();
+                } catch (error) {
+                    newItem.pending = true;
+                    offlineQueue.push(newItem);
+                    saveLocalData();
+                    showMessage('📱 Saved locally (sync failed)');
+                }
+            } else {
+                // Offline mode
+                newItem.pending = true;
+                offlineQueue.push(newItem);
+                saveLocalData();
+                showMessage('📴 Saved offline');
+            }
+            
+            updateUI();
+        }
+
+        function deleteItem(itemId) {
+            if (!confirm('Delete this item?')) return;
+            
+            const itemIndex = inventory.findIndex(item => item.id === itemId);
+            if (itemIndex === -1) return;
+            
+            const item = inventory[itemIndex];
+            
+            // Remove from inventory
+            inventory.splice(itemIndex, 1);
+            
+            // If item was synced, add to deletion queue
+            if (item.synced) {
+                offlineQueue.push({
+                    id: itemId,
+                    _delete: true,
+                    name: item.name
+                });
+            }
+            
+            saveLocalData();
+            updateUI();
+            
+            if (isOnline) {
+                syncWithGitHub();
+            }
+        }
+
+        function searchSuggestions() {
+            const searchTerm = document.getElementById('nameInput').value.toUpperCase().trim();
+            const suggestions = document.getElementById('suggestions');
+            
+            if (searchTerm.length < 2) {
+                suggestions.style.display = 'none';
+                return;
+            }
+            
+            const matches = inventory.filter(item => 
+                item.name && item.name.includes(searchTerm)
+            ).slice(0, 5);
+            
+            if (matches.length === 0) {
+                suggestions.style.display = 'none';
+                return;
+            }
+            
+            suggestions.innerHTML = matches.map(item => `
+                <div class="suggestion-item" onclick="fillSuggestion('${item.id}')">
+                    <strong>${item.name}</strong><br>
+                    <small>${item.group} • Qty: ${item.quantity}</small>
+                </div>
+            `).join('');
+            
+            suggestions.style.display = 'block';
+        }
+
+        function fillSuggestion(itemId) {
+            const item = inventory.find(i => i.id === itemId);
+            if (item) {
+                document.getElementById('nameInput').value = item.name;
+                document.getElementById('quantityInput').value = item.quantity;
+                document.getElementById('groupInput').value = item.group;
+                document.getElementById('detailsInput').value = item.details || '';
+                document.getElementById('suggestions').style.display = 'none';
+                document.getElementById('quantityInput').focus();
+            }
+        }
+
+        // ============================================
+        // GROUP MANAGEMENT
+        // ============================================
+        function updateGroupSelect() {
+            const select = document.getElementById('groupInput');
+            select.innerHTML = '<option value="">Select Group</option>' +
+                GROUPS.map(group => `<option value="${group}">${group}</option>`).join('');
+        }
+
+        function renderGroupsList() {
+            const container = document.getElementById('groupsList');
+            container.innerHTML = GROUPS.map(group => `
+                <div style="background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px;">
+                    ${group}
+                    <button onclick="deleteGroup('${group}')" style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 0.875rem;">×</button>
+                </div>
+            `).join('');
+        }
+
+        function addGroup() {
+            const input = document.getElementById('newGroupInput');
+            const groupName = input.value.trim().toUpperCase();
+            
+            if (!groupName) {
+                showMessage('Please enter group name');
+                return;
+            }
+            
+            if (GROUPS.includes(groupName)) {
+                showMessage('Group already exists');
+                return;
+            }
+            
+            GROUPS.push(groupName);
+            saveGroups();
+            updateGroupSelect();
+            renderGroupsList();
+            input.value = '';
+            showMessage(`✅ Added group: ${groupName}`);
+        }
+
+        function deleteGroup(groupName) {
+            if (!confirm(`Delete group "${groupName}"? Items in this group will keep it as their group.`)) {
+                return;
+            }
+            
+            const index = GROUPS.indexOf(groupName);
+            if (index !== -1) {
+                GROUPS.splice(index, 1);
+                saveGroups();
+                updateGroupSelect();
+                renderGroupsList();
+                showMessage(`✅ Deleted group: ${groupName}`);
+            }
+        }
+
+        // ============================================
+        // UI UPDATES
+        // ============================================
+        function updateUI() {
+            updateInventoryList();
+            updateStats();
+        }
+
+        function updateInventoryList() {
+            const container = document.getElementById('inventoryList');
+            
+            if (inventory.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <p>No inventory items yet</p>
+                        <p>Add your first item above</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // NEWEST ITEMS FIRST (already added to beginning of array)
+            container.innerHTML = inventory.map(item => `
+                <div class="table-row ${item.pending ? 'pending' : ''}">
+                    <div class="item-name">${item.name}</div>
+                    <div class="text-center item-quantity">${item.quantity}</div>
+                    <div class="text-center">
+                        <span class="item-group">${item.group}</span>
+                    </div>
+                    <div class="item-details">${item.details || '-'}</div>
+                    <div class="text-right item-actions">
+                        <button onclick="deleteItem('${item.id}')" class="icon-btn">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('totalCount').textContent = `${inventory.length} items`;
+            
+            const pendingItems = inventory.filter(item => item.pending).length + offlineQueue.length;
+            const pendingCount = document.getElementById('pendingCount');
+            const pendingNum = document.getElementById('pendingNum');
+            
+            if (pendingItems > 0) {
+                pendingCount.classList.remove('hidden');
+                pendingNum.textContent = pendingItems;
+            } else {
+                pendingCount.classList.add('hidden');
+            }
+        }
+
+        function updateConnectionStatus(status) {
+            const element = document.getElementById('connectionStatus');
+            
+            if (status === 'syncing') {
+                element.textContent = 'Syncing...';
+                element.className = 'status-badge status-syncing';
+            } else if (isOnline) {
+                element.textContent = 'Online';
+                element.className = 'status-badge status-online';
+            } else {
+                element.textContent = 'Offline';
+                element.className = 'status-badge status-offline';
+            }
+        }
+
+        function updateGroupSelect() {
+            const select = document.getElementById('groupInput');
+            select.innerHTML = '<option value="">Select Group</option>' +
+                GROUPS.map(group => `<option value="${group}">${group}</option>`).join('');
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        function setupEventListeners() {
+            // Add item
+            document.getElementById('addBtn').addEventListener('click', addItem);
+            
+            // Enter key in name field
+            document.getElementById('nameInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addItem();
+            });
+            
+            // Type-ahead suggestions
+            document.getElementById('nameInput').addEventListener('input', searchSuggestions);
+            
+            // Sync button
+            document.getElementById('syncBtn').addEventListener('click', () => {
+                if (isOnline) {
+                    syncWithGitHub();
+                } else {
+                    showMessage('You are offline');
+                }
+            });
+            
+            // Admin toggle
+            document.getElementById('adminBtn').addEventListener('click', () => {
+                const password = prompt('Enter admin password:');
+                if (password === CONFIG.ADMIN_PASSWORD) {
+                    adminMode = !adminMode;
+                    document.getElementById('adminPanel').classList.toggle('show', adminMode);
+                } else if (password) {
+                    showMessage('Incorrect password');
+                }
+            });
+            
+            // Add group
+            document.getElementById('addGroupBtn').addEventListener('click', addGroup);
+            document.getElementById('newGroupInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addGroup();
+            });
+            
+            // Export data
+            document.getElementById('exportBtn').addEventListener('click', exportData);
+            
+            // Import data
+            document.getElementById('importBtn').addEventListener('click', () => {
+                document.getElementById('importFile').click();
+            });
+            document.getElementById('importFile').addEventListener('change', importData);
+            
+            // Delete all
+            document.getElementById('deleteAllBtn').addEventListener('click', showDeleteModal);
+            document.getElementById('cancelDeleteBtn').addEventListener('click', hideDeleteModal);
+            document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDeleteAll);
+            document.getElementById('confirmDeleteInput').addEventListener('input', (e) => {
+                document.getElementById('confirmDeleteBtn').disabled = e.target.value !== 'DELETE ALL';
+            });
+            
+            // Online/offline detection
+            window.addEventListener('online', () => {
+                isOnline = true;
+                updateConnectionStatus();
+                syncWithGitHub();
+            });
+            
+            window.addEventListener('offline', () => {
+                isOnline = false;
+                updateConnectionStatus();
+            });
+            
+            // Click outside to close suggestions
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.form-group')) {
+                    document.getElementById('suggestions').style.display = 'none';
+                }
+            });
+        }
+
+        // ============================================
+        // DATA IMPORT/EXPORT
+        // ============================================
+        function exportData() {
+            try {
+                const data = {
+                    version: '1.0',
+                    exportedAt: new Date().toISOString(),
+                    inventory: inventory,
+                    groups: GROUPS
+                };
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `inventory-backup-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                URL.revokeObjectURL(url);
+                
+                showMessage('✅ Backup exported');
+            } catch (error) {
+                showMessage('❌ Export failed');
+            }
+        }
+
+        async function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (!confirm('Import will replace ALL current data. Continue?')) {
+                event.target.value = '';
+                return;
+            }
+            
+            try {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        
+                        if (data.inventory && Array.isArray(data.inventory)) {
+                            inventory = data.inventory;
+                        }
+                        
+                        if (data.groups && Array.isArray(data.groups)) {
+                            GROUPS = data.groups;
+                            saveGroups();
+                            updateGroupSelect();
+                            renderGroupsList();
+                        }
+                        
+                        saveLocalData();
+                        
+                        if (isOnline) {
+                            await syncWithGitHub();
+                        } else {
+                            updateUI();
+                        }
+                        
+                        showMessage(`✅ Imported ${inventory.length} items`);
+                    } catch (error) {
+                        showMessage('❌ Invalid backup file');
+                    }
+                };
+                reader.readAsText(file);
+            } catch (error) {
+                showMessage('❌ Failed to read file');
+            }
+            
+            event.target.value = '';
+        }
+
+        // ============================================
+        // DELETE ALL FUNCTION
+        // ============================================
+        function showDeleteModal() {
+            document.getElementById('deleteModal').classList.add('show');
+            document.getElementById('confirmDeleteInput').value = '';
+            document.getElementById('confirmDeleteBtn').disabled = true;
+            document.getElementById('confirmDeleteInput').focus();
+        }
+
+        function hideDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+        }
+
+        async function confirmDeleteAll() {
+            hideDeleteModal();
+            
+            try {
+                // Clear from GitHub
+                if (isOnline) {
+                    await gitHubDB.deleteAll();
+                }
+                
+                // Clear local data
+                inventory = [];
+                offlineQueue = [];
+                saveLocalData();
+                
+                // Update UI
+                updateUI();
+                
+                showMessage('✅ All data deleted');
+            } catch (error) {
+                showMessage('❌ Failed to delete from GitHub');
+                
+                // Still clear local
+                inventory = [];
+                offlineQueue = [];
+                saveLocalData();
+                updateUI();
+            }
+        }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        function showMessage(message) {
+            // Remove existing message
+            const existing = document.querySelector('.message-toast');
+            if (existing) existing.remove();
+            
+            // Create message element
+            const messageEl = document.createElement('div');
+            messageEl.className = 'message-toast';
+            messageEl.textContent = message;
+            messageEl.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: ${message.includes('✅') ? '#10b981' : message.includes('❌') ? '#ef4444' : '#3b82f6'};
+                color: white;
+                padding: 10px 20px;
+                border-radius: 4px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 1000;
+                font-size: 0.875rem;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            // Add animation
+            if (!document.querySelector('#message-animations')) {
+                const style = document.createElement('style');
+                style.id = 'message-animations';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+                    @keyframes slideOut {
+                        from {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                        to {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            document.body.appendChild(messageEl);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (messageEl.parentNode) {
+                    messageEl.style.animation = 'slideOut 0.3s ease-out forwards';
+                    setTimeout(() => {
+                        if (messageEl.parentNode) {
+                            messageEl.parentNode.removeChild(messageEl);
+                        }
+                    }, 300);
+                }
+            }, 3000);
+        }
+
+        // Make functions available globally
+        window.fillSuggestion = fillSuggestion;
+        window.deleteItem = deleteItem;
+        window.deleteGroup = deleteGroup;
+    </script>
 </body>
 </html>
