@@ -7,348 +7,163 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
     
     <style>
-        /* ===== RESET & BASE ===== */
+        /* RESET & BASE */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.4; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 15px; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 12px; }
         
-        /* ===== HEADER ===== */
-        .header { background: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .header-left { display: flex; align-items: center; gap: 15px; }
-        .logo { font-size: 1.8rem; }
-        .header-title { font-size: 1.2rem; font-weight: 600; color: #2563eb; }
-        .sync-status { display: flex; align-items: center; gap: 10px; }
-        .sync-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
-        .sync-online { background: #10b981; color: white; }
-        .sync-offline { background: #ef4444; color: white; }
-        .sync-pending { background: #f59e0b; color: white; }
+        /* HEADER */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
+        .header h1 { font-size: 1.5rem; font-weight: 600; color: #2563eb; display: flex; align-items: center; gap: 8px; }
         
-        /* ===== TABS ===== */
-        .tabs { display: flex; gap: 2px; background: #e2e8f0; padding: 2px; border-radius: 8px; margin-bottom: 20px; }
-        .tab { flex: 1; padding: 12px; text-align: center; background: white; border: none; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.3s; }
-        .tab:first-child { border-radius: 6px 0 0 6px; }
-        .tab:last-child { border-radius: 0 6px 6px 0; }
-        .tab.active { background: #2563eb; color: white; }
+        /* SETUP MODAL */
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .modal-content { background: white; border-radius: 8px; padding: 24px; max-width: 500px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); }
+        .modal h3 { margin-bottom: 15px; color: #2563eb; }
+        .modal p { margin-bottom: 10px; color: #64748b; }
+        .modal ol { margin: 10px 0 20px 20px; }
+        .modal li { margin-bottom: 5px; }
+        .modal input { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 4px; margin: 10px 0; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
         
-        /* ===== FORMS ===== */
-        .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 20px; color: #1e293b; display: flex; align-items: center; gap: 8px; }
-        
-        .form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
-        .form-group { display: flex; flex-direction: column; }
-        .form-label { font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 6px; text-transform: uppercase; }
-        input, select, textarea { width: 100%; padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 6px; font-size: 0.9rem; transition: all 0.2s; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
-        #nameInput, #detailsInput, #groupInput { text-transform: uppercase; }
-        
-        /* ===== BUTTONS ===== */
-        .btn { padding: 10px 20px; border: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        /* BUTTONS */
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
         .btn-primary { background: #2563eb; color: white; }
         .btn-primary:hover { background: #1d4ed8; }
-        .btn-success { background: #10b981; color: white; }
-        .btn-success:hover { background: #0da271; }
-        .btn-warning { background: #f59e0b; color: white; }
-        .btn-warning:hover { background: #d97706; }
-        .btn-danger { background: #ef4444; color: white; }
-        .btn-danger:hover { background: #dc2626; }
         .btn-secondary { background: #64748b; color: white; }
         .btn-secondary:hover { background: #475569; }
         
-        .btn-small { padding: 6px 12px; font-size: 0.8rem; }
-        .btn-wide { width: 100%; justify-content: center; }
+        /* STATUS */
+        .status-bar { background: #f1f5f9; padding: 8px 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #64748b; }
+        .status-badge { padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
+        .status-online { background: #10b981; color: white; }
+        .status-offline { background: #ef4444; color: white; }
         
-        /* ===== TABLES ===== */
-        .table-container { overflow-x: auto; }
-        .table { width: 100%; border-collapse: collapse; }
-        .table th { background: #f1f5f9; padding: 12px 15px; text-align: left; font-weight: 600; font-size: 0.75rem; color: #64748b; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
-        .table td { padding: 12px 15px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
-        .table tr:hover { background: #f8fafc; }
-        .table tr.pending { background: #fffbeb; }
-        .table tr.approved { background: #f0fdf4; }
+        /* ADD FORM */
+        .add-form { background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .form-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-label { font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
+        input, select { width: 100%; padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.875rem; }
+        input:focus, select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
+        #nameInput, #detailsInput { text-transform: uppercase; }
         
-        .item-name { font-weight: 600; color: #1e293b; text-transform: uppercase; }
-        .item-quantity { font-weight: 700; color: #2563eb; }
-        .item-group { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+        /* INVENTORY TABLE */
+        .inventory-table { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .table-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr; background: #f1f5f9; padding: 12px 15px; font-weight: 600; font-size: 0.75rem; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
+        .table-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr; padding: 12px 15px; border-bottom: 1px solid #e2e8f0; align-items: center; }
+        .table-row:hover { background: #f8fafc; }
+        .item-name { font-weight: 600; text-transform: uppercase; font-size: 0.875rem; }
+        .item-quantity { font-weight: 700; color: #2563eb; text-align: center; }
+        .item-group { background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
         
-        .action-buttons { display: flex; gap: 5px; }
-        .action-btn { padding: 4px 8px; border: none; border-radius: 4px; font-size: 0.75rem; cursor: pointer; }
-        .edit-btn { background: #f59e0b; color: white; }
-        .delete-btn { background: #ef4444; color: white; }
-        .approve-btn { background: #10b981; color: white; }
-        .reject-btn { background: #ef4444; color: white; }
-        
-        /* ===== BATCH SYSTEM ===== */
-        .batch-section { background: #f0fdf4; border: 2px dashed #10b981; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
-        .batch-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .batch-actions { display: flex; gap: 10px; }
-        
-        /* ===== STATUS BADGES ===== */
-        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
-        .status-pending { background: #fef3c7; color: #92400e; }
-        .status-approved { background: #d1fae5; color: #065f46; }
-        .status-rejected { background: #fee2e2; color: #991b1b; }
-        
-        /* ===== MODALS ===== */
-        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; display: none; }
-        .modal.active { display: flex; }
-        .modal-content { background: white; border-radius: 10px; padding: 25px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .modal-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 15px; color: #1e293b; }
-        .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-        
-        /* ===== SETUP FORM ===== */
-        .setup-form { max-width: 500px; margin: 40px auto; }
-        .setup-form input { margin-bottom: 15px; }
-        .step { margin-bottom: 25px; }
-        .step-number { display: inline-block; background: #2563eb; color: white; width: 24px; height: 24px; border-radius: 50%; text-align: center; line-height: 24px; margin-right: 10px; }
-        
-        /* ===== UTILITY ===== */
+        /* UTILITY */
         .hidden { display: none !important; }
         .text-center { text-align: center; }
         .text-right { text-align: right; }
-        .mt-10 { margin-top: 10px; }
-        .mt-20 { margin-top: 20px; }
-        .mb-10 { margin-bottom: 10px; }
-        .mb-20 { margin-bottom: 20px; }
         
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 1024px) {
-            .form-grid { grid-template-columns: repeat(2, 1fr); }
-        }
+        /* RESPONSIVE */
         @media (max-width: 768px) {
-            .form-grid { grid-template-columns: 1fr; }
-            .header { flex-direction: column; gap: 15px; align-items: stretch; }
-            .table { font-size: 0.85rem; }
-            .table th, .table td { padding: 8px 10px; }
+            .form-row { grid-template-columns: 1fr; }
+            .table-header, .table-row { grid-template-columns: 2fr 1fr 1fr 0.5fr; }
+            .item-details { display: none; }
         }
     </style>
 </head>
 <body>
-    <!-- SETUP MODAL -->
-    <div id="setupModal" class="modal active">
-        <div class="modal-content">
-            <div class="modal-title">🔧 Setup Required</div>
-            
-            <div class="setup-form">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <strong>GitHub Repository</strong>
-                    <p style="font-size: 0.9rem; color: #64748b; margin: 5px 0 10px 34px;">
-                        Make sure you have created: <br>
-                        • <strong>inventory-data</strong> repository (Public)<br>
-                        • With file: <code>data/inventory.json</code>
-                    </p>
-                </div>
-                
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <strong>GitHub Token</strong>
-                    <p style="font-size: 0.9rem; color: #64748b; margin: 5px 0 10px 34px;">
-                        <a href="https://github.com/settings/tokens" target="_blank" style="color: #2563eb;">Create token here</a><br>
-                        • Click "Generate new token"<br>
-                        • Select only <strong>inventory-data</strong> repository<br>
-                        • Permissions: <strong>Contents: Read and write</strong>
-                    </p>
-                    <input type="text" id="githubTokenInput" placeholder="Paste your GitHub token here" style="margin-left: 34px;">
-                </div>
-                
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <strong>Login</strong>
-                    <div style="margin-left: 34px;">
-                        <input type="password" id="loginPassword" placeholder="Admin password (leave empty for staff)">
-                        <div style="display: flex; gap: 10px; margin-top: 10px;">
-                            <button id="staffLoginBtn" class="btn btn-secondary">Staff Login</button>
-                            <button id="adminLoginBtn" class="btn btn-primary">Admin Login</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="modal-buttons">
-                <button id="skipSyncBtn" class="btn btn-secondary">Skip Sync (Local Only)</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MAIN APP -->
-    <div class="container" id="mainApp" style="display: none;">
+    <div class="container">
         <!-- HEADER -->
         <div class="header">
-            <div class="header-left">
-                <div class="logo">📦</div>
-                <div class="header-title">INVENTORY SYSTEM - REAL TIME SYNC</div>
-            </div>
-            <div class="sync-status">
-                <span id="syncStatus" class="sync-badge sync-online">🔄 Synced</span>
-                <span class="user-badge" id="userRole">Staff</span>
-                <button id="logoutBtn" class="btn btn-small btn-secondary">Logout</button>
-            </div>
+            <h1><span>📦</span> Inventory System</h1>
         </div>
 
-        <!-- TABS -->
-        <div class="tabs">
-            <button class="tab active" data-tab="add">➕ Add Items</button>
-            <button class="tab" data-tab="pending">⏳ Pending Approval</button>
-            <button class="tab" data-tab="inventory">📋 Inventory</button>
-            <button class="tab" data-tab="activity" id="activityTab">📊 Activity</button>
-        </div>
-
-        <!-- ADD ITEMS TAB -->
-        <div id="addTab" class="tab-content">
-            <div class="card">
-                <div class="card-title">➕ ADD NEW ITEMS (Auto-saves to cloud)</div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">Item Name</label>
-                        <input type="text" id="nameInput" placeholder="ITEM NAME" autocapitalize="characters">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Quantity</label>
-                        <input type="number" id="quantityInput" placeholder="0" min="1">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Group</label>
-                        <input type="text" id="groupInput" placeholder="RAW MATERIAL, TOOLS, etc" autocapitalize="characters">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Details</label>
-                        <input type="text" id="detailsInput" placeholder="Details (Optional)" autocapitalize="characters">
-                    </div>
-                </div>
-                <button id="addItemBtn" class="btn btn-primary btn-wide">➕ ADD TO BATCH</button>
-                <p class="text-center mt-10" style="color: #64748b; font-size: 0.85rem;">
-                    Items auto-save to cloud. Admin can approve from anywhere.
-                </p>
-            </div>
-
-            <!-- CURRENT BATCH -->
-            <div class="batch-section">
-                <div class="batch-header">
-                    <div class="card-title">📦 CURRENT BATCH (Auto-syncing)</div>
-                    <div class="batch-actions">
-                        <button id="clearBatchBtn" class="btn btn-danger btn-small">🗑️ Clear</button>
-                        <button id="submitBatchBtn" class="btn btn-success btn-small">📤 Submit Now</button>
-                    </div>
-                </div>
-                <div class="table-container">
-                    <table class="table" id="batchTable">
-                        <thead>
-                            <tr>
-                                <th width="30%">Item Name</th>
-                                <th width="15%">Quantity</th>
-                                <th width="20%">Group</th>
-                                <th width="25%">Details</th>
-                                <th width="10%">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="batchItems">
-                            <!-- Batch items will appear here -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="text-right mt-10">
-                    <span id="batchCount">0 items • Auto-syncing to cloud</span>
+        <!-- SETUP MODAL (Shows on first run) -->
+        <div id="setupModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>🔐 Setup Required</h3>
+                <p>This app needs a GitHub token to store your inventory data.</p>
+                
+                <p><strong>Step 1: Generate Token</strong></p>
+                <ol>
+                    <li>Go to <a href="https://github.com/settings/tokens" target="_blank">GitHub Tokens</a></li>
+                    <li>Click <strong>"Generate new token"</strong></li>
+                    <li>Token name: <code>Inventory-App</code></li>
+                    <li>Expiration: <code>90 days</code> (recommended)</li>
+                    <li>Select repositories: <code>inventory-data</code></li>
+                    <li>Permissions: <strong>Contents: Read and write</strong></li>
+                    <li>Click "Generate token"</li>
+                    <li><strong>COPY the token</strong> (starts with github_pat_)</li>
+                </ol>
+                
+                <p><strong>Step 2: Paste Token Here</strong></p>
+                <input type="text" id="tokenInput" placeholder="Paste your GitHub token here">
+                <p style="font-size: 0.75rem; color: #64748b;">Token is stored ONLY in your browser, never sent to any server.</p>
+                
+                <div class="modal-buttons">
+                    <button id="saveTokenBtn" class="btn btn-primary">Save Token</button>
                 </div>
             </div>
         </div>
 
-        <!-- PENDING BATCH TAB -->
-        <div id="pendingTab" class="tab-content hidden">
-            <div class="card">
-                <div class="card-title">⏳ PENDING ITEMS (From all locations)</div>
-                <div class="table-container">
-                    <table class="table" id="pendingTable">
-                        <thead>
-                            <tr>
-                                <th width="25%">Item Name</th>
-                                <th width="10%">Qty</th>
-                                <th width="15%">Group</th>
-                                <th width="20%">Details</th>
-                                <th width="15%">Added By</th>
-                                <th width="15%">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pendingItems">
-                            <!-- Pending items will appear here -->
-                        </tbody>
-                    </table>
-                </div>
-                <div id="adminBatchActions" class="hidden mt-20">
-                    <div class="card-title">👑 ADMIN ACTIONS</div>
-                    <div style="display: flex; gap: 10px;">
-                        <button id="approveAllBtn" class="btn btn-success">✅ Approve All</button>
-                        <button id="rejectAllBtn" class="btn btn-danger">❌ Reject All</button>
-                        <button id="refreshBtn" class="btn btn-secondary">🔄 Refresh</button>
-                    </div>
-                </div>
+        <!-- STATUS BAR -->
+        <div class="status-bar">
+            <div class="stats">
+                <span id="totalCount">0 items</span>
+                <span id="pendingCount" class="hidden">• <span id="pendingNum">0</span> pending</span>
             </div>
+            <div id="connectionStatus" class="status-badge status-online">Online</div>
         </div>
 
-        <!-- INVENTORY TAB -->
-        <div id="inventoryTab" class="tab-content hidden">
-            <div class="card">
-                <div class="card-title">📋 LIVE INVENTORY (Cloud Synced)</div>
-                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <input type="text" id="searchInput" placeholder="🔍 Search items..." style="flex: 1;">
-                    <select id="filterGroup">
-                        <option value="">All Groups</option>
+        <!-- ADD FORM -->
+        <div class="add-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Item Name</label>
+                    <input type="text" id="nameInput" placeholder="Type name..." autocapitalize="characters">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Quantity</label>
+                    <input type="number" id="quantityInput" placeholder="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Group</label>
+                    <select id="groupInput">
+                        <option value="">Select Group</option>
+                        <option value="RAW MATERIAL">RAW MATERIAL</option>
+                        <option value="FINISHED GOODS">FINISHED GOODS</option>
+                        <option value="TOOLS">TOOLS</option>
+                        <option value="CONSUMABLES">CONSUMABLES</option>
                     </select>
-                    <button id="refreshInventoryBtn" class="btn btn-secondary">🔄 Refresh</button>
                 </div>
-                <div class="table-container">
-                    <table class="table" id="inventoryTable">
-                        <thead>
-                            <tr>
-                                <th width="25%">Item Name</th>
-                                <th width="10%">Qty</th>
-                                <th width="15%">Group</th>
-                                <th width="30%">Details</th>
-                                <th width="20%">Last Updated</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inventoryItems">
-                            <!-- Inventory items will appear here -->
-                        </tbody>
-                    </table>
+                <div class="form-group">
+                    <label class="form-label">Details</label>
+                    <input type="text" id="detailsInput" placeholder="Details..." autocapitalize="characters">
                 </div>
-                <div class="text-right mt-10">
-                    <span id="inventoryCount">0 items • Synced from cloud</span>
+            </div>
+            <button id="addBtn" class="btn btn-primary" style="width: 100%;">➕ Add Item</button>
+        </div>
+
+        <!-- INVENTORY TABLE -->
+        <div class="inventory-table">
+            <div class="table-header">
+                <div>ITEM NAME</div>
+                <div class="text-center">QUANTITY</div>
+                <div class="text-center">GROUP</div>
+                <div>DETAILS</div>
+                <div class="text-right">ACTIONS</div>
+            </div>
+            <div id="inventoryList">
+                <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+                    <div style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;">📭</div>
+                    <p>No inventory items yet</p>
+                    <p>Add your first item above</p>
                 </div>
             </div>
         </div>
-
-        <!-- ACTIVITY TAB -->
-        <div id="activityTabContent" class="tab-content hidden">
-            <div class="card">
-                <div class="card-title">📊 SYSTEM ACTIVITY</div>
-                <div class="table-container">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th width="20%">Time</th>
-                                <th width="30%">Action</th>
-                                <th width="25%">Item</th>
-                                <th width="25%">User</th>
-                            </tr>
-                        </thead>
-                        <tbody id="activityLog">
-                            <tr><td colspan="4" class="text-center">Loading activity...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- DELETE MODAL -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-title">⚠️ Confirm Delete</div>
-            <p id="deleteMessage">Are you sure you want to delete this item?</p>
-            <div class="modal-buttons">
-                <button id="cancelDeleteBtn" class="btn btn-secondary">Cancel</button>
-                <button id="confirmDeleteBtn" class="btn btn-danger">Delete</button>
-            </div>
+        
+        <!-- SETTINGS BUTTON -->
+        <div style="text-align: center; margin-top: 20px;">
+            <button id="settingsBtn" class="btn btn-secondary">⚙️ Settings</button>
         </div>
     </div>
 
@@ -357,349 +172,238 @@
         // CONFIGURATION
         // ============================================
         const CONFIG = {
-            ADMIN_PASSWORD: 'Arshiyan2@',
             GITHUB_USERNAME: 'unique205',
             DATA_REPO: 'inventory-data',
             DATA_FILE: 'data/inventory.json',
             BRANCH: 'main',
-            SYNC_INTERVAL: 10000, // Sync every 10 seconds
-            MAX_RETRIES: 3
+            ADMIN_PASSWORD: 'admin123'
         };
 
-        // ============================================
-        // APPLICATION STATE
-        // ============================================
-        let currentUser = null; // 'staff' or 'admin'
-        let currentBatch = []; // Items staff is adding (local)
-        let pendingItems = []; // Items waiting approval (cloud)
-        let inventory = []; // Approved items (cloud)
-        let activityLog = []; // System activity
-        let githubToken = null;
+        // Application state
+        let inventory = [];
+        let offlineQueue = [];
         let isOnline = navigator.onLine;
-        let syncInProgress = false;
-        let syncInterval = null;
-        let lastSyncTime = null;
+        let githubToken = null;
 
         // ============================================
         // INITIALIZATION
         // ============================================
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('🚀 Inventory System Loading...');
+            console.log('🚀 Starting app...');
             
-            // Load local data
-            loadLocalData();
+            // Check if token exists in localStorage
+            githubToken = localStorage.getItem('github_token');
             
-            // Setup event listeners
-            setupEventListeners();
-            
-            // Start sync if token exists
-            if (githubToken) {
-                startAutoSync();
+            if (!githubToken) {
+                // Show setup modal
+                showSetupModal();
+            } else {
+                // Token exists, initialize app
+                initializeApp();
             }
+            
+            setupEventListeners();
         });
 
         // ============================================
-        // DATA MANAGEMENT
+        // SETUP MODAL
         // ============================================
-        function loadLocalData() {
-            // Load GitHub token
-            githubToken = localStorage.getItem('github_token');
+        function showSetupModal() {
+            const modal = document.getElementById('setupModal');
+            modal.style.display = 'flex';
             
-            // Load current batch
-            const savedBatch = localStorage.getItem('current_batch');
-            if (savedBatch) {
-                try {
-                    currentBatch = JSON.parse(savedBatch);
-                } catch (e) {
-                    currentBatch = [];
-                }
-            }
+            document.getElementById('saveTokenBtn').addEventListener('click', saveToken);
             
-            // Load user session
-            const savedUser = localStorage.getItem('current_user');
-            if (savedUser) {
-                currentUser = savedUser;
-                showMainApp();
-            }
-            
-            // Load activity log
-            const savedActivity = localStorage.getItem('activity_log');
-            if (savedActivity) {
-                try {
-                    activityLog = JSON.parse(savedActivity);
-                } catch (e) {
-                    activityLog = [];
-                }
-            }
-        }
-
-        function saveLocalData() {
-            localStorage.setItem('current_batch', JSON.stringify(currentBatch));
-            localStorage.setItem('activity_log', JSON.stringify(activityLog));
-            if (githubToken) {
-                localStorage.setItem('github_token', githubToken);
-            }
-            if (currentUser) {
-                localStorage.setItem('current_user', currentUser);
-            }
-        }
-
-        function addActivity(action, itemName, details = '') {
-            const activity = {
-                id: 'act_' + Date.now(),
-                timestamp: new Date().toISOString(),
-                user: currentUser || 'unknown',
-                action: action,
-                item: itemName,
-                details: details
-            };
-            
-            activityLog.unshift(activity); // Add to beginning
-            if (activityLog.length > 100) {
-                activityLog = activityLog.slice(0, 100); // Keep only last 100
-            }
-            
-            saveLocalData();
-            updateActivityLog();
-        }
-
-        // ============================================
-        // CLOUD SYNC FUNCTIONS (REAL-TIME)
-        // ============================================
-        async function startAutoSync() {
-            if (!githubToken) return;
-            
-            // Initial sync
-            await syncAllData();
-            
-            // Set up periodic sync
-            syncInterval = setInterval(async () => {
-                if (isOnline && !syncInProgress) {
-                    await syncAllData();
-                }
-            }, CONFIG.SYNC_INTERVAL);
-            
-            // Also sync when coming online
-            window.addEventListener('online', async () => {
-                isOnline = true;
-                updateSyncStatus('🔄 Syncing...', 'pending');
-                await syncAllData();
+            // Also allow Enter key
+            document.getElementById('tokenInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') saveToken();
             });
         }
 
-        async function syncAllData() {
-            if (!isOnline || !githubToken || syncInProgress) return;
+        function saveToken() {
+            const tokenInput = document.getElementById('tokenInput');
+            const token = tokenInput.value.trim();
             
-            syncInProgress = true;
-            updateSyncStatus('🔄 Syncing...', 'pending');
+            if (!token) {
+                alert('Please enter a token');
+                return;
+            }
             
-            try {
-                console.log('🔄 Starting cloud sync...');
+            if (!token.startsWith('github_pat_') && !token.startsWith('ghp_')) {
+                if (!confirm('Token should start with github_pat_ or ghp_. Are you sure this is correct?')) {
+                    return;
+                }
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('github_token', token);
+            githubToken = token;
+            
+            // Hide modal
+            document.getElementById('setupModal').style.display = 'none';
+            
+            // Initialize app
+            initializeApp();
+        }
+
+        // ============================================
+        // APP INITIALIZATION
+        // ============================================
+        async function initializeApp() {
+            console.log('🔌 Testing GitHub connection...');
+            
+            // Test the token
+            const isValid = await testGitHubToken();
+            
+            if (isValid) {
+                // Load data
+                loadLocalData();
+                updateUI();
                 
-                // 1. Push local batch to cloud (if staff)
-                if (currentUser === 'staff' && currentBatch.length > 0) {
-                    await pushBatchToCloud();
+                if (isOnline) {
+                    await syncWithGitHub();
                 }
                 
-                // 2. Pull latest data from cloud
-                await pullFromCloud();
-                
-                // 3. Update UI
-                updateAllTables();
-                
-                // 4. Update sync status
-                lastSyncTime = new Date();
-                updateSyncStatus(`✅ Synced ${formatTime(lastSyncTime)}`, 'online');
-                
-                console.log('✅ Cloud sync completed');
-                
-            } catch (error) {
-                console.error('❌ Sync failed:', error);
-                updateSyncStatus('❌ Sync failed', 'offline');
-            } finally {
-                syncInProgress = false;
+                console.log('✅ App ready');
+            } else {
+                // Token is invalid, clear it and show setup again
+                localStorage.removeItem('github_token');
+                githubToken = null;
+                showSetupModal();
+                alert('Invalid token. Please generate a new one.');
             }
         }
 
-        async function pushBatchToCloud() {
-            if (currentBatch.length === 0) return;
-            
-            // Read existing pending items
-            let cloudPending = await readPendingFromCloud();
-            
-            // Add local batch items
-            currentBatch.forEach(item => {
-                // Check if item already exists
-                const exists = cloudPending.some(pending => 
-                    pending.name === item.name && 
-                    pending.group === item.group &&
-                    pending.status === 'pending'
-                );
-                
-                if (!exists) {
-                    cloudPending.push({
-                        ...item,
-                        addedBy: 'Staff (' + (navigator.userAgent.match(/Mobile/) ? 'Mobile' : 'Desktop') + ')',
-                        addedAt: new Date().toISOString(),
-                        location: getLocationFromIP(),
-                        status: 'pending',
-                        synced: true
-                    });
-                }
-            });
-            
-            // Write back to cloud
-            await writePendingToCloud(cloudPending);
-            
-            // Clear local batch after successful sync
-            currentBatch = [];
-            saveLocalData();
-            updateBatchTable();
-            
-            addActivity('BATCH_SUBMITTED', `${currentBatch.length} items`, 'Submitted to cloud');
-        }
-
-        async function pullFromCloud() {
-            // Pull both pending items and inventory
-            const [cloudPending, cloudInventory] = await Promise.all([
-                readPendingFromCloud(),
-                readInventoryFromCloud()
-            ]);
-            
-            // Update local state
-            pendingItems = cloudPending;
-            inventory = cloudInventory;
-            
-            // Update UI
-            updatePendingTable();
-            updateInventoryTable();
-            updateGroupsFilter();
-            
-            addActivity('DATA_PULLED', 'Cloud data', `Pending: ${pendingItems.length}, Inventory: ${inventory.length}`);
-        }
-
-        async function readPendingFromCloud() {
-            const url = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/pending.json`;
-            
+        async function testGitHubToken() {
             try {
-                const response = await fetch(url, {
+                const testUrl = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}`;
+                const response = await fetch(testUrl, {
                     headers: {
                         'Authorization': `token ${githubToken}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
                 
-                if (response.status === 404) {
-                    return []; // File doesn't exist yet
+                if (response.status === 401 || response.status === 403) {
+                    return false;
                 }
                 
-                if (!response.ok) {
-                    throw new Error(`GitHub error: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                const content = atob(data.content.replace(/\n/g, ''));
-                return JSON.parse(content);
+                return response.ok;
             } catch (error) {
-                console.error('Failed to read pending:', error);
-                return [];
+                console.error('Token test failed:', error);
+                return false;
             }
         }
 
-        async function readInventoryFromCloud() {
-            const url = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/${CONFIG.DATA_FILE}`;
+        // ============================================
+        // GITHUB OPERATIONS
+        // ============================================
+        async function syncWithGitHub() {
+            if (!isOnline || !githubToken) return;
+            
+            updateStatus('Syncing...', 'syncing');
             
             try {
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `token ${githubToken}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                
-                if (response.status === 404) {
-                    return []; // File doesn't exist yet
+                // Push offline changes
+                if (offlineQueue.length > 0) {
+                    await pushToGitHub();
                 }
                 
-                if (!response.ok) {
-                    throw new Error(`GitHub error: ${response.status}`);
-                }
+                // Pull latest data
+                await pullFromGitHub();
                 
-                const data = await response.json();
-                const content = atob(data.content.replace(/\n/g, ''));
-                return JSON.parse(content);
+                updateStatus('Online', 'online');
+                showMessage('✅ Synced with GitHub');
+                
             } catch (error) {
-                console.error('Failed to read inventory:', error);
-                return [];
+                console.error('Sync failed:', error);
+                updateStatus('Sync failed', 'offline');
+                showMessage('❌ Sync failed - Using local data');
             }
         }
 
-        async function writePendingToCloud(data) {
-            const url = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/pending.json`;
-            
-            // Get current SHA if file exists
-            let sha = null;
+        async function pushToGitHub() {
+            // Read current data
+            let remoteData = [];
             try {
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `token ${githubToken}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                if (response.ok) {
-                    const info = await response.json();
-                    sha = info.sha;
-                }
+                remoteData = await readFromGitHub();
             } catch (e) {
-                // File doesn't exist
+                // File doesn't exist yet, start with empty array
+                remoteData = [];
             }
             
-            const content = btoa(JSON.stringify(data, null, 2));
-            const body = {
-                message: `Pending items update ${new Date().toLocaleString()}`,
-                content: content,
-                branch: CONFIG.BRANCH
-            };
+            // Merge offline changes
+            offlineQueue.forEach(item => {
+                if (item._delete) {
+                    const index = remoteData.findIndex(i => i.id === item.id);
+                    if (index !== -1) remoteData.splice(index, 1);
+                } else {
+                    const existingIndex = remoteData.findIndex(i => i.id === item.id);
+                    if (existingIndex === -1) {
+                        remoteData.unshift(item); // New items on top
+                    } else {
+                        remoteData[existingIndex] = item;
+                    }
+                }
+            });
             
-            if (sha) {
-                body.sha = sha;
-            }
+            // Write back
+            await writeToGitHub(remoteData);
+            
+            // Update local
+            inventory = remoteData;
+            offlineQueue = [];
+            saveLocalData();
+        }
+
+        async function pullFromGitHub() {
+            const remoteData = await readFromGitHub();
+            inventory = remoteData;
+            saveLocalData();
+            updateUI();
+        }
+
+        async function readFromGitHub() {
+            const url = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/${CONFIG.DATA_FILE}`;
             
             const response = await fetch(url, {
-                method: 'PUT',
                 headers: {
                     'Authorization': `token ${githubToken}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(body)
+                    'Accept': 'application/vnd.github.v3+json'
+                }
             });
             
-            if (!response.ok) {
-                throw new Error(`GitHub write error: ${response.status}`);
+            if (response.status === 404) {
+                return []; // File doesn't exist yet
             }
             
-            return await response.json();
+            if (!response.ok) {
+                throw new Error(`GitHub read error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            const content = atob(data.content.replace(/\n/g, ''));
+            return JSON.parse(content);
         }
 
-        async function writeInventoryToCloud(data) {
+        async function writeToGitHub(data) {
             const url = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/${CONFIG.DATA_FILE}`;
             
-            // Get current SHA if file exists
+            // First, get current SHA
             let sha = null;
             try {
-                const response = await fetch(url, {
+                const infoResponse = await fetch(url, {
                     headers: {
                         'Authorization': `token ${githubToken}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
-                if (response.ok) {
-                    const info = await response.json();
+                if (infoResponse.ok) {
+                    const info = await infoResponse.json();
                     sha = info.sha;
                 }
             } catch (e) {
-                // File doesn't exist
+                // File doesn't exist, no SHA needed
             }
             
             const content = btoa(JSON.stringify(data, null, 2));
@@ -731,477 +435,244 @@
         }
 
         // ============================================
-        // USER MANAGEMENT
+        // LOCAL DATA MANAGEMENT
         // ============================================
-        function loginAsStaff() {
-            currentUser = 'staff';
-            localStorage.setItem('current_user', 'staff');
-            showMainApp();
-            showMessage('✅ Logged in as Staff');
-            addActivity('LOGIN', 'Staff login');
-        }
-
-        function loginAsAdmin(password) {
-            if (password === CONFIG.ADMIN_PASSWORD) {
-                currentUser = 'admin';
-                localStorage.setItem('current_user', 'admin');
-                showMainApp();
-                showMessage('✅ Logged in as Admin');
-                addActivity('LOGIN', 'Admin login');
-                return true;
-            } else {
-                showMessage('❌ Incorrect admin password');
-                return false;
+        function loadLocalData() {
+            const saved = localStorage.getItem('inventory_data');
+            if (saved) {
+                try {
+                    inventory = JSON.parse(saved);
+                } catch (e) {
+                    inventory = [];
+                }
+            }
+            
+            const queue = localStorage.getItem('inventory_queue');
+            if (queue) {
+                try {
+                    offlineQueue = JSON.parse(queue);
+                } catch (e) {
+                    offlineQueue = [];
+                }
             }
         }
 
-        function logout() {
-            addActivity('LOGOUT', `${currentUser} logout`);
-            currentUser = null;
-            localStorage.removeItem('current_user');
-            document.getElementById('mainApp').style.display = 'none';
-            document.getElementById('setupModal').classList.add('active');
-            showMessage('Logged out successfully');
-            
-            // Stop auto-sync
-            if (syncInterval) {
-                clearInterval(syncInterval);
-                syncInterval = null;
-            }
-        }
-
-        function showMainApp() {
-            document.getElementById('setupModal').classList.remove('active');
-            document.getElementById('mainApp').style.display = 'block';
-            
-            // Update UI based on user role
-            document.getElementById('userRole').textContent = currentUser === 'admin' ? 'Admin' : 'Staff';
-            
-            // Show/hide admin features
-            document.getElementById('adminBatchActions').classList.toggle('hidden', currentUser !== 'admin');
-            document.getElementById('activityTab').classList.toggle('hidden', currentUser !== 'admin');
-            
-            // Start auto-sync if token exists
-            if (githubToken && !syncInterval) {
-                startAutoSync();
-            }
-            
-            // Update all tables
-            updateAllTables();
+        function saveLocalData() {
+            localStorage.setItem('inventory_data', JSON.stringify(inventory));
+            localStorage.setItem('inventory_queue', JSON.stringify(offlineQueue));
         }
 
         // ============================================
-        // BATCH MANAGEMENT (STAFF)
+        // CORE FUNCTIONS
         // ============================================
-        function addItemToBatch() {
+        async function addItem() {
             const name = document.getElementById('nameInput').value.trim().toUpperCase();
-            const quantity = parseInt(document.getElementById('quantityInput').value);
-            const group = document.getElementById('groupInput').value.trim().toUpperCase();
+            const quantity = parseInt(document.getElementById('quantityInput').value) || 0;
+            const group = document.getElementById('groupInput').value;
             const details = document.getElementById('detailsInput').value.trim().toUpperCase();
             
-            // Validation
-            if (!name) {
-                showMessage('❌ Please enter item name');
-                return;
-            }
-            if (!quantity || quantity < 1) {
-                showMessage('❌ Please enter valid quantity');
-                return;
-            }
-            if (!group) {
-                showMessage('❌ Please enter group');
+            if (!name || !quantity || !group) {
+                showMessage('Please fill all required fields');
                 return;
             }
             
-            // Create item
             const newItem = {
                 id: 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
                 name: name,
                 quantity: quantity,
                 group: group,
                 details: details,
-                addedAt: new Date().toISOString(),
-                status: 'pending',
-                synced: false
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                synced: false,
+                pending: true
             };
             
-            // Add to batch
-            currentBatch.push(newItem);
+            // Add to top of list
+            inventory.unshift(newItem);
             
             // Clear form
             document.getElementById('nameInput').value = '';
             document.getElementById('quantityInput').value = '';
-            document.getElementById('groupInput').value = '';
             document.getElementById('detailsInput').value = '';
             document.getElementById('nameInput').focus();
             
-            // Save and update
+            // Save locally
+            offlineQueue.push(newItem);
             saveLocalData();
-            updateBatchTable();
-            updateCounts();
             
-            // Auto-sync if online
+            // Update UI
+            updateUI();
+            
+            // Try to sync
             if (isOnline && githubToken) {
-                setTimeout(() => syncAllData(), 1000);
-            }
-            
-            addActivity('ITEM_ADDED', name, `Qty: ${quantity}, Group: ${group}`);
-            showMessage('✅ Item added to batch (Auto-syncing...)');
-        }
-
-        function removeFromBatch(itemId) {
-            const itemIndex = currentBatch.findIndex(item => item.id === itemId);
-            if (itemIndex === -1) return;
-            
-            const item = currentBatch[itemIndex];
-            currentBatch.splice(itemIndex, 1);
-            
-            saveLocalData();
-            updateBatchTable();
-            updateCounts();
-            
-            addActivity('ITEM_REMOVED', item.name, 'From local batch');
-            showMessage('✅ Item removed from batch');
-        }
-
-        function clearBatch() {
-            if (currentBatch.length === 0) {
-                showMessage('⚠️ Batch is already empty');
-                return;
-            }
-            
-            if (confirm('Clear all items from current batch?')) {
-                addActivity('BATCH_CLEARED', `${currentBatch.length} items`);
-                currentBatch = [];
-                saveLocalData();
-                updateBatchTable();
-                updateCounts();
-                showMessage('✅ Batch cleared');
-            }
-        }
-
-        // ============================================
-        // APPROVAL SYSTEM (ADMIN)
-        // ============================================
-        async function approveItem(itemId) {
-            const itemIndex = pendingItems.findIndex(item => item.id === itemId);
-            if (itemIndex === -1) return;
-            
-            const item = pendingItems[itemIndex];
-            
-            // Remove from pending
-            pendingItems.splice(itemIndex, 1);
-            
-            // Add to inventory
-            const existingIndex = inventory.findIndex(invItem => 
-                invItem.name === item.name && invItem.group === item.group
-            );
-            
-            if (existingIndex !== -1) {
-                // Update quantity
-                inventory[existingIndex].quantity += item.quantity;
-                inventory[existingIndex].updatedAt = new Date().toISOString();
-                inventory[existingIndex].lastUpdatedBy = 'Admin';
+                await syncWithGitHub();
             } else {
-                // Add new item
-                inventory.unshift({
-                    ...item,
-                    status: 'approved',
-                    approvedAt: new Date().toISOString(),
-                    approvedBy: 'Admin'
+                showMessage('📴 Saved offline');
+            }
+        }
+
+        async function deleteItem(itemId) {
+            if (!confirm('Delete this item?')) return;
+            
+            const itemIndex = inventory.findIndex(item => item.id === itemId);
+            if (itemIndex === -1) return;
+            
+            const item = inventory[itemIndex];
+            inventory.splice(itemIndex, 1);
+            
+            if (item.synced) {
+                offlineQueue.push({
+                    id: itemId,
+                    _delete: true,
+                    name: item.name
                 });
             }
             
-            // Update cloud
-            await writePendingToCloud(pendingItems);
-            await writeInventoryToCloud(inventory);
+            saveLocalData();
+            updateUI();
             
-            // Update UI
-            updatePendingTable();
-            updateInventoryTable();
-            updateCounts();
-            
-            addActivity('ITEM_APPROVED', item.name, `Qty: ${item.quantity}`);
-            showMessage('✅ Item approved and added to inventory');
-        }
-
-        async function rejectItem(itemId) {
-            const itemIndex = pendingItems.findIndex(item => item.id === itemId);
-            if (itemIndex === -1) return;
-            
-            const item = pendingItems[itemIndex];
-            
-            // Remove from pending
-            pendingItems.splice(itemIndex, 1);
-            
-            // Update cloud
-            await writePendingToCloud(pendingItems);
-            
-            // Update UI
-            updatePendingTable();
-            updateCounts();
-            
-            addActivity('ITEM_REJECTED', item.name, `Qty: ${item.quantity}`);
-            showMessage('✅ Item rejected');
-        }
-
-        async function approveAllPending() {
-            if (pendingItems.length === 0) {
-                showMessage('❌ No pending items to approve');
-                return;
+            if (isOnline && githubToken) {
+                await syncWithGitHub();
             }
-            
-            if (!confirm(`Approve all ${pendingItems.length} pending items?`)) {
-                return;
-            }
-            
-            // Process each item
-            pendingItems.forEach(item => {
-                const existingIndex = inventory.findIndex(invItem => 
-                    invItem.name === item.name && invItem.group === item.group
-                );
-                
-                if (existingIndex !== -1) {
-                    inventory[existingIndex].quantity += item.quantity;
-                    inventory[existingIndex].updatedAt = new Date().toISOString();
-                } else {
-                    inventory.unshift({
-                        ...item,
-                        status: 'approved',
-                        approvedAt: new Date().toISOString(),
-                        approvedBy: 'Admin'
-                    });
-                }
-            });
-            
-            // Clear pending
-            pendingItems = [];
-            
-            // Update cloud
-            await writePendingToCloud(pendingItems);
-            await writeInventoryToCloud(inventory);
-            
-            // Update UI
-            updatePendingTable();
-            updateInventoryTable();
-            updateCounts();
-            
-            addActivity('ALL_APPROVED', `${inventory.length} items`);
-            showMessage(`✅ All items approved and added to inventory`);
-        }
-
-        async function rejectAllPending() {
-            if (pendingItems.length === 0) {
-                showMessage('❌ No pending items to reject');
-                return;
-            }
-            
-            if (!confirm(`Reject all ${pendingItems.length} pending items?`)) {
-                return;
-            }
-            
-            addActivity('ALL_REJECTED', `${pendingItems.length} items`);
-            pendingItems = [];
-            
-            // Update cloud
-            await writePendingToCloud(pendingItems);
-            
-            // Update UI
-            updatePendingTable();
-            updateCounts();
-            
-            showMessage('✅ All pending items rejected');
         }
 
         // ============================================
-        // UI UPDATES
+        // UI FUNCTIONS
         // ============================================
-        function updateAllTables() {
-            updateBatchTable();
-            updatePendingTable();
-            updateInventoryTable();
-            updateCounts();
-            updateGroupsFilter();
-            updateActivityLog();
+        function updateUI() {
+            updateInventoryList();
+            updateStats();
         }
 
-        function updateBatchTable() {
-            const tbody = document.getElementById('batchItems');
-            
-            if (currentBatch.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="text-center" style="padding: 40px; color: #64748b;">
-                            No items in current batch. Add items above.
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            tbody.innerHTML = currentBatch.map(item => `
-                <tr class="pending">
-                    <td class="item-name">${item.name}</td>
-                    <td class="item-quantity">${item.quantity}</td>
-                    <td><span class="item-group">${item.group}</span></td>
-                    <td>${item.details || '-'}</td>
-                    <td>
-                        <div class="action-buttons">
-                            <button onclick="removeFromBatch('${item.id}')" class="action-btn delete-btn" title="Remove">🗑️</button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function updatePendingTable() {
-            const tbody = document.getElementById('pendingItems');
-            
-            if (pendingItems.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="text-center" style="padding: 40px; color: #64748b;">
-                            No pending items for approval.
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            tbody.innerHTML = pendingItems.map(item => `
-                <tr class="pending">
-                    <td class="item-name">${item.name}</td>
-                    <td class="item-quantity">${item.quantity}</td>
-                    <td><span class="item-group">${item.group}</span></td>
-                    <td>${item.details || '-'}</td>
-                    <td>${item.addedBy || 'Staff'}</td>
-                    <td>
-                        ${currentUser === 'admin' ? `
-                            <div class="action-buttons">
-                                <button onclick="approveItem('${item.id}')" class="action-btn approve-btn" title="Approve">✅</button>
-                                <button onclick="rejectItem('${item.id}')" class="action-btn reject-btn" title="Reject">❌</button>
-                            </div>
-                        ` : `
-                            <span class="status-badge status-pending">Waiting Approval</span>
-                        `}
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function updateInventoryTable() {
-            const tbody = document.getElementById('inventoryItems');
+        function updateInventoryList() {
+            const container = document.getElementById('inventoryList');
             
             if (inventory.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="text-center" style="padding: 40px; color: #64748b;">
-                            No items in inventory yet.
-                        </td>
-                    </tr>
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+                        <div style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;">📭</div>
+                        <p>No inventory items yet</p>
+                        <p>Add your first item above</p>
+                    </div>
                 `;
                 return;
             }
             
-            tbody.innerHTML = inventory.map(item => `
-                <tr class="approved">
-                    <td class="item-name">${item.name}</td>
-                    <td class="item-quantity">${item.quantity}</td>
-                    <td><span class="item-group">${item.group}</span></td>
-                    <td>${item.details || '-'}</td>
-                    <td style="font-size: 0.8rem; color: #64748b;">
-                        ${formatTime(item.updatedAt || item.approvedAt || item.addedAt)}
-                    </td>
-                </tr>
+            container.innerHTML = inventory.map(item => `
+                <div class="table-row">
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-quantity">${item.quantity}</div>
+                    <div class="text-center"><span class="item-group">${item.group}</span></div>
+                    <div>${item.details || '-'}</div>
+                    <div class="text-right">
+                        <button onclick="deleteItem('${item.id}')" style="background: none; border: 1px solid #e2e8f0; border-radius: 4px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer;">🗑️</button>
+                    </div>
+                </div>
             `).join('');
         }
 
-        function updateActivityLog() {
-            const tbody = document.getElementById('activityLog');
+        function updateStats() {
+            document.getElementById('totalCount').textContent = `${inventory.length} items`;
             
-            if (activityLog.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="4" class="text-center" style="padding: 40px; color: #64748b;">
-                            No activity recorded yet.
-                        </td>
-                    </tr>
-                `;
-                return;
+            const pendingItems = offlineQueue.length;
+            const pendingCount = document.getElementById('pendingCount');
+            const pendingNum = document.getElementById('pendingNum');
+            
+            if (pendingItems > 0) {
+                pendingCount.classList.remove('hidden');
+                pendingNum.textContent = pendingItems;
+            } else {
+                pendingCount.classList.add('hidden');
             }
-            
-            tbody.innerHTML = activityLog.slice(0, 20).map(activity => `
-                <tr>
-                    <td style="font-size: 0.8rem; color: #64748b;">
-                        ${formatTime(activity.timestamp)}
-                    </td>
-                    <td>
-                        <span style="font-weight: 600; color: #1e293b;">${activity.action}</span>
-                        <br>
-                        <span style="font-size: 0.75rem; color: #64748b;">${activity.details}</span>
-                    </td>
-                    <td>${activity.item}</td>
-                    <td>
-                        <span class="user-badge">${activity.user}</span>
-                    </td>
-                </tr>
-            `).join('');
         }
 
-        function updateGroupsFilter() {
-            const select = document.getElementById('filterGroup');
-            const groups = new Set();
+        function updateStatus(text, type) {
+            const element = document.getElementById('connectionStatus');
+            element.textContent = text;
+            element.className = 'status-badge ' + (type === 'online' ? 'status-online' : type === 'offline' ? 'status-offline' : 'status-syncing');
+        }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        function setupEventListeners() {
+            document.getElementById('addBtn').addEventListener('click', addItem);
+            document.getElementById('nameInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addItem();
+            });
             
-            inventory.forEach(item => groups.add(item.group));
-            pendingItems.forEach(item => groups.add(item.group));
-            currentBatch.forEach(item => groups.add(item.group));
-            
-            select.innerHTML = '<option value="">All Groups</option>';
-            Array.from(groups).sort().forEach(group => {
-                if (group) {
-                    select.innerHTML += `<option value="${group}">${group}</option>`;
+            document.getElementById('settingsBtn').addEventListener('click', () => {
+                const action = prompt('Settings:\n1. Change GitHub token\n2. Clear all data\n3. Export data\n\nEnter 1, 2, or 3:');
+                
+                if (action === '1') {
+                    // Change token
+                    const newToken = prompt('Enter new GitHub token:');
+                    if (newToken) {
+                        localStorage.setItem('github_token', newToken);
+                        githubToken = newToken;
+                        alert('Token updated. App will restart.');
+                        location.reload();
+                    }
+                } else if (action === '2') {
+                    // Clear data
+                    if (confirm('Clear ALL local data?')) {
+                        localStorage.clear();
+                        alert('Data cleared. App will restart.');
+                        location.reload();
+                    }
+                } else if (action === '3') {
+                    // Export data
+                    exportData();
                 }
+            });
+            
+            window.addEventListener('online', () => {
+                isOnline = true;
+                updateStatus('Online', 'online');
+                if (githubToken) {
+                    syncWithGitHub();
+                }
+            });
+            
+            window.addEventListener('offline', () => {
+                isOnline = false;
+                updateStatus('Offline', 'offline');
             });
         }
 
-        function updateCounts() {
-            document.getElementById('batchCount').textContent = 
-                `${currentBatch.length} items in batch • ${pendingItems.length} pending approval`;
-            document.getElementById('inventoryCount').textContent = 
-                `${inventory.length} items in inventory • Last sync: ${lastSyncTime ? formatTime(lastSyncTime) : 'Never'}`;
-        }
-
-        function updateSyncStatus(text, status) {
-            const element = document.getElementById('syncStatus');
-            element.textContent = text;
-            element.className = 'sync-badge ' + 
-                (status === 'online' ? 'sync-online' : 
-                 status === 'offline' ? 'sync-offline' : 'sync-pending');
+        // ============================================
+        // DATA EXPORT
+        // ============================================
+        function exportData() {
+            try {
+                const data = {
+                    version: '1.0',
+                    exportedAt: new Date().toISOString(),
+                    inventory: inventory
+                };
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `inventory-backup-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                URL.revokeObjectURL(url);
+                
+                showMessage('✅ Backup exported');
+            } catch (error) {
+                showMessage('❌ Export failed');
+            }
         }
 
         // ============================================
-        // UTILITY FUNCTIONS
+        // MESSAGE FUNCTIONS
         // ============================================
-        function formatTime(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            
-            if (diffMins < 1) return 'Just now';
-            if (diffMins < 60) return `${diffMins}m ago`;
-            if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
-            return date.toLocaleDateString();
-        }
-
-        function getLocationFromIP() {
-            // Simple location detection based on timezone
-            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            if (timezone.includes('India')) return 'Pusad';
-            if (timezone.includes('London')) return 'London';
-            return 'Unknown';
-        }
-
         function showMessage(message) {
             // Remove existing
             const existing = document.querySelector('.message-toast');
@@ -1215,13 +686,13 @@
                 position: fixed;
                 bottom: 20px;
                 right: 20px;
-                background: ${message.includes('✅') ? '#10b981' : message.includes('❌') ? '#ef4444' : message.includes('⚠️') ? '#f59e0b' : '#2563eb'};
+                background: ${message.includes('✅') ? '#10b981' : '#ef4444'};
                 color: white;
                 padding: 10px 20px;
-                border-radius: 6px;
+                border-radius: 4px;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                 z-index: 1000;
-                font-size: 0.9rem;
+                font-size: 0.875rem;
                 animation: slideIn 0.3s ease-out;
             `;
             
@@ -1239,129 +710,6 @@
             }, 3000);
         }
 
-        // ============================================
-        // EVENT LISTENERS
-        // ============================================
-        function setupEventListeners() {
-            // Setup buttons
-            document.getElementById('staffLoginBtn').addEventListener('click', () => {
-                const token = document.getElementById('githubTokenInput').value.trim();
-                if (token) {
-                    githubToken = token;
-                    localStorage.setItem('github_token', token);
-                }
-                loginAsStaff();
-            });
-            
-            document.getElementById('adminLoginBtn').addEventListener('click', () => {
-                const token = document.getElementById('githubTokenInput').value.trim();
-                const password = document.getElementById('loginPassword').value;
-                
-                if (token) {
-                    githubToken = token;
-                    localStorage.setItem('github_token', token);
-                }
-                
-                loginAsAdmin(password);
-            });
-            
-            document.getElementById('skipSyncBtn').addEventListener('click', () => {
-                githubToken = null;
-                localStorage.removeItem('github_token');
-                loginAsStaff();
-                showMessage('⚠️ Using local mode only - No cloud sync');
-            });
-            
-            // Enter key in login
-            document.getElementById('loginPassword').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    const token = document.getElementById('githubTokenInput').value.trim();
-                    const password = document.getElementById('loginPassword').value;
-                    
-                    if (token) {
-                        githubToken = token;
-                        localStorage.setItem('github_token', token);
-                    }
-                    
-                    loginAsAdmin(password);
-                }
-            });
-            
-            // Logout
-            document.getElementById('logoutBtn').addEventListener('click', logout);
-            
-            // Tabs
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', (e) => {
-                    const tabName = e.target.dataset.tab;
-                    
-                    // Hide all tabs
-                    document.querySelectorAll('.tab-content').forEach(tab => {
-                        tab.classList.add('hidden');
-                    });
-                    
-                    // Remove active class
-                    document.querySelectorAll('.tab').forEach(tab => {
-                        tab.classList.remove('active');
-                    });
-                    
-                    // Show selected tab
-                    document.getElementById(tabName + 'Tab').classList.remove('hidden');
-                    e.target.classList.add('active');
-                });
-            });
-            
-            // Add item
-            document.getElementById('addItemBtn').addEventListener('click', addItemToBatch);
-            document.getElementById('nameInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') addItemToBatch();
-            });
-            
-            // Batch actions
-            document.getElementById('clearBatchBtn').addEventListener('click', clearBatch);
-            document.getElementById('submitBatchBtn').addEventListener('click', () => {
-                if (currentBatch.length === 0) {
-                    showMessage('❌ No items in batch to submit');
-                    return;
-                }
-                syncAllData();
-                showMessage('✅ Batch submitted for approval');
-            });
-            
-            // Admin actions
-            document.getElementById('approveAllBtn').addEventListener('click', approveAllPending);
-            document.getElementById('rejectAllBtn').addEventListener('click', rejectAllPending);
-            document.getElementById('refreshBtn').addEventListener('click', () => syncAllData());
-            document.getElementById('refreshInventoryBtn').addEventListener('click', () => syncAllData());
-            
-            // Search
-            document.getElementById('searchInput').addEventListener('input', () => {
-                const searchTerm = document.getElementById('searchInput').value.toUpperCase();
-                const filterGroup = document.getElementById('filterGroup').value;
-                
-                updateInventoryTable(searchTerm, filterGroup);
-            });
-            
-            document.getElementById('filterGroup').addEventListener('change', () => {
-                const searchTerm = document.getElementById('searchInput').value.toUpperCase();
-                const filterGroup = document.getElementById('filterGroup').value;
-                
-                updateInventoryTable(searchTerm, filterGroup);
-            });
-            
-            // Online/offline
-            window.addEventListener('online', () => {
-                isOnline = true;
-                updateSyncStatus('🔄 Coming online...', 'pending');
-                setTimeout(() => syncAllData(), 2000);
-            });
-            
-            window.addEventListener('offline', () => {
-                isOnline = false;
-                updateSyncStatus('🔴 Offline', 'offline');
-            });
-        }
-
         // Add animation styles
         const style = document.createElement('style');
         style.textContent = `
@@ -1373,22 +721,11 @@
                 from { transform: translateX(0); opacity: 1; }
                 to { transform: translateX(100%); opacity: 0; }
             }
-            .user-badge {
-                background: #e0f2fe;
-                color: #0369a1;
-                padding: 4px 10px;
-                border-radius: 20px;
-                font-size: 0.75rem;
-                font-weight: 600;
-                display: inline-block;
-            }
         `;
         document.head.appendChild(style);
 
         // Make functions globally available
-        window.removeFromBatch = removeFromBatch;
-        window.approveItem = approveItem;
-        window.rejectItem = rejectItem;
+        window.deleteItem = deleteItem;
     </script>
 </body>
 </html>
