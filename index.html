@@ -93,7 +93,7 @@
 
     .field-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: 1fr;
       gap: 0.6rem;
       margin-bottom: 0.6rem;
     }
@@ -237,6 +237,7 @@
       border-color: var(--accent);
     }
 
+    /* ===== SMALL SCREENS ===== */
     @media (max-width: 640px) {
       header {
         gap: 0.5rem;
@@ -256,13 +257,28 @@
       }
 
       button.small {
-        width: auto;
+        width: 100%;
+        margin-right: 0;
       }
 
-      /* hide ID column on small screens to avoid crowding */
+      /* Hide ID column on narrow screens */
       th:nth-child(1),
       td:nth-child(1) {
         display: none;
+      }
+
+      /* Actions column vertically stacked */
+      td.actions-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+    }
+
+    /* Wider screens: 2-column row for name/qty/group */
+    @media (min-width: 641px) {
+      .field-row {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       }
     }
   </style>
@@ -467,7 +483,6 @@
     }
 
     async function getBackendToken() {
-      // Returns token string or null (NO POPUP)
       try {
         const res = await fetch(BACKEND_URL, { method: "POST" });
         if (!res.ok) {
@@ -558,7 +573,6 @@
         setStatus("LOADED");
       } catch (err) {
         console.error("ERROR LOADING INVENTORY:", err);
-        // FAIL GRACEFULLY: NO POPUP, JUST WORK OFFLINE
         inventory = [];
         currentSha = null;
         populateNameList();
@@ -616,7 +630,7 @@
           <td>${item.quantity}</td>
           <td>${item.group || ""}</td>
           <td>${item.details || ""}</td>
-          <td>
+          <td class="actions-cell">
             <button class="small secondary" data-action="edit-batch" data-index="${index}">EDIT</button>
             <button class="small danger" data-action="remove-batch" data-index="${index}">REMOVE</button>
           </td>`;
@@ -679,7 +693,7 @@
         console.error("BATCH UPLOAD FAILED:", err);
         batchStatus.textContent = "ERROR UPLOADING BATCH.";
         setStatus("ERROR UPLOADING");
-        alert("ERROR UPLOADING BATCH: " + err.message);
+        // no alert here – only inline message
       }
     });
 
@@ -743,7 +757,7 @@
             <td>${item.details || ""}</td>
             <td>${formatDate(item.batchTime || item.timestamp)}</td>
             <td>${formatDate(item.updatedAt || item.timestamp)}</td>
-            <td>
+            <td class="actions-cell">
               <button class="small secondary" data-action="edit-item" data-id="${item.id}">EDIT</button>
               <button class="small danger" data-action="delete-item" data-id="${item.id}">DELETE</button>
             </td>`;
@@ -788,7 +802,7 @@
           <td>${item.group || ""}</td>
           <td>${item.details || ""}</td>
           <td>${formatDate(item.updatedAt || item.timestamp)}</td>
-          <td>
+          <td class="actions-cell">
             <button class="small secondary" data-action="edit-item" data-id="${item.id}">EDIT</button>
             <button class="small danger" data-action="delete-item" data-id="${item.id}">DELETE</button>
           </td>`;
@@ -809,11 +823,6 @@
         alert("BATCH HAS NO ITEMS.");
         return;
       }
-
-      if (
-        !confirm("APPROVE THIS BATCH AND SEND WHATSAPP NOTIFICATION (BACKEND STUB)?")
-      )
-        return;
 
       try {
         setStatus("APPROVING BATCH…");
@@ -837,17 +846,17 @@
           }))
         };
 
-        await fetch(NOTIFY_URL, {
+        // Backend stub – no popup if it fails
+        fetch(NOTIFY_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
-        });
+        }).catch((err) => console.error("NOTIFY FAILED:", err));
 
-        setStatus("BATCH APPROVED & NOTIFICATION SENT (STUB)");
+        setStatus("BATCH APPROVED (NOTIFICATION STUB)");
       } catch (err) {
         console.error("APPROVE/NOTIFY FAILED:", err);
         setStatus("ERROR APPROVING BATCH");
-        alert("ERROR APPROVING BATCH: " + err.message);
       }
     });
 
@@ -862,7 +871,10 @@
 
       if (btn.dataset.action === "edit-item") {
         const item = inventory.find((it) => it.id === id);
-        if (!item) return alert("ITEM NOT FOUND.");
+        if (!item) {
+          setStatus("ITEM NOT FOUND");
+          return;
+        }
 
         currentRole = "admin";
         updateRoleUI();
@@ -885,7 +897,6 @@
 
           const idx = inventory.findIndex((it) => it.id === id);
           if (idx === -1) {
-            alert("ITEM NOT FOUND AFTER REFRESH.");
             setStatus("ITEM NOT FOUND");
             return;
           }
@@ -897,7 +908,6 @@
         } catch (err) {
           console.error("DELETE FAILED:", err);
           setStatus("ERROR DELETING");
-          alert("ERROR DELETING ITEM: " + err.message);
         }
       }
     }
@@ -950,7 +960,7 @@
 
       if (currentRole === "admin") {
         if (!adminEditId) {
-          alert("SELECT AN ITEM TO EDIT FROM ADMIN TABLE.");
+          setStatus("SELECT AN ITEM FROM ADMIN TABLE");
           return;
         }
 
@@ -960,7 +970,6 @@
 
           const idx = inventory.findIndex((it) => it.id === adminEditId);
           if (idx === -1) {
-            alert("ITEM NOT FOUND AFTER REFRESH.");
             setStatus("ITEM NOT FOUND");
             return;
           }
@@ -981,7 +990,6 @@
         } catch (err) {
           console.error("SAVE FAILED:", err);
           setStatus("ERROR SAVING");
-          alert("ERROR SAVING: " + err.message);
         }
       }
     });
