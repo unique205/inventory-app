@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📦 Inventory System</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <h1>📦 INVENTORY SYSTEM</h1>
+            <div class="subtitle">Pusad • Nanded • London • Everywhere</div>
+        </header>
+
+        <!-- SYNC STATUS -->
+        <div class="sync-banner" id="syncStatus">
+            <span>🔵 Checking connection...</span>
+        </div>
+
+        <!-- ADD ITEM FORM -->
+        <div class="card form-card">
+            <h2>➕ ADD NEW ITEM</h2>
+            
+            <div class="form-group">
+                <label>ITEM NAME (Start typing to search)</label>
+                <input type="text" id="nameInput" placeholder="e.g., CEMENT, STEEL, PAINT" 
+                       autocapitalize="characters" autocomplete="off">
+                <div id="suggestions" class="suggestions"></div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>QUANTITY</label>
+                    <input type="number" id="quantityInput" placeholder="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label>GROUP</label>
+                    <select id="groupInput">
+                        <option value="">Select Group</option>
+                        <option value="RAW MATERIAL">RAW MATERIAL</option>
+                        <option value="FINISHED GOODS">FINISHED GOODS</option>
+                        <option value="TOOLS & EQUIPMENT">TOOLS & EQUIPMENT</option>
+                        <option value="CONSUMABLES">CONSUMABLES</option>
+                        <option value="PACKAGING">PACKAGING</option>
+                        <option value="SPARE PARTS">SPARE PARTS</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>ITEM DETAILS (Optional)</label>
+                <textarea id="detailsInput" placeholder="Brand, size, specifications..." 
+                         rows="2" autocapitalize="characters"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>LOCATION</label>
+                <div class="location-buttons">
+                    <button class="location-btn active" data-location="PUSAD">PUSAD</button>
+                    <button class="location-btn" data-location="NANDED">NANDED</button>
+                    <button class="location-btn" data-location="LONDON">LONDON</button>
+                    <button class="location-btn" data-location="OTHER">OTHER</button>
+                </div>
+                <input type="hidden" id="locationInput" value="PUSAD">
+            </div>
+
+            <button id="addBtn" class="btn-primary">
+                <span>➕ ADD TO INVENTORY</span>
+            </button>
+        </div>
+
+        <!-- FILTERS -->
+        <div class="filters-card card">
+            <div class="filters-row">
+                <select id="filterLocation">
+                    <option value="">📍 ALL LOCATIONS</option>
+                    <option value="PUSAD">📍 PUSAD</option>
+                    <option value="NANDED">📍 NANDED</option>
+                    <option value="LONDON">📍 LONDON</option>
+                    <option value="OTHER">📍 OTHER</option>
+                </select>
+                
+                <select id="filterGroup">
+                    <option value="">📦 ALL GROUPS</option>
+                    <option value="RAW MATERIAL">🏭 RAW MATERIAL</option>
+                    <option value="FINISHED GOODS">📦 FINISHED GOODS</option>
+                    <option value="TOOLS & EQUIPMENT">🔧 TOOLS</option>
+                    <option value="CONSUMABLES">🧴 CONSUMABLES</option>
+                    <option value="PACKAGING">📦 PACKAGING</option>
+                    <option value="SPARE PARTS">⚙️ SPARE PARTS</option>
+                </select>
+                
+                <input type="text" id="searchInput" placeholder="🔍 Search items...">
+            </div>
+            <div class="stats">
+                <span id="totalCount">0 items</span>
+                <span id="pendingCount" class="pending-badge">0 pending sync</span>
+            </div>
+        </div>
+
+        <!-- INVENTORY LIST -->
+        <div class="card">
+            <div class="list-header">
+                <h2>📋 INVENTORY LIST</h2>
+                <button id="refreshBtn" class="icon-btn">🔄</button>
+            </div>
+            
+            <div id="inventoryList" class="inventory-list">
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <p>No inventory items yet</p>
+                    <p class="empty-hint">Add your first item above!</p>
+                </div>
+            </div>
+            
+            <div class="list-footer">
+                <div id="lastSync">Last sync: Never</div>
+            </div>
+        </div>
+
+        <!-- ADMIN PANEL (Hidden) -->
+        <div id="adminPanel" class="card admin-card hidden">
+            <h2>👑 ADMIN CONTROLS</h2>
+            
+            <div class="admin-section">
+                <h3>⚠️ DANGER ZONE</h3>
+                <div class="danger-actions">
+                    <button id="deleteAllBtn" class="btn-danger">
+                        🗑️ DELETE ALL ENTRIES EVERYWHERE
+                    </button>
+                    <p class="warning-text">This will delete data from GitHub and all devices!</p>
+                </div>
+            </div>
+            
+            <div class="admin-section">
+                <h3>🔧 DATA MANAGEMENT</h3>
+                <div class="admin-actions">
+                    <button id="exportBtn" class="btn-secondary">📥 Export Data (JSON)</button>
+                    <button id="importBtn" class="btn-secondary">📤 Import Data</button>
+                    <input type="file" id="importFile" accept=".json" class="hidden">
+                </div>
+            </div>
+            
+            <div class="admin-section">
+                <h3>⚙️ SETTINGS</h3>
+                <div class="form-group">
+                    <label>Admin Password</label>
+                    <input type="password" id="adminPassword" placeholder="Current: admin123">
+                    <button id="changePasswordBtn" class="btn-small">Change</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer>
+            <div class="footer-buttons">
+                <button id="toggleAdminBtn" class="footer-btn">
+                    <span class="icon">👑</span>
+                    <span>Admin</span>
+                </button>
+                <button id="offlineBtn" class="footer-btn">
+                    <span class="icon" id="offlineIcon">📶</span>
+                    <span id="offlineText">Online</span>
+                </button>
+                <button id="installBtn" class="footer-btn hidden">
+                    <span class="icon">📱</span>
+                    <span>Install App</span>
+                </button>
+            </div>
+            <div class="footer-info">
+                <p>Data stored on GitHub • Works offline • Auto-syncs</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- MODAL FOR DELETE CONFIRMATION -->
+    <div id="deleteModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>⚠️ CONFIRM DELETE ALL</h3>
+            <p>This will PERMANENTLY delete ALL inventory data from:</p>
+            <ul>
+                <li>📱 This device</li>
+                <li>☁️ GitHub database</li>
+                <li>📶 All other devices (on next sync)</li>
+            </ul>
+            <p><strong>This action cannot be undone!</strong></p>
+            
+            <div class="modal-actions">
+                <input type="text" id="confirmDeleteInput" 
+                       placeholder="Type 'DELETE ALL' to confirm">
+                <div class="modal-buttons">
+                    <button id="cancelDeleteBtn" class="btn-secondary">Cancel</button>
+                    <button id="confirmDeleteBtn" class="btn-danger" disabled>DELETE EVERYTHING</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="github-db.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
