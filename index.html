@@ -15,13 +15,23 @@
         /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
         .header h1 { font-size: 1.5rem; font-weight: 600; color: #2563eb; display: flex; align-items: center; gap: 8px; }
-        .header-controls { display: flex; gap: 10px; align-items: center; }
         
-        /* ERROR DISPLAY */
-        .error-box { background: #fee2e2; color: #dc2626; padding: 12px; border-radius: 6px; margin: 10px 0; border: 1px solid #dc2626; }
-        .error-box h3 { margin-top: 0; margin-bottom: 8px; }
-        .error-box ol { margin: 10px 0; padding-left: 20px; }
-        .error-box a { color: #2563eb; text-decoration: underline; }
+        /* SETUP MODAL */
+        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
+        .modal-content { background: white; border-radius: 8px; padding: 24px; max-width: 500px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); }
+        .modal h3 { margin-bottom: 15px; color: #2563eb; }
+        .modal p { margin-bottom: 10px; color: #64748b; }
+        .modal ol { margin: 10px 0 20px 20px; }
+        .modal li { margin-bottom: 5px; }
+        .modal input { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 4px; margin: 10px 0; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+        
+        /* BUTTONS */
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-secondary { background: #64748b; color: white; }
+        .btn-secondary:hover { background: #475569; }
         
         /* STATUS */
         .status-bar { background: #f1f5f9; padding: 8px 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #64748b; }
@@ -37,11 +47,6 @@
         input, select { width: 100%; padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.875rem; }
         input:focus, select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
         #nameInput, #detailsInput { text-transform: uppercase; }
-        
-        /* BUTTONS */
-        .btn { padding: 8px 16px; border: none; border-radius: 4px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
-        .btn-primary { background: #2563eb; color: white; }
-        .btn-primary:hover { background: #1d4ed8; }
         
         /* INVENTORY TABLE */
         .inventory-table { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
@@ -70,14 +75,35 @@
         <!-- HEADER -->
         <div class="header">
             <h1><span>📦</span> Inventory System</h1>
-            <div class="header-controls">
-                <button id="syncBtn" class="btn btn-primary btn-small">🔄 Sync</button>
-                <button id="adminBtn" class="btn btn-small">⚙️ Admin</button>
-            </div>
         </div>
 
-        <!-- ERROR DISPLAY (will show if issues) -->
-        <div id="errorContainer"></div>
+        <!-- SETUP MODAL (Shows on first run) -->
+        <div id="setupModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>🔐 Setup Required</h3>
+                <p>This app needs a GitHub token to store your inventory data.</p>
+                
+                <p><strong>Step 1: Generate Token</strong></p>
+                <ol>
+                    <li>Go to <a href="https://github.com/settings/tokens" target="_blank">GitHub Tokens</a></li>
+                    <li>Click <strong>"Generate new token"</strong></li>
+                    <li>Token name: <code>Inventory-App</code></li>
+                    <li>Expiration: <code>90 days</code> (recommended)</li>
+                    <li>Select repositories: <code>inventory-data</code></li>
+                    <li>Permissions: <strong>Contents: Read and write</strong></li>
+                    <li>Click "Generate token"</li>
+                    <li><strong>COPY the token</strong> (starts with github_pat_)</li>
+                </ol>
+                
+                <p><strong>Step 2: Paste Token Here</strong></p>
+                <input type="text" id="tokenInput" placeholder="Paste your GitHub token here">
+                <p style="font-size: 0.75rem; color: #64748b;">Token is stored ONLY in your browser, never sent to any server.</p>
+                
+                <div class="modal-buttons">
+                    <button id="saveTokenBtn" class="btn btn-primary">Save Token</button>
+                </div>
+            </div>
+        </div>
 
         <!-- STATUS BAR -->
         <div class="status-bar">
@@ -134,19 +160,19 @@
                 </div>
             </div>
         </div>
+        
+        <!-- SETTINGS BUTTON -->
+        <div style="text-align: center; margin-top: 20px;">
+            <button id="settingsBtn" class="btn btn-secondary">⚙️ Settings</button>
+        </div>
     </div>
 
     <script>
         // ============================================
-        // CONFIGURATION - UPDATE THIS SECTION
+        // CONFIGURATION
         // ============================================
         const CONFIG = {
-            // Your GitHub username
             GITHUB_USERNAME: 'unique205',
-            
-            // ⚠️ REPLACE WITH YOUR NEW FINE-GRAINED TOKEN (starts with github_pat_)
-            GITHUB_TOKEN: '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',
-            
             DATA_REPO: 'inventory-data',
             DATA_FILE: 'data/inventory.json',
             BRANCH: 'main',
@@ -157,7 +183,7 @@
         let inventory = [];
         let offlineQueue = [];
         let isOnline = navigator.onLine;
-        let gitHubDB = null;
+        let githubToken = null;
 
         // ============================================
         // INITIALIZATION
@@ -165,18 +191,73 @@
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('🚀 Starting app...');
             
-            // First, validate configuration
-            if (!validateConfig()) {
+            // Check if token exists in localStorage
+            githubToken = localStorage.getItem('github_token');
+            
+            if (!githubToken) {
+                // Show setup modal
+                showSetupModal();
+            } else {
+                // Token exists, initialize app
+                initializeApp();
+            }
+            
+            setupEventListeners();
+        });
+
+        // ============================================
+        // SETUP MODAL
+        // ============================================
+        function showSetupModal() {
+            const modal = document.getElementById('setupModal');
+            modal.style.display = 'flex';
+            
+            document.getElementById('saveTokenBtn').addEventListener('click', saveToken);
+            
+            // Also allow Enter key
+            document.getElementById('tokenInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') saveToken();
+            });
+        }
+
+        function saveToken() {
+            const tokenInput = document.getElementById('tokenInput');
+            const token = tokenInput.value.trim();
+            
+            if (!token) {
+                alert('Please enter a token');
                 return;
             }
             
-            // Initialize GitHub connection
-            const success = await initializeGitHub();
+            if (!token.startsWith('github_pat_') && !token.startsWith('ghp_')) {
+                if (!confirm('Token should start with github_pat_ or ghp_. Are you sure this is correct?')) {
+                    return;
+                }
+            }
             
-            if (success) {
+            // Save to localStorage
+            localStorage.setItem('github_token', token);
+            githubToken = token;
+            
+            // Hide modal
+            document.getElementById('setupModal').style.display = 'none';
+            
+            // Initialize app
+            initializeApp();
+        }
+
+        // ============================================
+        // APP INITIALIZATION
+        // ============================================
+        async function initializeApp() {
+            console.log('🔌 Testing GitHub connection...');
+            
+            // Test the token
+            const isValid = await testGitHubToken();
+            
+            if (isValid) {
                 // Load data
                 loadLocalData();
-                setupEventListeners();
                 updateUI();
                 
                 if (isOnline) {
@@ -184,120 +265,32 @@
                 }
                 
                 console.log('✅ App ready');
+            } else {
+                // Token is invalid, clear it and show setup again
+                localStorage.removeItem('github_token');
+                githubToken = null;
+                showSetupModal();
+                alert('Invalid token. Please generate a new one.');
             }
-        });
-
-        // ============================================
-        // CONFIGURATION VALIDATION
-        // ============================================
-        function validateConfig() {
-            const errors = [];
-            
-            // Check username
-            if (!CONFIG.GITHUB_USERNAME || CONFIG.GITHUB_USERNAME === 'YOUR_GITHUB_USERNAME_HERE') {
-                errors.push('GitHub username not set');
-            }
-            
-            // Check token
-            if (!CONFIG.GITHUB_TOKEN || CONFIG.GITHUB_TOKEN.includes('REPLACE')) {
-                errors.push('GitHub token not set');
-            } else if (CONFIG.GITHUB_TOKEN.length < 40) {
-                errors.push('GitHub token appears too short');
-            }
-            
-            if (errors.length > 0) {
-                showError(`
-                    <h3>❌ Configuration Error</h3>
-                    <p>Please update the configuration in the script:</p>
-                    <ul>
-                        ${errors.map(err => `<li>${err}</li>`).join('')}
-                    </ul>
-                    <p><strong>Current token:</strong> ${CONFIG.GITHUB_TOKEN.substring(0, 10)}...</p>
-                `);
-                return false;
-            }
-            
-            return true;
         }
 
-        // ============================================
-        // GITHUB INITIALIZATION
-        // ============================================
-        async function initializeGitHub() {
+        async function testGitHubToken() {
             try {
-                console.log('🔌 Testing GitHub connection...');
-                
-                // Test 1: Check if repository exists and is accessible
-                const repoUrl = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}`;
-                const repoResponse = await fetch(repoUrl);
-                
-                if (repoResponse.status === 404) {
-                    showError(`
-                        <h3>❌ Repository Not Found</h3>
-                        <p>Repository <strong>${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}</strong> does not exist or is private.</p>
-                        <p>Please:</p>
-                        <ol>
-                            <li>Go to <a href="https://github.com/new" target="_blank">Create new repository</a></li>
-                            <li>Name it: <strong>inventory-data</strong></li>
-                            <li>Make it <strong>PUBLIC</strong></li>
-                            <li>Create file: <code>data/inventory.json</code> with content: <code>[]</code></li>
-                        </ol>
-                    `);
-                    return false;
-                }
-                
-                if (!repoResponse.ok) {
-                    throw new Error(`Repository check failed: ${repoResponse.status}`);
-                }
-                
-                // Test 2: Check if we can access with token
-                const testUrl = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/${CONFIG.DATA_FILE}`;
-                const testResponse = await fetch(testUrl, {
+                const testUrl = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}`;
+                const response = await fetch(testUrl, {
                     headers: {
-                        'Authorization': `token ${CONFIG.GITHUB_TOKEN}`,
+                        'Authorization': `token ${githubToken}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
                 
-                if (testResponse.status === 401 || testResponse.status === 403) {
-                    showError(`
-                        <h3>❌ Invalid GitHub Token</h3>
-                        <p>Your token is not working. Please:</p>
-                        <ol>
-                            <li>Go to <a href="https://github.com/settings/tokens" target="_blank">GitHub Tokens</a></li>
-                            <li>Click <strong>"Generate new token"</strong> (NOT "classic")</li>
-                            <li>Token name: <strong>Inventory-App</strong></li>
-                            <li>Expiration: 90 days</li>
-                            <li>Select repositories: <strong>inventory-data</strong> and <strong>inventory-app</strong></li>
-                            <li>Permissions: <strong>Contents: Read and write</strong></li>
-                            <li>Click "Generate token" and COPY it</li>
-                            <li>Replace the token in the CONFIG section</li>
-                        </ol>
-                        <p><strong>Current token starts with:</strong> ${CONFIG.GITHUB_TOKEN.substring(0, 15)}...</p>
-                    `);
+                if (response.status === 401 || response.status === 403) {
                     return false;
                 }
                 
-                if (testResponse.status === 404) {
-                    // File doesn't exist yet, that's okay for first time
-                    console.log('📄 Data file will be created on first write');
-                }
-                
-                console.log('✅ GitHub connection successful');
-                return true;
-                
+                return response.ok;
             } catch (error) {
-                console.error('GitHub init error:', error);
-                showError(`
-                    <h3>❌ Connection Failed</h3>
-                    <p>Error: ${error.message}</p>
-                    <p>Please check:</p>
-                    <ol>
-                        <li>Internet connection</li>
-                        <li>GitHub repository exists and is public</li>
-                        <li>Token has correct permissions</li>
-                    </ol>
-                `);
+                console.error('Token test failed:', error);
                 return false;
             }
         }
@@ -306,7 +299,7 @@
         // GITHUB OPERATIONS
         // ============================================
         async function syncWithGitHub() {
-            if (!isOnline) return;
+            if (!isOnline || !githubToken) return;
             
             updateStatus('Syncing...', 'syncing');
             
@@ -375,7 +368,7 @@
             
             const response = await fetch(url, {
                 headers: {
-                    'Authorization': `token ${CONFIG.GITHUB_TOKEN}`,
+                    'Authorization': `token ${githubToken}`,
                     'Accept': 'application/vnd.github.v3+json'
                 }
             });
@@ -399,11 +392,9 @@
             // First, get current SHA
             let sha = null;
             try {
-                const current = await readFromGitHub();
-                // We need to get the actual SHA from the API
                 const infoResponse = await fetch(url, {
                     headers: {
-                        'Authorization': `token ${CONFIG.GITHUB_TOKEN}`,
+                        'Authorization': `token ${githubToken}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
@@ -429,7 +420,7 @@
             const response = await fetch(url, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `token ${CONFIG.GITHUB_TOKEN}`,
+                    'Authorization': `token ${githubToken}`,
                     'Accept': 'application/vnd.github.v3+json',
                     'Content-Type': 'application/json'
                 },
@@ -514,7 +505,7 @@
             updateUI();
             
             // Try to sync
-            if (isOnline) {
+            if (isOnline && githubToken) {
                 await syncWithGitHub();
             } else {
                 showMessage('📴 Saved offline');
@@ -541,7 +532,7 @@
             saveLocalData();
             updateUI();
             
-            if (isOnline) {
+            if (isOnline && githubToken) {
                 await syncWithGitHub();
             }
         }
@@ -611,18 +602,37 @@
                 if (e.key === 'Enter') addItem();
             });
             
-            document.getElementById('syncBtn').addEventListener('click', () => {
-                if (isOnline) {
-                    syncWithGitHub();
-                } else {
-                    showMessage('You are offline');
+            document.getElementById('settingsBtn').addEventListener('click', () => {
+                const action = prompt('Settings:\n1. Change GitHub token\n2. Clear all data\n3. Export data\n\nEnter 1, 2, or 3:');
+                
+                if (action === '1') {
+                    // Change token
+                    const newToken = prompt('Enter new GitHub token:');
+                    if (newToken) {
+                        localStorage.setItem('github_token', newToken);
+                        githubToken = newToken;
+                        alert('Token updated. App will restart.');
+                        location.reload();
+                    }
+                } else if (action === '2') {
+                    // Clear data
+                    if (confirm('Clear ALL local data?')) {
+                        localStorage.clear();
+                        alert('Data cleared. App will restart.');
+                        location.reload();
+                    }
+                } else if (action === '3') {
+                    // Export data
+                    exportData();
                 }
             });
             
             window.addEventListener('online', () => {
                 isOnline = true;
                 updateStatus('Online', 'online');
-                syncWithGitHub();
+                if (githubToken) {
+                    syncWithGitHub();
+                }
             });
             
             window.addEventListener('offline', () => {
@@ -632,13 +642,37 @@
         }
 
         // ============================================
-        // MESSAGE FUNCTIONS
+        // DATA EXPORT
         // ============================================
-        function showError(html) {
-            const container = document.getElementById('errorContainer');
-            container.innerHTML = `<div class="error-box">${html}</div>`;
+        function exportData() {
+            try {
+                const data = {
+                    version: '1.0',
+                    exportedAt: new Date().toISOString(),
+                    inventory: inventory
+                };
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `inventory-backup-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                URL.revokeObjectURL(url);
+                
+                showMessage('✅ Backup exported');
+            } catch (error) {
+                showMessage('❌ Export failed');
+            }
         }
 
+        // ============================================
+        // MESSAGE FUNCTIONS
+        // ============================================
         function showMessage(message) {
             // Remove existing
             const existing = document.querySelector('.message-toast');
