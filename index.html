@@ -4,477 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📦 Inventory System</title>
-    <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
     
     <style>
-        /* ===== RESET & BASE STYLES ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary-color: #2563eb;
-            --primary-dark: #1d4ed8;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --background: #f8fafc;
-            --card-bg: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --border-color: #e2e8f0;
-            --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            --radius: 8px;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--background);
-            color: var(--text-primary);
-            line-height: 1.4;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 12px;
-        }
-
-        /* ===== HEADER ===== */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .header-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        /* ===== COMPACT ADD FORM ===== */
-        .add-form {
-            background: white;
-            border-radius: var(--radius);
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-            text-transform: uppercase;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 8px 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 0.875rem;
-            font-family: inherit;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-        }
-
-        #nameInput, #detailsInput {
-            text-transform: uppercase;
-            font-size: 0.875rem;
-        }
-
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        input[type="number"] {
-            -moz-appearance: textfield;
-        }
-
-        /* ===== BUTTONS ===== */
-        .btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-        }
-
-        .btn-danger {
-            background: var(--danger-color);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        .btn-small {
-            padding: 4px 8px;
-            font-size: 0.75rem;
-        }
-
-        .icon-btn {
-            background: none;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 0.875rem;
-        }
-
-        /* ===== SUGGESTIONS ===== */
-        .suggestions {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            box-shadow: var(--shadow);
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-        }
-
-        .suggestion-item {
-            padding: 8px 10px;
-            border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
-            font-size: 0.875rem;
-        }
-
-        .suggestion-item:hover {
-            background: var(--background);
-        }
-
-        .suggestion-item strong {
-            color: var(--primary-color);
-        }
-
-        .suggestion-item small {
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-        }
-
-        /* ===== STATUS BAR ===== */
-        .status-bar {
-            background: var(--background);
-            padding: 8px 15px;
-            border-radius: var(--radius);
-            margin-bottom: 15px;
-            border: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-        }
-
-        .stats {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .status-badge {
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-
-        .status-online {
-            background: #10b981;
-            color: white;
-        }
-
-        .status-offline {
-            background: #ef4444;
-            color: white;
-        }
-
-        .status-syncing {
-            background: #f59e0b;
-            color: white;
-        }
-
-        /* ===== TABULAR INVENTORY LIST ===== */
-        .inventory-table {
-            background: white;
-            border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
-        }
-
-        .table-header {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr;
-            background: #f1f5f9;
-            padding: 12px 15px;
-            font-weight: 600;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .table-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr;
-            padding: 12px 15px;
-            border-bottom: 1px solid var(--border-color);
-            align-items: center;
-            transition: background 0.2s;
-        }
-
-        .table-row:hover {
-            background: #f8fafc;
-        }
-
-        .table-row:last-child {
-            border-bottom: none;
-        }
-
-        .table-row.pending {
-            background: #fff7ed;
-        }
-
-        .item-name {
-            font-weight: 600;
-            color: var(--text-primary);
-            text-transform: uppercase;
-            font-size: 0.875rem;
-        }
-
-        .item-quantity {
-            font-weight: 700;
-            color: var(--primary-color);
-            font-size: 0.875rem;
-        }
-
-        .item-group {
-            background: #e0f2fe;
-            color: #0369a1;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .item-details {
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .item-actions {
-            display: flex;
-            gap: 5px;
-            justify-content: flex-end;
-        }
-
-        /* ===== EMPTY STATE ===== */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
-        }
-
-        .empty-icon {
-            font-size: 2rem;
-            margin-bottom: 10px;
-            opacity: 0.5;
-        }
-
-        /* ===== MODAL ===== */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            padding: 20px;
-            display: none;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: var(--radius);
-            padding: 20px;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-content h3 {
-            color: var(--danger-color);
-            margin-bottom: 15px;
-            font-size: 1.25rem;
-        }
-
-        .modal-actions {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-
-        /* ===== ADMIN PANEL ===== */
-        .admin-panel {
-            background: #fff7ed;
-            border: 1px solid #fed7aa;
-            border-radius: var(--radius);
-            padding: 15px;
-            margin-top: 15px;
-            display: none;
-        }
-
-        .admin-panel.show {
-            display: block;
-        }
-
-        .admin-section {
-            margin-bottom: 15px;
-        }
-
-        .admin-section h4 {
-            font-size: 0.875rem;
-            color: #92400e;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        .danger-zone {
-            background: #fee2e2;
-            padding: 15px;
-            border-radius: 4px;
-            border: 2px dashed var(--danger-color);
-        }
-
-        /* ===== RESPONSIVE DESIGN ===== */
+        /* RESET & BASE */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.4; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 12px; }
+        
+        /* HEADER */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
+        .header h1 { font-size: 1.5rem; font-weight: 600; color: #2563eb; display: flex; align-items: center; gap: 8px; }
+        .header-controls { display: flex; gap: 10px; align-items: center; }
+        
+        /* ERROR DISPLAY */
+        .error-box { background: #fee2e2; color: #dc2626; padding: 12px; border-radius: 6px; margin: 10px 0; border: 1px solid #dc2626; }
+        .error-box h3 { margin-top: 0; margin-bottom: 8px; }
+        .error-box ol { margin: 10px 0; padding-left: 20px; }
+        .error-box a { color: #2563eb; text-decoration: underline; }
+        
+        /* STATUS */
+        .status-bar { background: #f1f5f9; padding: 8px 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #64748b; }
+        .status-badge { padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
+        .status-online { background: #10b981; color: white; }
+        .status-offline { background: #ef4444; color: white; }
+        
+        /* ADD FORM */
+        .add-form { background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .form-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-label { font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
+        input, select { width: 100%; padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.875rem; }
+        input:focus, select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
+        #nameInput, #detailsInput { text-transform: uppercase; }
+        
+        /* BUTTONS */
+        .btn { padding: 8px 16px; border: none; border-radius: 4px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        
+        /* INVENTORY TABLE */
+        .inventory-table { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .table-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr; background: #f1f5f9; padding: 12px 15px; font-weight: 600; font-size: 0.75rem; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
+        .table-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr; padding: 12px 15px; border-bottom: 1px solid #e2e8f0; align-items: center; }
+        .table-row:hover { background: #f8fafc; }
+        .item-name { font-weight: 600; text-transform: uppercase; font-size: 0.875rem; }
+        .item-quantity { font-weight: 700; color: #2563eb; text-align: center; }
+        .item-group { background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+        
+        /* UTILITY */
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        
+        /* RESPONSIVE */
         @media (max-width: 768px) {
-            .container {
-                padding: 8px;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-                gap: 8px;
-            }
-            
-            .table-header,
-            .table-row {
-                grid-template-columns: 2fr 1fr 1fr 0.5fr;
-            }
-            
-            .item-details {
-                display: none;
-            }
-            
-            .header {
-                flex-direction: column;
-                gap: 10px;
-                align-items: stretch;
-            }
-            
-            .header-controls {
-                justify-content: space-between;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .table-header,
-            .table-row {
-                grid-template-columns: 2fr 1fr 0.5fr;
-            }
-            
-            .item-group {
-                display: none;
-            }
-        }
-
-        /* ===== UTILITY CLASSES ===== */
-        .hidden {
-            display: none !important;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .text-right {
-            text-align: right;
+            .form-row { grid-template-columns: 1fr; }
+            .table-header, .table-row { grid-template-columns: 2fr 1fr 1fr 0.5fr; }
+            .item-details { display: none; }
         }
     </style>
 </head>
@@ -482,21 +69,15 @@
     <div class="container">
         <!-- HEADER -->
         <div class="header">
-            <h1>
-                <span>📦</span>
-                <span>Inventory System</span>
-            </h1>
+            <h1><span>📦</span> Inventory System</h1>
             <div class="header-controls">
-                <button id="syncBtn" class="btn btn-primary btn-small">
-                    <span>🔄</span>
-                    <span>Sync</span>
-                </button>
-                <button id="adminBtn" class="btn btn-small">
-                    <span>⚙️</span>
-                    <span>Admin</span>
-                </button>
+                <button id="syncBtn" class="btn btn-primary btn-small">🔄 Sync</button>
+                <button id="adminBtn" class="btn btn-small">⚙️ Admin</button>
             </div>
         </div>
+
+        <!-- ERROR DISPLAY (will show if issues) -->
+        <div id="errorContainer"></div>
 
         <!-- STATUS BAR -->
         <div class="status-bar">
@@ -504,79 +85,39 @@
                 <span id="totalCount">0 items</span>
                 <span id="pendingCount" class="hidden">• <span id="pendingNum">0</span> pending</span>
             </div>
-            <div id="connectionStatus" class="status-badge status-online">
-                Online
-            </div>
+            <div id="connectionStatus" class="status-badge status-online">Online</div>
         </div>
 
-        <!-- COMPACT ADD FORM -->
+        <!-- ADD FORM -->
         <div class="add-form">
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Item Name</label>
-                    <input type="text" id="nameInput" placeholder="Type name to search..." 
-                           autocapitalize="characters" autocomplete="off">
-                    <div id="suggestions" class="suggestions"></div>
+                    <input type="text" id="nameInput" placeholder="Type name..." autocapitalize="characters">
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label">Quantity</label>
                     <input type="number" id="quantityInput" placeholder="0" min="0">
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label">Group</label>
                     <select id="groupInput">
                         <option value="">Select Group</option>
-                        <!-- Groups will be loaded from config -->
+                        <option value="RAW MATERIAL">RAW MATERIAL</option>
+                        <option value="FINISHED GOODS">FINISHED GOODS</option>
+                        <option value="TOOLS">TOOLS</option>
+                        <option value="CONSUMABLES">CONSUMABLES</option>
                     </select>
                 </div>
-                
                 <div class="form-group">
                     <label class="form-label">Details</label>
-                    <input type="text" id="detailsInput" placeholder="Details..." 
-                           autocapitalize="characters">
+                    <input type="text" id="detailsInput" placeholder="Details..." autocapitalize="characters">
                 </div>
             </div>
-            <button id="addBtn" class="btn btn-primary" style="width: 100%;">
-                <span>➕</span>
-                <span>Add Item</span>
-            </button>
+            <button id="addBtn" class="btn btn-primary" style="width: 100%;">➕ Add Item</button>
         </div>
 
-        <!-- ADMIN PANEL -->
-        <div id="adminPanel" class="admin-panel">
-            <div class="admin-section">
-                <h4>Manage Groups</h4>
-                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <input type="text" id="newGroupInput" placeholder="New group name" style="flex: 1;">
-                    <button id="addGroupBtn" class="btn btn-small">Add</button>
-                </div>
-                <div id="groupsList" style="display: flex; flex-wrap: wrap; gap: 5px;">
-                    <!-- Groups will be listed here -->
-                </div>
-            </div>
-            
-            <div class="admin-section">
-                <h4>Data Management</h4>
-                <div style="display: flex; gap: 10px;">
-                    <button id="exportBtn" class="btn btn-small">📥 Export</button>
-                    <button id="importBtn" class="btn btn-small">📤 Import</button>
-                    <input type="file" id="importFile" accept=".json" class="hidden">
-                </div>
-            </div>
-            
-            <div class="admin-section">
-                <div class="danger-zone">
-                    <h4>Danger Zone</h4>
-                    <button id="deleteAllBtn" class="btn btn-danger btn-small">
-                        🗑️ Delete All Data
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- TABULAR INVENTORY LIST -->
+        <!-- INVENTORY TABLE -->
         <div class="inventory-table">
             <div class="table-header">
                 <div>ITEM NAME</div>
@@ -585,11 +126,9 @@
                 <div>DETAILS</div>
                 <div class="text-right">ACTIONS</div>
             </div>
-            
             <div id="inventoryList">
-                <!-- Items will be loaded here -->
-                <div class="empty-state">
-                    <div class="empty-icon">📭</div>
+                <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+                    <div style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;">📭</div>
                     <p>No inventory items yet</p>
                     <p>Add your first item above</p>
                 </div>
@@ -597,39 +136,15 @@
         </div>
     </div>
 
-    <!-- DELETE CONFIRMATION MODAL -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <h3>⚠️ Delete All Data?</h3>
-            <p>This will permanently delete ALL inventory data from GitHub and all devices.</p>
-            <p><strong>This cannot be undone!</strong></p>
-            
-            <div style="margin: 15px 0;">
-                <input type="text" id="confirmDeleteInput" 
-                       placeholder="Type 'DELETE ALL' to confirm" 
-                       style="width: 100%; padding: 8px;">
-            </div>
-            
-            <div class="modal-actions">
-                <button id="cancelDeleteBtn" class="btn btn-small">Cancel</button>
-                <button id="confirmDeleteBtn" class="btn btn-danger btn-small" disabled>
-                    Delete Everything
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script>
         // ============================================
-        // CONFIGURATION - UPDATE THESE VALUES
+        // CONFIGURATION - UPDATE THIS SECTION
         // ============================================
         const CONFIG = {
-            // Your GitHub username (all lowercase)
+            // Your GitHub username
             GITHUB_USERNAME: 'unique205',
             
-            // ⚠️ REPLACE THIS WITH YOUR NEW 40-CHARACTER TOKEN
-            // Go to GitHub → Settings → Developer settings → Personal access tokens
-            // Generate new token (classic) with "repo" permission
+            // ⚠️ REPLACE WITH YOUR NEW FINE-GRAINED TOKEN (starts with github_pat_)
             GITHUB_TOKEN: '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',
             
             DATA_REPO: 'inventory-data',
@@ -638,333 +153,305 @@
             ADMIN_PASSWORD: 'admin123'
         };
 
-        // ============================================
-        // VERIFY CONFIGURATION
-        // ============================================
-        function validateConfig() {
-            console.log('🔧 Validating configuration...');
-            
-            if (!CONFIG.GITHUB_USERNAME || CONFIG.GITHUB_USERNAME === 'YOUR_GITHUB_USERNAME_HERE') {
-                showError('❌ Please set your GitHub username in CONFIG');
-                return false;
-            }
-            
-            if (!CONFIG.GITHUB_TOKEN || CONFIG.GITHUB_TOKEN.includes('REPLACE')) {
-                showError('❌ Please generate and add your GitHub token in CONFIG');
-                showTokenHelp();
-                return false;
-            }
-            
-            if (CONFIG.GITHUB_TOKEN.length !== 40 || !CONFIG.GITHUB_TOKEN.startsWith('ghp_')) {
-                showError('❌ Invalid GitHub token format. Token should be 40 characters starting with "ghp_"');
-                showTokenHelp();
-                return false;
-            }
-            
-            console.log('✅ Configuration valid');
-            return true;
-        }
-
-        function showTokenHelp() {
-            const help = `
-                <div style="background: #fee2e2; border: 2px solid #dc2626; border-radius: 8px; padding: 15px; margin: 10px 0;">
-                    <h4 style="color: #dc2626; margin-top: 0;">How to get GitHub Token:</h4>
-                    <ol style="margin: 10px 0; padding-left: 20px;">
-                        <li>Go to <a href="https://github.com/settings/tokens" target="_blank">GitHub Tokens</a></li>
-                        <li>Click "Generate new token" → "Generate new token (classic)"</li>
-                        <li>Set expiration to "No expiration"</li>
-                        <li>Select ONLY the "repo" scope</li>
-                        <li>Click "Generate token"</li>
-                        <li>COPY the 40-character token (starts with ghp_)</li>
-                        <li>Replace the GITHUB_TOKEN value above</li>
-                    </ol>
-                    <p><strong>Important:</strong> Token should look like: ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</p>
-                </div>
-            `;
-            
-            const container = document.createElement('div');
-            container.innerHTML = help;
-            document.querySelector('.container').prepend(container);
-        }
-
-        function showError(message) {
-            const errorDiv = document.createElement('div');
-            errorDiv.style.cssText = `
-                background: #fee2e2;
-                color: #dc2626;
-                padding: 12px;
-                border-radius: 6px;
-                margin: 10px 0;
-                border: 1px solid #dc2626;
-                font-weight: 600;
-            `;
-            errorDiv.textContent = message;
-            document.querySelector('.container').prepend(errorDiv);
-            console.error(message);
-        }
-
-        // ============================================
-        // APPLICATION STATE
-        // ============================================
+        // Application state
         let inventory = [];
         let offlineQueue = [];
         let isOnline = navigator.onLine;
-        let syncInProgress = false;
-        let adminMode = false;
-        let GROUPS = ['RAW MATERIAL', 'FINISHED GOODS', 'TOOLS', 'CONSUMABLES', 'PACKAGING'];
-
-        // ============================================
-        // GITHUB DATABASE FUNCTIONS
-        // ============================================
-        class GitHubDB {
-            constructor() {
-                if (!validateConfig()) {
-                    throw new Error('Invalid configuration');
-                }
-                
-                this.baseURL = 'https://api.github.com';
-                this.currentSHA = null;
-                this.headers = {
-                    'Authorization': `token ${CONFIG.GITHUB_TOKEN}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                };
-                this.initialized = false;
-            }
-
-            async initialize() {
-                if (this.initialized) return true;
-                
-                try {
-                    console.log('🔌 Testing GitHub connection...');
-                    
-                    // Test connection by getting repository info
-                    const testUrl = `${this.baseURL}/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}`;
-                    const testResponse = await fetch(testUrl, { headers: this.headers });
-                    
-                    if (testResponse.status === 404) {
-                        throw new Error(`Repository not found: ${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}. Make sure it exists and is PUBLIC.`);
-                    }
-                    
-                    if (!testResponse.ok) {
-                        const errorData = await testResponse.json();
-                        throw new Error(`GitHub API error (${testResponse.status}): ${errorData.message || 'Unknown error'}`);
-                    }
-                    
-                    // Try to get the data file
-                    await this.getFileSHA();
-                    
-                    this.initialized = true;
-                    console.log('✅ GitHub connection successful');
-                    return true;
-                    
-                } catch (error) {
-                    console.error('❌ GitHub initialization failed:', error);
-                    
-                    // Provide specific error messages
-                    if (error.message.includes('401') || error.message.includes('Bad credentials')) {
-                        showError('❌ Invalid GitHub token. Please generate a new token with "repo" permissions.');
-                    } else if (error.message.includes('404')) {
-                        showError(`❌ Repository not found: ${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}. Please create this repository.`);
-                    } else if (error.message.includes('403')) {
-                        showError('❌ Access forbidden. Make sure your token has "repo" permissions and the repository is PUBLIC.');
-                    } else {
-                        showError(`❌ Connection failed: ${error.message}`);
-                    }
-                    
-                    return false;
-                }
-            }
-
-            async getFileSHA() {
-                const url = `${this.baseURL}/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/${CONFIG.DATA_FILE}?ref=${CONFIG.BRANCH}`;
-                
-                try {
-                    const response = await fetch(url, { headers: this.headers });
-                    
-                    if (response.status === 404) {
-                        console.log('📄 Data file not found (first time setup)');
-                        return null;
-                    }
-                    
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        throw new Error(`GitHub API error ${response.status}: ${errorText}`);
-                    }
-                    
-                    const data = await response.json();
-                    this.currentSHA = data.sha;
-                    return data.sha;
-                } catch (error) {
-                    console.error('Failed to get file SHA:', error);
-                    return null;
-                }
-            }
-
-            async readAll() {
-                if (!this.initialized) {
-                    await this.initialize();
-                }
-                
-                const url = `${this.baseURL}/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/${CONFIG.DATA_FILE}?ref=${CONFIG.BRANCH}`;
-                
-                try {
-                    console.log('📥 Reading data from GitHub...');
-                    const response = await fetch(url, { headers: this.headers });
-                    
-                    if (response.status === 404) {
-                        console.log('No data file found, returning empty array');
-                        return [];
-                    }
-                    
-                    if (!response.ok) {
-                        throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
-                    }
-                    
-                    const data = await response.json();
-                    this.currentSHA = data.sha;
-                    
-                    // Decode base64 content
-                    const content = atob(data.content.replace(/\n/g, ''));
-                    
-                    try {
-                        const parsed = JSON.parse(content);
-                        console.log(`✅ Read ${parsed.length} items from GitHub`);
-                        return parsed;
-                    } catch (parseError) {
-                        console.error('Invalid JSON in data file:', parseError);
-                        return [];
-                    }
-                } catch (error) {
-                    console.error('Failed to read data from GitHub:', error);
-                    throw error;
-                }
-            }
-
-            async writeAll(data) {
-                if (!this.initialized) {
-                    await this.initialize();
-                }
-                
-                const sha = this.currentSHA || await this.getFileSHA();
-                const url = `${this.baseURL}/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/${CONFIG.DATA_FILE}`;
-                
-                // Convert data to pretty JSON
-                const jsonString = JSON.stringify(data, null, 2);
-                const content = btoa(unescape(encodeURIComponent(jsonString)));
-                
-                const body = {
-                    message: `📦 Inventory update ${new Date().toLocaleString()}`,
-                    content: content,
-                    branch: CONFIG.BRANCH
-                };
-                
-                if (sha) {
-                    body.sha = sha;
-                }
-                
-                try {
-                    console.log('📤 Writing data to GitHub...');
-                    const response = await fetch(url, {
-                        method: 'PUT',
-                        headers: this.headers,
-                        body: JSON.stringify(body)
-                    });
-                    
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(`GitHub API error (${response.status}): ${errorData.message || 'Unknown error'}`);
-                    }
-                    
-                    const result = await response.json();
-                    this.currentSHA = result.content.sha;
-                    
-                    console.log(`✅ Successfully wrote ${data.length} items to GitHub`);
-                    return result;
-                } catch (error) {
-                    console.error('Failed to write data to GitHub:', error);
-                    throw error;
-                }
-            }
-
-            async deleteAll() {
-                return this.writeAll([]);
-            }
-        }
+        let gitHubDB = null;
 
         // ============================================
         // INITIALIZATION
         // ============================================
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('🚀 Inventory App Initializing...');
+            console.log('🚀 Starting app...');
             
-            // Validate configuration first
+            // First, validate configuration
             if (!validateConfig()) {
                 return;
             }
             
-            // Initialize GitHub DB
-            let gitHubDB;
-            try {
-                gitHubDB = new GitHubDB();
-                const initialized = await gitHubDB.initialize();
+            // Initialize GitHub connection
+            const success = await initializeGitHub();
+            
+            if (success) {
+                // Load data
+                loadLocalData();
+                setupEventListeners();
+                updateUI();
                 
-                if (!initialized) {
-                    showError('❌ Failed to initialize GitHub connection. Check your configuration.');
-                    return;
+                if (isOnline) {
+                    await syncWithGitHub();
                 }
-            } catch (error) {
-                showError(`❌ Initialization error: ${error.message}`);
-                return;
+                
+                console.log('✅ App ready');
             }
-            
-            // Load groups from localStorage
-            const savedGroups = localStorage.getItem('inventory_groups');
-            if (savedGroups) {
-                try {
-                    GROUPS = JSON.parse(savedGroups);
-                } catch (e) {
-                    console.log('Using default groups');
-                }
-            }
-            updateGroupSelect();
-            renderGroupsList();
-
-            // Load inventory from localStorage
-            loadLocalData();
-            
-            // Setup event listeners
-            setupEventListeners(gitHubDB);
-            
-            // Update UI
-            updateUI();
-            updateConnectionStatus();
-            
-            // Try to sync if online
-            if (isOnline) {
-                await syncWithGitHub(gitHubDB);
-            }
-            
-            // Auto-sync every 2 minutes if online
-            setInterval(async () => {
-                if (isOnline && !syncInProgress && offlineQueue.length > 0) {
-                    await syncWithGitHub(gitHubDB);
-                }
-            }, 2 * 60 * 1000);
-            
-            console.log('✅ App initialized successfully');
         });
 
         // ============================================
-        // DATA MANAGEMENT
+        // CONFIGURATION VALIDATION
+        // ============================================
+        function validateConfig() {
+            const errors = [];
+            
+            // Check username
+            if (!CONFIG.GITHUB_USERNAME || CONFIG.GITHUB_USERNAME === 'YOUR_GITHUB_USERNAME_HERE') {
+                errors.push('GitHub username not set');
+            }
+            
+            // Check token
+            if (!CONFIG.GITHUB_TOKEN || CONFIG.GITHUB_TOKEN.includes('REPLACE')) {
+                errors.push('GitHub token not set');
+            } else if (CONFIG.GITHUB_TOKEN.length < 40) {
+                errors.push('GitHub token appears too short');
+            }
+            
+            if (errors.length > 0) {
+                showError(`
+                    <h3>❌ Configuration Error</h3>
+                    <p>Please update the configuration in the script:</p>
+                    <ul>
+                        ${errors.map(err => `<li>${err}</li>`).join('')}
+                    </ul>
+                    <p><strong>Current token:</strong> ${CONFIG.GITHUB_TOKEN.substring(0, 10)}...</p>
+                `);
+                return false;
+            }
+            
+            return true;
+        }
+
+        // ============================================
+        // GITHUB INITIALIZATION
+        // ============================================
+        async function initializeGitHub() {
+            try {
+                console.log('🔌 Testing GitHub connection...');
+                
+                // Test 1: Check if repository exists and is accessible
+                const repoUrl = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}`;
+                const repoResponse = await fetch(repoUrl);
+                
+                if (repoResponse.status === 404) {
+                    showError(`
+                        <h3>❌ Repository Not Found</h3>
+                        <p>Repository <strong>${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}</strong> does not exist or is private.</p>
+                        <p>Please:</p>
+                        <ol>
+                            <li>Go to <a href="https://github.com/new" target="_blank">Create new repository</a></li>
+                            <li>Name it: <strong>inventory-data</strong></li>
+                            <li>Make it <strong>PUBLIC</strong></li>
+                            <li>Create file: <code>data/inventory.json</code> with content: <code>[]</code></li>
+                        </ol>
+                    `);
+                    return false;
+                }
+                
+                if (!repoResponse.ok) {
+                    throw new Error(`Repository check failed: ${repoResponse.status}`);
+                }
+                
+                // Test 2: Check if we can access with token
+                const testUrl = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/${CONFIG.DATA_FILE}`;
+                const testResponse = await fetch(testUrl, {
+                    headers: {
+                        'Authorization': `token ${CONFIG.GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (testResponse.status === 401 || testResponse.status === 403) {
+                    showError(`
+                        <h3>❌ Invalid GitHub Token</h3>
+                        <p>Your token is not working. Please:</p>
+                        <ol>
+                            <li>Go to <a href="https://github.com/settings/tokens" target="_blank">GitHub Tokens</a></li>
+                            <li>Click <strong>"Generate new token"</strong> (NOT "classic")</li>
+                            <li>Token name: <strong>Inventory-App</strong></li>
+                            <li>Expiration: 90 days</li>
+                            <li>Select repositories: <strong>inventory-data</strong> and <strong>inventory-app</strong></li>
+                            <li>Permissions: <strong>Contents: Read and write</strong></li>
+                            <li>Click "Generate token" and COPY it</li>
+                            <li>Replace the token in the CONFIG section</li>
+                        </ol>
+                        <p><strong>Current token starts with:</strong> ${CONFIG.GITHUB_TOKEN.substring(0, 15)}...</p>
+                    `);
+                    return false;
+                }
+                
+                if (testResponse.status === 404) {
+                    // File doesn't exist yet, that's okay for first time
+                    console.log('📄 Data file will be created on first write');
+                }
+                
+                console.log('✅ GitHub connection successful');
+                return true;
+                
+            } catch (error) {
+                console.error('GitHub init error:', error);
+                showError(`
+                    <h3>❌ Connection Failed</h3>
+                    <p>Error: ${error.message}</p>
+                    <p>Please check:</p>
+                    <ol>
+                        <li>Internet connection</li>
+                        <li>GitHub repository exists and is public</li>
+                        <li>Token has correct permissions</li>
+                    </ol>
+                `);
+                return false;
+            }
+        }
+
+        // ============================================
+        // GITHUB OPERATIONS
+        // ============================================
+        async function syncWithGitHub() {
+            if (!isOnline) return;
+            
+            updateStatus('Syncing...', 'syncing');
+            
+            try {
+                // Push offline changes
+                if (offlineQueue.length > 0) {
+                    await pushToGitHub();
+                }
+                
+                // Pull latest data
+                await pullFromGitHub();
+                
+                updateStatus('Online', 'online');
+                showMessage('✅ Synced with GitHub');
+                
+            } catch (error) {
+                console.error('Sync failed:', error);
+                updateStatus('Sync failed', 'offline');
+                showMessage('❌ Sync failed - Using local data');
+            }
+        }
+
+        async function pushToGitHub() {
+            // Read current data
+            let remoteData = [];
+            try {
+                remoteData = await readFromGitHub();
+            } catch (e) {
+                // File doesn't exist yet, start with empty array
+                remoteData = [];
+            }
+            
+            // Merge offline changes
+            offlineQueue.forEach(item => {
+                if (item._delete) {
+                    const index = remoteData.findIndex(i => i.id === item.id);
+                    if (index !== -1) remoteData.splice(index, 1);
+                } else {
+                    const existingIndex = remoteData.findIndex(i => i.id === item.id);
+                    if (existingIndex === -1) {
+                        remoteData.unshift(item); // New items on top
+                    } else {
+                        remoteData[existingIndex] = item;
+                    }
+                }
+            });
+            
+            // Write back
+            await writeToGitHub(remoteData);
+            
+            // Update local
+            inventory = remoteData;
+            offlineQueue = [];
+            saveLocalData();
+        }
+
+        async function pullFromGitHub() {
+            const remoteData = await readFromGitHub();
+            inventory = remoteData;
+            saveLocalData();
+            updateUI();
+        }
+
+        async function readFromGitHub() {
+            const url = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/${CONFIG.DATA_FILE}`;
+            
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `token ${CONFIG.GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+            
+            if (response.status === 404) {
+                return []; // File doesn't exist yet
+            }
+            
+            if (!response.ok) {
+                throw new Error(`GitHub read error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            const content = atob(data.content.replace(/\n/g, ''));
+            return JSON.parse(content);
+        }
+
+        async function writeToGitHub(data) {
+            const url = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/${CONFIG.DATA_FILE}`;
+            
+            // First, get current SHA
+            let sha = null;
+            try {
+                const current = await readFromGitHub();
+                // We need to get the actual SHA from the API
+                const infoResponse = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${CONFIG.GITHUB_TOKEN}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                if (infoResponse.ok) {
+                    const info = await infoResponse.json();
+                    sha = info.sha;
+                }
+            } catch (e) {
+                // File doesn't exist, no SHA needed
+            }
+            
+            const content = btoa(JSON.stringify(data, null, 2));
+            const body = {
+                message: `Inventory update ${new Date().toLocaleString()}`,
+                content: content,
+                branch: CONFIG.BRANCH
+            };
+            
+            if (sha) {
+                body.sha = sha;
+            }
+            
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${CONFIG.GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`GitHub write error: ${response.status}`);
+            }
+            
+            return await response.json();
+        }
+
+        // ============================================
+        // LOCAL DATA MANAGEMENT
         // ============================================
         function loadLocalData() {
             const saved = localStorage.getItem('inventory_data');
             if (saved) {
                 try {
                     inventory = JSON.parse(saved);
-                    console.log(`📁 Loaded ${inventory.length} items from localStorage`);
-                } catch (error) {
+                } catch (e) {
                     inventory = [];
                 }
             }
@@ -973,8 +460,7 @@
             if (queue) {
                 try {
                     offlineQueue = JSON.parse(queue);
-                    console.log(`📦 Loaded ${offlineQueue.length} items in offline queue`);
-                } catch (error) {
+                } catch (e) {
                     offlineQueue = [];
                 }
             }
@@ -985,102 +471,20 @@
             localStorage.setItem('inventory_queue', JSON.stringify(offlineQueue));
         }
 
-        function saveGroups() {
-            localStorage.setItem('inventory_groups', JSON.stringify(GROUPS));
-        }
-
-        // ============================================
-        // SYNC FUNCTIONS
-        // ============================================
-        async function syncWithGitHub(gitHubDB) {
-            if (syncInProgress || !isOnline) return;
-            
-            syncInProgress = true;
-            updateConnectionStatus('syncing');
-            
-            try {
-                console.log('🔄 Starting sync with GitHub...');
-                
-                // Push offline changes
-                if (offlineQueue.length > 0) {
-                    console.log(`📤 Pushing ${offlineQueue.length} offline items to GitHub...`);
-                    
-                    const remoteData = await gitHubDB.readAll();
-                    
-                    // Merge data
-                    offlineQueue.forEach(item => {
-                        if (item._delete) {
-                            const index = remoteData.findIndex(i => i.id === item.id);
-                            if (index !== -1) remoteData.splice(index, 1);
-                        } else {
-                            const existingIndex = remoteData.findIndex(i => i.id === item.id);
-                            if (existingIndex === -1) {
-                                remoteData.unshift(item); // Add to beginning
-                            } else {
-                                remoteData[existingIndex] = item;
-                            }
-                        }
-                    });
-                    
-                    await gitHubDB.writeAll(remoteData);
-                    offlineQueue = [];
-                    inventory = remoteData;
-                    saveLocalData();
-                    
-                    console.log('✅ Offline items synced to GitHub');
-                } else {
-                    // Just pull latest data
-                    console.log('📥 Pulling latest data from GitHub...');
-                    const remoteData = await gitHubDB.readAll();
-                    inventory = remoteData;
-                    saveLocalData();
-                }
-                
-                updateUI();
-                updateConnectionStatus('online');
-                
-                // Show success message
-                showMessage('✅ Synced with GitHub');
-                console.log('✅ Sync completed successfully');
-                
-            } catch (error) {
-                console.error('❌ Sync failed:', error);
-                updateConnectionStatus('offline');
-                showMessage('❌ Sync failed - Using local data');
-            } finally {
-                syncInProgress = false;
-            }
-        }
-
         // ============================================
         // CORE FUNCTIONS
         // ============================================
-        async function addItem(gitHubDB) {
+        async function addItem() {
             const name = document.getElementById('nameInput').value.trim().toUpperCase();
             const quantity = parseInt(document.getElementById('quantityInput').value) || 0;
             const group = document.getElementById('groupInput').value;
             const details = document.getElementById('detailsInput').value.trim().toUpperCase();
             
-            // Validation
-            if (!name) {
-                showMessage('Please enter item name');
-                document.getElementById('nameInput').focus();
+            if (!name || !quantity || !group) {
+                showMessage('Please fill all required fields');
                 return;
             }
             
-            if (!quantity || quantity < 0) {
-                showMessage('Please enter valid quantity');
-                document.getElementById('quantityInput').focus();
-                return;
-            }
-            
-            if (!group) {
-                showMessage('Please select a group');
-                document.getElementById('groupInput').focus();
-                return;
-            }
-            
-            // Create item (NEWEST ITEMS ON TOP)
             const newItem = {
                 id: 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
                 name: name,
@@ -1089,11 +493,11 @@
                 details: details,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
-                synced: !isOnline,
-                pending: !isOnline
+                synced: false,
+                pending: true
             };
             
-            // Add to BEGINNING of array (newest on top)
+            // Add to top of list
             inventory.unshift(newItem);
             
             // Clear form
@@ -1102,42 +506,30 @@
             document.getElementById('detailsInput').value = '';
             document.getElementById('nameInput').focus();
             
-            // Hide suggestions
-            document.getElementById('suggestions').style.display = 'none';
+            // Save locally
+            offlineQueue.push(newItem);
+            saveLocalData();
             
-            // Handle sync
+            // Update UI
+            updateUI();
+            
+            // Try to sync
             if (isOnline) {
-                try {
-                    offlineQueue.push(newItem);
-                    await syncWithGitHub(gitHubDB);
-                } catch (error) {
-                    newItem.pending = true;
-                    offlineQueue.push(newItem);
-                    saveLocalData();
-                    showMessage('📱 Saved locally (sync failed)');
-                }
+                await syncWithGitHub();
             } else {
-                newItem.pending = true;
-                offlineQueue.push(newItem);
-                saveLocalData();
                 showMessage('📴 Saved offline');
             }
-            
-            updateUI();
         }
 
-        function deleteItem(itemId, gitHubDB) {
+        async function deleteItem(itemId) {
             if (!confirm('Delete this item?')) return;
             
             const itemIndex = inventory.findIndex(item => item.id === itemId);
             if (itemIndex === -1) return;
             
             const item = inventory[itemIndex];
-            
-            // Remove from inventory
             inventory.splice(itemIndex, 1);
             
-            // If item was synced, add to deletion queue
             if (item.synced) {
                 offlineQueue.push({
                     id: itemId,
@@ -1149,109 +541,13 @@
             saveLocalData();
             updateUI();
             
-            if (isOnline && gitHubDB) {
-                syncWithGitHub(gitHubDB);
-            }
-        }
-
-        function searchSuggestions() {
-            const searchTerm = document.getElementById('nameInput').value.toUpperCase().trim();
-            const suggestions = document.getElementById('suggestions');
-            
-            if (searchTerm.length < 2) {
-                suggestions.style.display = 'none';
-                return;
-            }
-            
-            const matches = inventory.filter(item => 
-                item.name && item.name.includes(searchTerm)
-            ).slice(0, 5);
-            
-            if (matches.length === 0) {
-                suggestions.style.display = 'none';
-                return;
-            }
-            
-            suggestions.innerHTML = matches.map(item => `
-                <div class="suggestion-item" onclick="window.fillSuggestion('${item.id}')">
-                    <strong>${item.name}</strong><br>
-                    <small>${item.group} • Qty: ${item.quantity}</small>
-                </div>
-            `).join('');
-            
-            suggestions.style.display = 'block';
-        }
-
-        function fillSuggestion(itemId) {
-            const item = inventory.find(i => i.id === itemId);
-            if (item) {
-                document.getElementById('nameInput').value = item.name;
-                document.getElementById('quantityInput').value = item.quantity;
-                document.getElementById('groupInput').value = item.group;
-                document.getElementById('detailsInput').value = item.details || '';
-                document.getElementById('suggestions').style.display = 'none';
-                document.getElementById('quantityInput').focus();
+            if (isOnline) {
+                await syncWithGitHub();
             }
         }
 
         // ============================================
-        // GROUP MANAGEMENT
-        // ============================================
-        function updateGroupSelect() {
-            const select = document.getElementById('groupInput');
-            select.innerHTML = '<option value="">Select Group</option>' +
-                GROUPS.map(group => `<option value="${group}">${group}</option>`).join('');
-        }
-
-        function renderGroupsList() {
-            const container = document.getElementById('groupsList');
-            container.innerHTML = GROUPS.map(group => `
-                <div style="background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px;">
-                    ${group}
-                    <button onclick="window.deleteGroup('${group}')" style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 0.875rem;">×</button>
-                </div>
-            `).join('');
-        }
-
-        function addGroup() {
-            const input = document.getElementById('newGroupInput');
-            const groupName = input.value.trim().toUpperCase();
-            
-            if (!groupName) {
-                showMessage('Please enter group name');
-                return;
-            }
-            
-            if (GROUPS.includes(groupName)) {
-                showMessage('Group already exists');
-                return;
-            }
-            
-            GROUPS.push(groupName);
-            saveGroups();
-            updateGroupSelect();
-            renderGroupsList();
-            input.value = '';
-            showMessage(`✅ Added group: ${groupName}`);
-        }
-
-        function deleteGroup(groupName) {
-            if (!confirm(`Delete group "${groupName}"? Items in this group will keep it as their group.`)) {
-                return;
-            }
-            
-            const index = GROUPS.indexOf(groupName);
-            if (index !== -1) {
-                GROUPS.splice(index, 1);
-                saveGroups();
-                updateGroupSelect();
-                renderGroupsList();
-                showMessage(`✅ Deleted group: ${groupName}`);
-            }
-        }
-
-        // ============================================
-        // UI UPDATES
+        // UI FUNCTIONS
         // ============================================
         function updateUI() {
             updateInventoryList();
@@ -1263,8 +559,8 @@
             
             if (inventory.length === 0) {
                 container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📭</div>
+                    <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+                        <div style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;">📭</div>
                         <p>No inventory items yet</p>
                         <p>Add your first item above</p>
                     </div>
@@ -1272,17 +568,14 @@
                 return;
             }
             
-            // NEWEST ITEMS FIRST (already added to beginning of array)
             container.innerHTML = inventory.map(item => `
-                <div class="table-row ${item.pending ? 'pending' : ''}">
+                <div class="table-row">
                     <div class="item-name">${item.name}</div>
-                    <div class="text-center item-quantity">${item.quantity}</div>
-                    <div class="text-center">
-                        <span class="item-group">${item.group}</span>
-                    </div>
-                    <div class="item-details">${item.details || '-'}</div>
-                    <div class="text-right item-actions">
-                        <button onclick="window.deleteItem('${item.id}', window.gitHubDB)" class="icon-btn">🗑️</button>
+                    <div class="item-quantity">${item.quantity}</div>
+                    <div class="text-center"><span class="item-group">${item.group}</span></div>
+                    <div>${item.details || '-'}</div>
+                    <div class="text-right">
+                        <button onclick="deleteItem('${item.id}')" style="background: none; border: 1px solid #e2e8f0; border-radius: 4px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer;">🗑️</button>
                     </div>
                 </div>
             `).join('');
@@ -1291,7 +584,7 @@
         function updateStats() {
             document.getElementById('totalCount').textContent = `${inventory.length} items`;
             
-            const pendingItems = inventory.filter(item => item.pending).length + offlineQueue.length;
+            const pendingItems = offlineQueue.length;
             const pendingCount = document.getElementById('pendingCount');
             const pendingNum = document.getElementById('pendingNum');
             
@@ -1303,231 +596,55 @@
             }
         }
 
-        function updateConnectionStatus(status) {
+        function updateStatus(text, type) {
             const element = document.getElementById('connectionStatus');
-            
-            if (status === 'syncing') {
-                element.textContent = 'Syncing...';
-                element.className = 'status-badge status-syncing';
-            } else if (isOnline) {
-                element.textContent = 'Online';
-                element.className = 'status-badge status-online';
-            } else {
-                element.textContent = 'Offline';
-                element.className = 'status-badge status-offline';
-            }
+            element.textContent = text;
+            element.className = 'status-badge ' + (type === 'online' ? 'status-online' : type === 'offline' ? 'status-offline' : 'status-syncing');
         }
 
         // ============================================
         // EVENT LISTENERS
         // ============================================
-        function setupEventListeners(gitHubDB) {
-            // Store gitHubDB globally for use in inline functions
-            window.gitHubDB = gitHubDB;
-            
-            // Add item
-            document.getElementById('addBtn').addEventListener('click', () => addItem(gitHubDB));
-            
-            // Enter key in name field
+        function setupEventListeners() {
+            document.getElementById('addBtn').addEventListener('click', addItem);
             document.getElementById('nameInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') addItem(gitHubDB);
+                if (e.key === 'Enter') addItem();
             });
             
-            // Type-ahead suggestions
-            document.getElementById('nameInput').addEventListener('input', searchSuggestions);
-            
-            // Sync button
             document.getElementById('syncBtn').addEventListener('click', () => {
                 if (isOnline) {
-                    syncWithGitHub(gitHubDB);
+                    syncWithGitHub();
                 } else {
                     showMessage('You are offline');
                 }
             });
             
-            // Admin toggle
-            document.getElementById('adminBtn').addEventListener('click', () => {
-                const password = prompt('Enter admin password:');
-                if (password === CONFIG.ADMIN_PASSWORD) {
-                    adminMode = !adminMode;
-                    document.getElementById('adminPanel').classList.toggle('show', adminMode);
-                } else if (password) {
-                    showMessage('Incorrect password');
-                }
-            });
-            
-            // Add group
-            document.getElementById('addGroupBtn').addEventListener('click', addGroup);
-            document.getElementById('newGroupInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') addGroup();
-            });
-            
-            // Export data
-            document.getElementById('exportBtn').addEventListener('click', exportData);
-            
-            // Import data
-            document.getElementById('importBtn').addEventListener('click', () => {
-                document.getElementById('importFile').click();
-            });
-            document.getElementById('importFile').addEventListener('change', (e) => importData(e, gitHubDB));
-            
-            // Delete all
-            document.getElementById('deleteAllBtn').addEventListener('click', showDeleteModal);
-            document.getElementById('cancelDeleteBtn').addEventListener('click', hideDeleteModal);
-            document.getElementById('confirmDeleteBtn').addEventListener('click', () => confirmDeleteAll(gitHubDB));
-            document.getElementById('confirmDeleteInput').addEventListener('input', (e) => {
-                document.getElementById('confirmDeleteBtn').disabled = e.target.value !== 'DELETE ALL';
-            });
-            
-            // Online/offline detection
             window.addEventListener('online', () => {
                 isOnline = true;
-                updateConnectionStatus();
-                syncWithGitHub(gitHubDB);
+                updateStatus('Online', 'online');
+                syncWithGitHub();
             });
             
             window.addEventListener('offline', () => {
                 isOnline = false;
-                updateConnectionStatus();
-            });
-            
-            // Click outside to close suggestions
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.form-group')) {
-                    document.getElementById('suggestions').style.display = 'none';
-                }
+                updateStatus('Offline', 'offline');
             });
         }
 
         // ============================================
-        // DATA IMPORT/EXPORT
+        // MESSAGE FUNCTIONS
         // ============================================
-        function exportData() {
-            try {
-                const data = {
-                    version: '1.0',
-                    exportedAt: new Date().toISOString(),
-                    inventory: inventory,
-                    groups: GROUPS
-                };
-                
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `inventory-backup-${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                
-                URL.revokeObjectURL(url);
-                
-                showMessage('✅ Backup exported');
-            } catch (error) {
-                showMessage('❌ Export failed');
-            }
+        function showError(html) {
+            const container = document.getElementById('errorContainer');
+            container.innerHTML = `<div class="error-box">${html}</div>`;
         }
 
-        async function importData(event, gitHubDB) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            if (!confirm('Import will replace ALL current data. Continue?')) {
-                event.target.value = '';
-                return;
-            }
-            
-            try {
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        
-                        if (data.inventory && Array.isArray(data.inventory)) {
-                            inventory = data.inventory;
-                        }
-                        
-                        if (data.groups && Array.isArray(data.groups)) {
-                            GROUPS = data.groups;
-                            saveGroups();
-                            updateGroupSelect();
-                            renderGroupsList();
-                        }
-                        
-                        saveLocalData();
-                        
-                        if (isOnline) {
-                            await syncWithGitHub(gitHubDB);
-                        } else {
-                            updateUI();
-                        }
-                        
-                        showMessage(`✅ Imported ${inventory.length} items`);
-                    } catch (error) {
-                        showMessage('❌ Invalid backup file');
-                    }
-                };
-                reader.readAsText(file);
-            } catch (error) {
-                showMessage('❌ Failed to read file');
-            }
-            
-            event.target.value = '';
-        }
-
-        // ============================================
-        // DELETE ALL FUNCTION
-        // ============================================
-        function showDeleteModal() {
-            document.getElementById('deleteModal').classList.add('show');
-            document.getElementById('confirmDeleteInput').value = '';
-            document.getElementById('confirmDeleteBtn').disabled = true;
-            document.getElementById('confirmDeleteInput').focus();
-        }
-
-        function hideDeleteModal() {
-            document.getElementById('deleteModal').classList.remove('show');
-        }
-
-        async function confirmDeleteAll(gitHubDB) {
-            hideDeleteModal();
-            
-            try {
-                // Clear from GitHub
-                if (isOnline && gitHubDB) {
-                    await gitHubDB.deleteAll();
-                }
-                
-                // Clear local data
-                inventory = [];
-                offlineQueue = [];
-                saveLocalData();
-                
-                // Update UI
-                updateUI();
-                
-                showMessage('✅ All data deleted');
-            } catch (error) {
-                showMessage('❌ Failed to delete from GitHub');
-                
-                // Still clear local
-                inventory = [];
-                offlineQueue = [];
-                saveLocalData();
-                updateUI();
-            }
-        }
-
-        // ============================================
-        // UTILITY FUNCTIONS
-        // ============================================
         function showMessage(message) {
-            // Remove existing message
+            // Remove existing
             const existing = document.querySelector('.message-toast');
             if (existing) existing.remove();
             
-            // Create message element
+            // Create new
             const messageEl = document.createElement('div');
             messageEl.className = 'message-toast';
             messageEl.textContent = message;
@@ -1535,7 +652,7 @@
                 position: fixed;
                 bottom: 20px;
                 right: 20px;
-                background: ${message.includes('✅') ? '#10b981' : message.includes('❌') ? '#ef4444' : '#3b82f6'};
+                background: ${message.includes('✅') ? '#10b981' : '#ef4444'};
                 color: white;
                 padding: 10px 20px;
                 border-radius: 4px;
@@ -1545,38 +662,8 @@
                 animation: slideIn 0.3s ease-out;
             `;
             
-            // Add animation
-            if (!document.querySelector('#message-animations')) {
-                const style = document.createElement('style');
-                style.id = 'message-animations';
-                style.textContent = `
-                    @keyframes slideIn {
-                        from {
-                            transform: translateX(100%);
-                            opacity: 0;
-                        }
-                        to {
-                            transform: translateX(0);
-                            opacity: 1;
-                        }
-                    }
-                    @keyframes slideOut {
-                        from {
-                            transform: translateX(0);
-                            opacity: 1;
-                        }
-                        to {
-                            transform: translateX(100%);
-                            opacity: 0;
-                        }
-                    }
-                `;
-                document.head.appendChild(style);
-            }
-            
             document.body.appendChild(messageEl);
             
-            // Auto-remove after 3 seconds
             setTimeout(() => {
                 if (messageEl.parentNode) {
                     messageEl.style.animation = 'slideOut 0.3s ease-out forwards';
@@ -1589,10 +676,22 @@
             }, 3000);
         }
 
-        // Make functions available globally
-        window.fillSuggestion = fillSuggestion;
+        // Add animation styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Make functions globally available
         window.deleteItem = deleteItem;
-        window.deleteGroup = deleteGroup;
     </script>
 </body>
 </html>
