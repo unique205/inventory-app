@@ -1,727 +1,621 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📦 Inventory System</title>
-    <style>
-        /* RESET */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; }
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-        
-        /* SETUP SCREEN */
-        .setup-screen { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
-        .setup-screen h2 { color: #2c3e50; margin-bottom: 20px; }
-        
-        /* TOKEN BOX */
-        .token-box { background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0; text-align: left; }
-        .token-box input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 5px; font-size: 16px; }
-        
-        /* BUTTONS */
-        .btn { padding: 12px 24px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin: 5px; }
-        .btn-primary { background: #3498db; color: white; }
-        .btn-primary:hover { background: #2980b9; }
-        .btn-secondary { background: #95a5a6; color: white; }
-        .btn-danger { background: #e74c3c; color: white; }
-        
-        /* LOGIN SCREEN */
-        .login-screen { text-align: center; padding: 40px; }
-        .login-buttons { display: flex; flex-direction: column; gap: 15px; max-width: 400px; margin: 30px auto; }
-        .login-btn { padding: 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; text-align: left; }
-        .staff-btn { background: #3498db; color: white; }
-        .admin-btn { background: #2c3e50; color: white; }
-        
-        /* STAFF FORM */
-        .staff-form { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #2c3e50; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        .form-row { display: flex; gap: 15px; }
-        .form-row .form-group { flex: 1; }
-        
-        /* SUGGESTIONS */
-        .suggestions { border: 1px solid #ddd; background: white; max-height: 200px; overflow-y: auto; margin-top: 5px; display: none; position: absolute; width: 100%; z-index: 100; }
-        .suggestion { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; }
-        .suggestion:hover { background: #f5f5f5; }
-        
-        /* MESSAGES */
-        .success { background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-top: 15px; text-align: center; }
-        .error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin: 10px 0; }
-        
-        /* INVENTORY TABLE */
-        .inventory-table { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 20px; }
-        .table-header { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr 1fr; background: #34495e; color: white; padding: 15px; font-weight: bold; }
-        .table-row { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr 1fr; padding: 12px 15px; border-bottom: 1px solid #eee; align-items: center; }
-        .table-row:hover { background: #f9f9f9; }
-        
-        /* CONTROLS */
-        .admin-controls { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
-        
-        /* MODAL */
-        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; padding: 30px; border-radius: 10px; max-width: 400px; width: 90%; }
-        
-        /* UTILITY */
-        .hidden { display: none !important; }
-        .visible { display: block !important; }
-        .text-center { text-align: center; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Inventory System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    header {
+      background: #111827;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1f2937;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+    .role-area {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+    select, input, button, textarea {
+      font: inherit;
+      border-radius: 0.375rem;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+      padding: 0.4rem 0.6rem;
+    }
+    button {
+      cursor: pointer;
+      background: #4f46e5;
+      border-color: #4f46e5;
+      font-weight: 500;
+    }
+    button:hover {
+      background: #6366f1;
+    }
+    button.secondary {
+      background: #111827;
+      border-color: #4b5563;
+    }
+    main {
+      max-width: 1100px;
+      margin: 1.5rem auto;
+      padding: 0 1rem 2rem;
+    }
+    .card {
+      background: #020617;
+      border-radius: 0.75rem;
+      border: 1px solid #1f2937;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.8);
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    label {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+    textarea {
+      min-height: 60px;
+      resize: vertical;
+    }
+    .actions-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.5rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .status {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+    .status span {
+      font-weight: 500;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    th, td {
+      border-bottom: 1px solid #1f2937;
+      padding: 0.4rem 0.5rem;
+      text-align: left;
+    }
+    th {
+      background: #020617;
+      position: sticky;
+      top: 54px; /* below header */
+      z-index: 5;
+    }
+    tr:hover td {
+      background: #020617;
+    }
+    .badge {
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: #111827;
+      border: 1px solid #4b5563;
+    }
+    .badge-admin {
+      background: rgba(34, 197, 94, 0.1);
+      border-color: #22c55e;
+      color: #bbf7d0;
+    }
+    .badge-staff {
+      background: rgba(59, 130, 246, 0.1);
+      border-color: #3b82f6;
+      color: #bfdbfe;
+    }
+    .btn-small {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.45rem;
+      margin-right: 0.25rem;
+    }
+    .danger {
+      background: #b91c1c;
+      border-color: #b91c1c;
+    }
+    .danger:hover {
+      background: #dc2626;
+    }
+    .muted {
+      color: #9ca3af;
+      font-size: 0.8rem;
+    }
+    @media (max-width: 768px) {
+      th:nth-child(1),
+      td:nth-child(1) {
+        display: none; /* hide ID on small screens */
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- SETUP SCREEN -->
-        <div id="setupScreen" class="setup-screen">
-            <h2>🔐 One-Time Setup</h2>
-            <p><strong>Admin:</strong> Setup token once. Staff will use same token.</p>
-            
-            <div class="token-box">
-                <p><strong>Step 1: Generate Token</strong></p>
-                <ol style="margin: 15px 0 15px 20px;">
-                    <li>Go to: <a href="https://github.com/settings/tokens" target="_blank">GitHub Tokens</a></li>
-                    <li>Click "Generate new token" → "Generate new token (classic)"</li>
-                    <li>Token name: <code>inventory-system</code></li>
-                    <li>Expiration: <strong>No expiration</strong></li>
-                    <li>Select scopes: <strong>ONLY "repo"</strong></li>
-                    <li>Click "Generate token"</li>
-                    <li><strong>COPY THE TOKEN</strong> (starts with ghp_)</li>
-                </ol>
-                
-                <p><strong>Step 2: Enter Token Here</strong></p>
-                <input type="text" id="githubToken" placeholder="Paste token starting with ghp_...">
-            </div>
-            
-            <div>
-                <button class="btn btn-primary" onclick="saveToken()">✅ Save Token & Continue</button>
-            </div>
-        </div>
-
-        <!-- LOGIN SCREEN -->
-        <div id="loginScreen" class="login-screen hidden">
-            <h1>📦 Inventory System</h1>
-            <p>Select your role:</p>
-            
-            <div class="login-buttons">
-                <button class="login-btn staff-btn" onclick="loginAsStaff()">
-                    <h3>👷 STAFF USER</h3>
-                    <p>• Add new items only<br>• Cannot view or delete<br>• Simple interface</p>
-                </button>
-                
-                <button class="login-btn admin-btn" onclick="loginAsAdmin()">
-                    <h3>👑 ADMIN USER</h3>
-                    <p>• View ALL inventory<br>• Add/Edit/Delete items<br>• Password: admin123</p>
-                </button>
-            </div>
-            
-            <div style="margin-top: 30px;">
-                <button class="btn btn-secondary" onclick="resetApp()">🔄 Reset Token</button>
-            </div>
-        </div>
-
-        <!-- STAFF INTERFACE -->
-        <div id="staffInterface" class="hidden">
-            <div class="header">
-                <h1>➕ Add Inventory Item</h1>
-                <p>Staff Mode: Add items only. Admin reviews inventory.</p>
-            </div>
-            
-            <div id="staffError" class="error hidden"></div>
-            
-            <div class="staff-form">
-                <div class="form-row">
-                    <div class="form-group" style="position: relative;">
-                        <label>ITEM NAME *</label>
-                        <input type="text" id="itemName" placeholder="Type item name..." autocapitalize="characters">
-                        <div id="suggestionsBox" class="suggestions"></div>
-                    </div>
-                    <div class="form-group">
-                        <label>QUANTITY *</label>
-                        <input type="number" id="itemQuantity" placeholder="0" min="0">
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>GROUP *</label>
-                        <select id="itemGroup">
-                            <option value="">Select Group</option>
-                            <option value="RAW MATERIAL">RAW MATERIAL</option>
-                            <option value="FINISHED GOODS">FINISHED GOODS</option>
-                            <option value="TOOLS">TOOLS</option>
-                            <option value="CONSUMABLES">CONSUMABLES</option>
-                            <option value="PACKAGING">PACKAGING</option>
-                            <option value="SPARE PARTS">SPARE PARTS</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>DETAILS (Optional)</label>
-                        <input type="text" id="itemDetails" placeholder="Brand, size, etc..." autocapitalize="characters">
-                    </div>
-                </div>
-                
-                <button class="btn btn-primary" onclick="addItem()">➕ ADD ITEM</button>
-                
-                <div id="successMessage" class="success hidden">
-                    ✅ Item added successfully!
-                </div>
-            </div>
-            
-            <div style="text-align: center; margin-top: 30px;">
-                <button class="btn btn-secondary" onclick="logout()">← Back to Login</button>
-            </div>
-        </div>
-
-        <!-- ADMIN INTERFACE -->
-        <div id="adminInterface" class="hidden">
-            <div class="header">
-                <h1>📋 Full Inventory</h1>
-                <p>Admin Mode: Viewing all items from all staff.</p>
-            </div>
-            
-            <div id="adminError" class="error hidden"></div>
-            
-            <div class="admin-controls">
-                <button class="btn btn-primary" onclick="loadInventory()">🔄 Refresh</button>
-                <button class="btn btn-secondary" onclick="exportData()">📥 Export</button>
-                <button class="btn btn-danger" onclick="showDeleteModal()">🗑️ Delete All</button>
-                <button class="btn btn-secondary" onclick="logout()">← Logout</button>
-            </div>
-            
-            <div class="inventory-table">
-                <div class="table-header">
-                    <div>ITEM NAME</div>
-                    <div>QUANTITY</div>
-                    <div>GROUP</div>
-                    <div>DETAILS</div>
-                    <div>ACTION</div>
-                </div>
-                <div id="inventoryList">
-                    <div style="text-align: center; padding: 40px; color: #7f8c8d;">
-                        <p>Click "Refresh" to load inventory...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <header>
+    <h1>Inventory System</h1>
+    <div class="role-area">
+      <span>Role:</span>
+      <select id="role-select">
+        <option value="staff">Staff</option>
+        <option value="admin">Admin</option>
+      </select>
+      <input
+        type="password"
+        id="admin-password"
+        placeholder="Admin password"
+        style="display:none;"
+      />
+      <button id="set-role-btn" class="secondary">Set</button>
+      <span id="current-role-label" class="badge badge-staff">Staff</span>
     </div>
+  </header>
 
-    <!-- DELETE MODAL -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <h3 style="color: #c0392b; margin-bottom: 15px;">⚠️ Delete All Items?</h3>
-            <p>This will delete ALL inventory items permanently.</p>
-            <p>Type <strong>DELETE ALL</strong> to confirm:</p>
-            <input type="text" id="confirmDelete" placeholder="Type DELETE ALL" style="width: 100%; padding: 10px; margin: 10px 0; border: 2px solid #ddd; border-radius: 5px;">
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button id="confirmDeleteBtn" class="btn btn-danger" disabled onclick="deleteAllItems()">Delete Everything</button>
-                <button class="btn btn-secondary" onclick="hideDeleteModal()">Cancel</button>
-            </div>
+  <main>
+    <!-- Add / Edit Item -->
+    <section class="card">
+      <h2 id="form-title">Add Item</h2>
+      <form id="item-form">
+        <input type="hidden" id="edit-index" value="" />
+        <div class="form-grid">
+          <div>
+            <label for="item-name">Item Name *</label>
+            <input id="item-name" required autocomplete="off" />
+          </div>
+          <div>
+            <label for="item-qty">Quantity *</label>
+            <input id="item-qty" type="number" min="0" step="1" required />
+          </div>
+          <div>
+            <label for="item-group">Group</label>
+            <input id="item-group" placeholder="e.g. RAW MATERIAL" />
+          </div>
+          <div>
+            <label for="item-addedby">Added By</label>
+            <input id="item-addedby" placeholder="staff / admin" />
+          </div>
         </div>
-    </div>
+        <div>
+          <label for="item-details">Details</label>
+          <textarea id="item-details" placeholder="Describe item (grade, brand, etc.)"></textarea>
+        </div>
+        <div class="actions-row">
+          <div>
+            <button type="submit" id="submit-btn">Save Item</button>
+            <button type="button" id="cancel-edit-btn" class="secondary" style="display:none;">
+              Cancel Edit
+            </button>
+          </div>
+          <div class="status" id="status-area">
+            Status: <span id="status-text">Idle</span>
+          </div>
+        </div>
+      </form>
+      <p class="muted">
+        • Staff can only <strong>add</strong> items.  
+        • Admin can <strong>view, edit & delete</strong> items (password protected).
+      </p>
+    </section>
 
-    <script>
-        // ============================================
-        // CONFIGURATION
-        // ============================================
-        const CONFIG = {
-            GITHUB_USERNAME: 'unique205',
-            REPO_NAME: 'inventory-data',
-            DATA_FILE: 'data/inventory.json',
-            ADMIN_PASSWORD: 'admin123'
-        };
+    <!-- Inventory Table -->
+    <section class="card">
+      <h2>Inventory Items</h2>
+      <div class="muted" id="count-info">Loading...</div>
+      <div style="overflow-x: auto; margin-top: 0.5rem;">
+        <table id="inventory-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Qty</th>
+              <th>Group</th>
+              <th>Details</th>
+              <th>Added By</th>
+              <th>Updated At</th>
+              <th id="actions-header">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inventory-body">
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 
-        // Application state
-        let currentUser = null;
-        let githubToken = null;
-        let allItems = [];
+  <script>
+    // ====== CONFIG ======
+    const BACKEND_URL = "https://inventory-backend-s4sv.onrender.com/get-token";
+    const REPO_OWNER = "unique205";
+    const REPO_NAME = "inventory-data";
+    const FILE_PATH = "data/inventory.json";
+    const BRANCH = "main";
+    const ADMIN_PASSWORD = "admin123"; // <-- change this to your secret
 
-        // ============================================
-        // INITIALIZATION
-        // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Starting inventory system...');
-            
-            // Load token from localStorage
-            githubToken = localStorage.getItem('inventory_token');
-            
-            if (githubToken) {
-                showScreen('loginScreen');
-            } else {
-                showScreen('setupScreen');
-            }
-            
-            // Setup event listeners
-            setupEventListeners();
-        });
+    // ====== STATE ======
+    let currentRole = "staff";
+    let inventory = [];
+    let currentSha = null;
 
-        function setupEventListeners() {
-            // Suggestions typing
-            document.getElementById('itemName')?.addEventListener('input', showSuggestions);
-            
-            // Delete confirmation input
-            document.getElementById('confirmDelete')?.addEventListener('input', function() {
-                const deleteBtn = document.getElementById('confirmDeleteBtn');
-                deleteBtn.disabled = this.value !== 'DELETE ALL';
-            });
-            
-            // Click outside suggestions
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.form-group')) {
-                    document.getElementById('suggestionsBox').style.display = 'none';
-                }
-            });
+    // ====== DOM ELEMENTS ======
+    const roleSelect = document.getElementById("role-select");
+    const adminPasswordInput = document.getElementById("admin-password");
+    const setRoleBtn = document.getElementById("set-role-btn");
+    const currentRoleLabel = document.getElementById("current-role-label");
+
+    const itemForm = document.getElementById("item-form");
+    const editIndexInput = document.getElementById("edit-index");
+    const itemNameInput = document.getElementById("item-name");
+    const itemQtyInput = document.getElementById("item-qty");
+    const itemGroupInput = document.getElementById("item-group");
+    const itemAddedByInput = document.getElementById("item-addedby");
+    const itemDetailsInput = document.getElementById("item-details");
+    const submitBtn = document.getElementById("submit-btn");
+    const cancelEditBtn = document.getElementById("cancel-edit-btn");
+    const formTitle = document.getElementById("form-title");
+
+    const statusText = document.getElementById("status-text");
+    const countInfo = document.getElementById("count-info");
+    const inventoryBody = document.getElementById("inventory-body");
+    const actionsHeader = document.getElementById("actions-header");
+
+    // ====== UTILS ======
+    function setStatus(msg) {
+      statusText.textContent = msg;
+    }
+
+    function generateId() {
+      const ts = Date.now();
+      const rand = Math.random().toString(36).substring(2, 8);
+      return `item_${ts}_${rand}`;
+    }
+
+    function formatDate(iso) {
+      if (!iso) return "-";
+      try {
+        const d = new Date(iso);
+        return d.toLocaleString();
+      } catch {
+        return iso;
+      }
+    }
+
+    async function getBackendToken() {
+      const res = await fetch(BACKEND_URL, { method: "POST" });
+      if (!res.ok) {
+        throw new Error("Backend token request failed");
+      }
+      const data = await res.json();
+      if (!data.token) throw new Error("Backend did not return token");
+      return data.token;
+    }
+
+    async function githubRequest(path, options = {}) {
+      const token = await getBackendToken();
+
+      const res = await fetch(`https://api.github.com${path}`, {
+        ...options,
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/vnd.github+json",
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        }
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`GitHub error ${res.status}: ${text}`);
+      }
+      return res.json();
+    }
+
+    // ====== LOAD INVENTORY ======
+    async function loadInventory() {
+      try {
+        setStatus("Loading from GitHub…");
+
+        const data = await githubRequest(
+          `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(FILE_PATH)}?ref=${BRANCH}`
+        );
+
+        currentSha = data.sha;
+
+        const decoded = atob(data.content.replace(/\n/g, ""));
+        inventory = decoded.trim() ? JSON.parse(decoded) : [];
+
+        renderInventory();
+        setStatus("Loaded");
+      } catch (err) {
+        console.error("Error loading inventory:", err);
+        if (err.message.includes("404")) {
+          inventory = [];
+          currentSha = null;
+          renderInventory();
+          setStatus("File not found, starting empty");
+        } else {
+          setStatus("Error loading inventory");
+          alert("Error loading inventory: " + err.message);
+        }
+      }
+    }
+
+    // ====== SAVE INVENTORY ======
+    async function saveInventory() {
+      const content = btoa(JSON.stringify(inventory, null, 2));
+
+      const body = {
+        message: "Update inventory.json from inventory-app",
+        content,
+        branch: BRANCH
+      };
+      if (currentSha) {
+        body.sha = currentSha;
+      }
+
+      const data = await githubRequest(
+        `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(FILE_PATH)}`,
+        {
+          method: "PUT",
+          body: JSON.stringify(body)
+        }
+      );
+
+      currentSha = data.content.sha;
+    }
+
+    // ====== RENDER INVENTORY TABLE ======
+    function renderInventory() {
+      inventoryBody.innerHTML = "";
+
+      countInfo.textContent = inventory.length
+        ? `${inventory.length} items`
+        : "No items yet";
+
+      inventory.forEach((item, index) => {
+        const tr = document.createElement("tr");
+
+        const tdId = document.createElement("td");
+        tdId.textContent = item.id || "-";
+        tr.appendChild(tdId);
+
+        const tdName = document.createElement("td");
+        tdName.textContent = item.name || "";
+        tr.appendChild(tdName);
+
+        const tdQty = document.createElement("td");
+        tdQty.textContent = item.quantity ?? "";
+        tr.appendChild(tdQty);
+
+        const tdGroup = document.createElement("td");
+        tdGroup.textContent = item.group || "";
+        tr.appendChild(tdGroup);
+
+        const tdDetails = document.createElement("td");
+        tdDetails.textContent = item.details || "";
+        tr.appendChild(tdDetails);
+
+        const tdAdded = document.createElement("td");
+        tdAdded.textContent = item.addedBy || "";
+        tr.appendChild(tdAdded);
+
+        const tdUpdated = document.createElement("td");
+        tdUpdated.textContent = formatDate(item.updatedAt || item.timestamp);
+        tr.appendChild(tdUpdated);
+
+        const tdActions = document.createElement("td");
+
+        if (currentRole === "admin") {
+          const editBtn = document.createElement("button");
+          editBtn.textContent = "Edit";
+          editBtn.className = "btn-small";
+          editBtn.addEventListener("click", () => startEditItem(index));
+          tdActions.appendChild(editBtn);
+
+          const delBtn = document.createElement("button");
+          delBtn.textContent = "Delete";
+          delBtn.className = "btn-small danger";
+          delBtn.addEventListener("click", () => deleteItem(index));
+          tdActions.appendChild(delBtn);
+        } else {
+          tdActions.textContent = "-";
+          tdActions.className = "muted";
         }
 
-        // ============================================
-        // SCREEN MANAGEMENT
-        // ============================================
-        function showScreen(screenId) {
-            const screens = ['setupScreen', 'loginScreen', 'staffInterface', 'adminInterface'];
-            screens.forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-            document.getElementById(screenId).classList.remove('hidden');
-            
-            // Clear messages
-            clearMessages();
+        tr.appendChild(tdActions);
+        inventoryBody.appendChild(tr);
+      });
+
+      // Hide actions header text for staff
+      actionsHeader.style.visibility = currentRole === "admin" ? "visible" : "visible";
+    }
+
+    // ====== ROLE HANDLING ======
+    function updateRoleDisplay() {
+      if (currentRole === "admin") {
+        currentRoleLabel.textContent = "Admin";
+        currentRoleLabel.className = "badge badge-admin";
+      } else {
+        currentRoleLabel.textContent = "Staff";
+        currentRoleLabel.className = "badge badge-staff";
+      }
+      renderInventory();
+    }
+
+    setRoleBtn.addEventListener("click", () => {
+      const selected = roleSelect.value;
+      if (selected === "admin") {
+        adminPasswordInput.style.display = "inline-block";
+        const pwd = adminPasswordInput.value.trim();
+        if (!pwd) {
+          alert("Enter admin password");
+          return;
+        }
+        if (pwd !== ADMIN_PASSWORD) {
+          alert("Wrong password");
+          adminPasswordInput.value = "";
+          roleSelect.value = "staff";
+          currentRole = "staff";
+        } else {
+          currentRole = "admin";
+          adminPasswordInput.value = "";
+        }
+      } else {
+        adminPasswordInput.style.display = "none";
+        currentRole = "staff";
+      }
+      updateRoleDisplay();
+    });
+
+    roleSelect.addEventListener("change", () => {
+      if (roleSelect.value === "admin") {
+        adminPasswordInput.style.display = "inline-block";
+      } else {
+        adminPasswordInput.style.display = "none";
+      }
+    });
+
+    // ====== FORM HANDLERS ======
+    function resetForm() {
+      editIndexInput.value = "";
+      itemNameInput.value = "";
+      itemQtyInput.value = "";
+      itemGroupInput.value = "";
+      itemAddedByInput.value = "";
+      itemDetailsInput.value = "";
+      submitBtn.textContent = "Save Item";
+      cancelEditBtn.style.display = "none";
+      formTitle.textContent = "Add Item";
+    }
+
+    function startEditItem(index) {
+      const item = inventory[index];
+      editIndexInput.value = index;
+      itemNameInput.value = item.name || "";
+      itemQtyInput.value = item.quantity ?? "";
+      itemGroupInput.value = item.group || "";
+      itemAddedByInput.value = item.addedBy || "";
+      itemDetailsInput.value = item.details || "";
+      submitBtn.textContent = "Update Item";
+      cancelEditBtn.style.display = "inline-block";
+      formTitle.textContent = "Edit Item";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function deleteItem(index) {
+      if (currentRole !== "admin") {
+        alert("Only admin can delete items.");
+        return;
+      }
+      const item = inventory[index];
+      if (!confirm(`Delete item "${item.name}"?`)) return;
+
+      try {
+        setStatus("Deleting item…");
+        inventory.splice(index, 1);
+        await saveInventory();
+        renderInventory();
+        setStatus("Item deleted");
+      } catch (err) {
+        console.error("Delete failed:", err);
+        setStatus("Error deleting item");
+        alert("Error deleting item: " + err.message);
+      }
+    }
+
+    itemForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!itemNameInput.value.trim()) {
+        alert("Item name is required");
+        return;
+      }
+
+      const now = new Date().toISOString();
+      const index = editIndexInput.value;
+
+      const baseItem = {
+        name: itemNameInput.value.trim().toUpperCase(),
+        quantity: Number(itemQtyInput.value || 0),
+        group: itemGroupInput.value.trim().toUpperCase(),
+        details: itemDetailsInput.value.trim(),
+        addedBy: itemAddedByInput.value.trim() || currentRole,
+      };
+
+      try {
+        if (index === "") {
+          // ADD
+          const newItem = {
+            id: generateId(),
+            ...baseItem,
+            timestamp: now,
+            updatedAt: now
+          };
+          setStatus("Adding item…");
+          inventory.push(newItem);
+        } else {
+          // EDIT
+          const existing = inventory[Number(index)];
+          const updatedItem = {
+            ...existing,
+            ...baseItem,
+            updatedAt: now
+          };
+          setStatus("Updating item…");
+          inventory[Number(index)] = updatedItem;
         }
 
-        function clearMessages() {
-            document.getElementById('staffError').classList.add('hidden');
-            document.getElementById('adminError').classList.add('hidden');
-            document.getElementById('successMessage').classList.add('hidden');
-        }
+        await saveInventory();
+        renderInventory();
+        resetForm();
+        setStatus("Saved");
+      } catch (err) {
+        console.error("Save failed:", err);
+        setStatus("Error saving");
+        alert("Error saving: " + err.message);
+      }
+    });
 
-        // ============================================
-        // TOKEN MANAGEMENT
-        // ============================================
-        function saveToken() {
-            const tokenInput = document.getElementById('githubToken');
-            const token = tokenInput.value.trim();
-            
-            if (!token) {
-                alert('Please enter a token');
-                return;
-            }
-            
-            if (!token.startsWith('ghp_')) {
-                if (!confirm('Token should start with "ghp_". Continue anyway?')) {
-                    return;
-                }
-            }
-            
-            // Save token
-            localStorage.setItem('inventory_token', token);
-            githubToken = token;
-            
-            // Test connection
-            testConnection();
-        }
+    cancelEditBtn.addEventListener("click", () => {
+      resetForm();
+    });
 
-        function resetApp() {
-            if (confirm('Reset token? You will need to enter it again.')) {
-                localStorage.removeItem('inventory_token');
-                githubToken = null;
-                showScreen('setupScreen');
-            }
-        }
-
-        async function testConnection() {
-            try {
-                const url = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.REPO_NAME}`;
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `token ${githubToken}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                
-                if (response.ok) {
-                    showScreen('loginScreen');
-                    showMessage('info', '✅ Connected to GitHub!');
-                } else {
-                    alert('Error: ' + response.status + '\n\n1. Check token is valid\n2. Repository exists: unique205/inventory-data');
-                }
-            } catch (error) {
-                alert('Connection failed. Check internet.');
-            }
-        }
-
-        // ============================================
-        // LOGIN FUNCTIONS
-        // ============================================
-        function loginAsStaff() {
-            currentUser = 'staff';
-            showScreen('staffInterface');
-            loadItemsForSuggestions();
-        }
-
-        function loginAsAdmin() {
-            const password = prompt('Enter admin password:');
-            if (password === CONFIG.ADMIN_PASSWORD) {
-                currentUser = 'admin';
-                showScreen('adminInterface');
-                loadInventory();
-            } else {
-                alert('Incorrect password');
-            }
-        }
-
-        function logout() {
-            currentUser = null;
-            showScreen('loginScreen');
-        }
-
-        // ============================================
-        // STAFF FUNCTIONS
-        // ============================================
-        async function addItem() {
-            const name = document.getElementById('itemName').value.trim().toUpperCase();
-            const quantity = parseInt(document.getElementById('itemQuantity').value) || 0;
-            const group = document.getElementById('itemGroup').value;
-            const details = document.getElementById('itemDetails').value.trim().toUpperCase();
-            
-            // Validation
-            if (!name) {
-                showStaffError('Please enter item name');
-                return;
-            }
-            if (!quantity || quantity < 0) {
-                showStaffError('Please enter valid quantity');
-                return;
-            }
-            if (!group) {
-                showStaffError('Please select a group');
-                return;
-            }
-            
-            // Create item
-            const newItem = {
-                id: 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                name: name,
-                quantity: quantity,
-                group: group,
-                details: details,
-                addedBy: 'staff',
-                timestamp: new Date().toISOString()
-            };
-            
-            try {
-                await saveItemToGitHub(newItem);
-                
-                // Success
-                showSuccess(`✅ ${name} added to inventory!`);
-                
-                // Clear form
-                document.getElementById('itemName').value = '';
-                document.getElementById('itemQuantity').value = '';
-                document.getElementById('itemDetails').value = '';
-                document.getElementById('itemGroup').value = '';
-                document.getElementById('itemName').focus();
-                document.getElementById('suggestionsBox').style.display = 'none';
-                
-            } catch (error) {
-                console.error('Error:', error);
-                showStaffError('Failed to save. Please try again.');
-            }
-        }
-
-        // ============================================
-        // SUGGESTIONS
-        // ============================================
-        async function loadItemsForSuggestions() {
-            try {
-                const data = await readFromGitHub();
-                allItems = data;
-            } catch (error) {
-                allItems = [];
-            }
-        }
-
-        function showSuggestions() {
-            const search = document.getElementById('itemName').value.toUpperCase();
-            const box = document.getElementById('suggestionsBox');
-            
-            if (search.length < 2) {
-                box.style.display = 'none';
-                return;
-            }
-            
-            const matches = allItems.filter(item => 
-                item.name.includes(search)
-            ).slice(0, 5);
-            
-            if (matches.length === 0) {
-                box.style.display = 'none';
-                return;
-            }
-            
-            box.innerHTML = matches.map(item => `
-                <div class="suggestion" onclick="selectSuggestion('${escapeString(item.name)}', '${item.group}', '${escapeString(item.details || '')}')">
-                    <strong>${item.name}</strong><br>
-                    <small>Group: ${item.group} | Last: ${item.quantity}</small>
-                </div>
-            `).join('');
-            
-            box.style.display = 'block';
-        }
-
-        function escapeString(str) {
-            return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
-        }
-
-        function selectSuggestion(name, group, details) {
-            document.getElementById('itemName').value = name;
-            document.getElementById('itemGroup').value = group;
-            document.getElementById('itemDetails').value = details || '';
-            document.getElementById('suggestionsBox').style.display = 'none';
-            document.getElementById('itemQuantity').focus();
-        }
-
-        // ============================================
-        // ADMIN FUNCTIONS
-        // ============================================
-        async function loadInventory() {
-            try {
-                const data = await readFromGitHub();
-                displayInventory(data);
-                showAdminMessage(`✅ Loaded ${data.length} items`);
-            } catch (error) {
-                console.error('Error:', error);
-                showAdminError('Failed to load inventory.');
-            }
-        }
-
-        function displayInventory(items) {
-            const container = document.getElementById('inventoryList');
-            
-            if (items.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #7f8c8d;">
-                        <p>No inventory items yet.</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Newest first
-            const sorted = [...items].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
-            container.innerHTML = sorted.map(item => `
-                <div class="table-row">
-                    <div>
-                        <strong>${item.name}</strong><br>
-                        <small style="color: #666;">${formatDate(item.timestamp)}</small>
-                    </div>
-                    <div><strong>${item.quantity}</strong></div>
-                    <div>${item.group}</div>
-                    <div>${item.details || '-'}</div>
-                    <div>
-                        <button onclick="deleteItem('${item.id}')" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
-                            Delete
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function formatDate(timestamp) {
-            try {
-                const date = new Date(timestamp);
-                return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            } catch (e) {
-                return 'Unknown date';
-            }
-        }
-
-        async function deleteItem(itemId) {
-            if (!confirm('Delete this item?')) return;
-            
-            try {
-                const allData = await readFromGitHub();
-                const newData = allData.filter(item => item.id !== itemId);
-                await writeToGitHub(newData);
-                loadInventory();
-                showAdminMessage('✅ Item deleted');
-            } catch (error) {
-                showAdminError('❌ Failed to delete item');
-            }
-        }
-
-        function showDeleteModal() {
-            document.getElementById('deleteModal').style.display = 'flex';
-            document.getElementById('confirmDelete').value = '';
-            document.getElementById('confirmDeleteBtn').disabled = true;
-            document.getElementById('confirmDelete').focus();
-        }
-
-        function hideDeleteModal() {
-            document.getElementById('deleteModal').style.display = 'none';
-        }
-
-        async function deleteAllItems() {
-            try {
-                await writeToGitHub([]);
-                loadInventory();
-                hideDeleteModal();
-                showAdminMessage('✅ All items deleted');
-            } catch (error) {
-                showAdminError('❌ Failed to delete items');
-            }
-        }
-
-        function exportData() {
-            try {
-                const data = JSON.stringify(allItems, null, 2);
-                const blob = new Blob([data], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `inventory-${new Date().toISOString().split('T')[0]}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-                showAdminMessage('✅ Data exported');
-            } catch (error) {
-                showAdminError('❌ Export failed');
-            }
-        }
-
-        // ============================================
-        // GITHUB FUNCTIONS
-        // ============================================
-        async function readFromGitHub() {
-            if (!githubToken) throw new Error('No token');
-            
-            const url = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.REPO_NAME}/contents/${CONFIG.DATA_FILE}`;
-            
-            const response = await fetch(url, {
-                headers: {
-                    'Authorization': `token ${githubToken}`,
-                    'Accept': 'application/vnd.github.v3+json'
-                }
-            });
-            
-            if (response.status === 404) {
-                return [];
-            }
-            
-            if (!response.ok) {
-                throw new Error(`GitHub error: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            const content = atob(data.content.replace(/\n/g, ''));
-            return JSON.parse(content);
-        }
-
-        async function writeToGitHub(data) {
-            if (!githubToken) throw new Error('No token');
-            
-            // Get current SHA
-            let sha = null;
-            try {
-                const info = await readFromGitHub();
-                const infoUrl = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.REPO_NAME}/contents/${CONFIG.DATA_FILE}`;
-                const infoResponse = await fetch(infoUrl, {
-                    headers: {
-                        'Authorization': `token ${githubToken}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                if (infoResponse.ok) {
-                    const infoData = await infoResponse.json();
-                    sha = infoData.sha;
-                }
-            } catch (e) {
-                // File doesn't exist
-            }
-            
-            const url = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.REPO_NAME}/contents/${CONFIG.DATA_FILE}`;
-            const content = btoa(JSON.stringify(data, null, 2));
-            
-            const body = {
-                message: `Inventory update by ${currentUser} - ${new Date().toLocaleString()}`,
-                content: content,
-                branch: 'main'
-            };
-            
-            if (sha) {
-                body.sha = sha;
-            }
-            
-            const response = await fetch(url, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${githubToken}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(body)
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Write error: ${response.status}`);
-            }
-        }
-
-        async function saveItemToGitHub(newItem) {
-            let existingData = [];
-            try {
-                existingData = await readFromGitHub();
-            } catch (e) {
-                existingData = [];
-            }
-            
-            // Check if exists
-            const existingIndex = existingData.findIndex(item => 
-                item.name === newItem.name && item.group === newItem.group
-            );
-            
-            if (existingIndex !== -1) {
-                existingData[existingIndex].quantity += newItem.quantity;
-                existingData[existingIndex].updatedAt = new Date().toISOString();
-            } else {
-                existingData.unshift(newItem);
-            }
-            
-            await writeToGitHub(existingData);
-        }
-
-        // ============================================
-        // MESSAGE FUNCTIONS
-        // ============================================
-        function showStaffError(message) {
-            const el = document.getElementById('staffError');
-            el.innerHTML = message;
-            el.classList.remove('hidden');
-        }
-
-        function showAdminError(message) {
-            const el = document.getElementById('adminError');
-            el.innerHTML = message;
-            el.classList.remove('hidden');
-        }
-
-        function showAdminMessage(message) {
-            alert(message); // Simple alert for now
-        }
-
-        function showSuccess(message) {
-            const el = document.getElementById('successMessage');
-            el.innerHTML = message;
-            el.classList.remove('hidden');
-            setTimeout(() => el.classList.add('hidden'), 3000);
-        }
-
-        function showMessage(type, message) {
-            alert(message); // Fallback
-        }
-
-        // Make functions globally available
-        window.selectSuggestion = selectSuggestion;
-        window.deleteItem = deleteItem;
-        window.showDeleteModal = showDeleteModal;
-        window.hideDeleteModal = hideDeleteModal;
-        window.deleteAllItems = deleteAllItems;
-    </script>
+    // ====== INIT ======
+    (async function init() {
+      updateRoleDisplay();
+      await loadInventory();
+    })();
+  </script>
 </body>
 </html>
