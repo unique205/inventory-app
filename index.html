@@ -224,7 +224,7 @@
         </div>
       </form>
       <p class="muted">
-        • Staff can only <strong>add</strong> items.  
+        • Staff can only <strong>add</strong> items.<br>
         • Admin can <strong>view, edit & delete</strong> items (password protected).
       </p>
     </section>
@@ -247,8 +247,7 @@
               <th id="actions-header">Actions</th>
             </tr>
           </thead>
-          <tbody id="inventory-body">
-          </tbody>
+          <tbody id="inventory-body"></tbody>
         </table>
       </div>
     </section>
@@ -261,7 +260,7 @@
     const REPO_NAME = "inventory-data";
     const FILE_PATH = "data/inventory.json";
     const BRANCH = "main";
-    const ADMIN_PASSWORD = "admin123"; // <-- change this to your secret
+    const ADMIN_PASSWORD = "admin123"; // change this to your secret
 
     // ====== STATE ======
     let currentRole = "staff";
@@ -313,9 +312,7 @@
 
     async function getBackendToken() {
       const res = await fetch(BACKEND_URL, { method: "POST" });
-      if (!res.ok) {
-        throw new Error("Backend token request failed");
-      }
+      if (!res.ok) throw new Error("Backend token request failed");
       const data = await res.json();
       if (!data.token) throw new Error("Backend did not return token");
       return data.token;
@@ -351,7 +348,6 @@
         );
 
         currentSha = data.sha;
-
         const decoded = atob(data.content.replace(/\n/g, ""));
         inventory = decoded.trim() ? JSON.parse(decoded) : [];
 
@@ -380,9 +376,7 @@
         content,
         branch: BRANCH
       };
-      if (currentSha) {
-        body.sha = currentSha;
-      }
+      if (currentSha) body.sha = currentSha;
 
       const data = await githubRequest(
         `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(FILE_PATH)}`,
@@ -435,7 +429,6 @@
         tr.appendChild(tdUpdated);
 
         const tdActions = document.createElement("td");
-
         if (currentRole === "admin") {
           const editBtn = document.createElement("button");
           editBtn.textContent = "Edit";
@@ -456,9 +449,6 @@
         tr.appendChild(tdActions);
         inventoryBody.appendChild(tr);
       });
-
-      // Hide actions header text for staff
-      actionsHeader.style.visibility = currentRole === "admin" ? "visible" : "visible";
     }
 
     // ====== ROLE HANDLING ======
@@ -575,7 +565,6 @@
 
       try {
         if (index === "") {
-          // ADD
           const newItem = {
             id: generateId(),
             ...baseItem,
@@ -585,7 +574,6 @@
           setStatus("Adding item…");
           inventory.push(newItem);
         } else {
-          // EDIT
           const existing = inventory[Number(index)];
           const updatedItem = {
             ...existing,
@@ -607,9 +595,7 @@
       }
     });
 
-    cancelEditBtn.addEventListener("click", () => {
-      resetForm();
-    });
+    cancelEditBtn.addEventListener("click", () => resetForm());
 
     // ====== INIT ======
     (async function init() {
