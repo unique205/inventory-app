@@ -16,15 +16,18 @@
       --text-main: #e5e7eb;
       --text-muted: #9ca3af;
     }
+
     * {
       box-sizing: border-box;
     }
+
     body {
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: var(--bg);
       color: var(--text-main);
     }
+
     header {
       display: flex;
       justify-content: space-between;
@@ -36,12 +39,14 @@
       top: 0;
       z-index: 10;
     }
+
     header h1 {
       margin: 0;
       font-size: 1.1rem;
       cursor: pointer;
       user-select: none;
     }
+
     .badge {
       padding: 0.2rem 0.6rem;
       border-radius: 999px;
@@ -49,10 +54,12 @@
       border: 1px solid #4b5563;
       background: #111827;
     }
+
     .badge-staff {
       border-color: #3b82f6;
       color: #bfdbfe;
     }
+
     .badge-admin {
       border-color: #22c55e;
       color: #bbf7d0;
@@ -63,6 +70,7 @@
       margin: 1rem auto 2rem;
       padding: 0 0.75rem;
     }
+
     .card {
       background: var(--card);
       border-radius: 0.75rem;
@@ -70,23 +78,29 @@
       padding: 0.9rem 0.9rem 1.1rem;
       margin-bottom: 1rem;
     }
+
     .card h2 {
       margin: 0 0 0.6rem;
       font-size: 1rem;
     }
+
     label {
       font-size: 0.75rem;
       color: var(--text-muted);
       display: block;
       margin-bottom: 0.15rem;
     }
+
     .field-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 0.6rem;
       margin-bottom: 0.6rem;
     }
-    input, textarea, button {
+
+    input,
+    textarea,
+    button {
       font: inherit;
       border-radius: 0.4rem;
       border: 1px solid #374151;
@@ -94,13 +108,17 @@
       color: var(--text-main);
       padding: 0.4rem 0.55rem;
     }
-    input.upper, textarea.upper {
+
+    input.upper,
+    textarea.upper {
       text-transform: uppercase;
     }
+
     textarea {
       min-height: 50px;
       resize: vertical;
     }
+
     button {
       cursor: pointer;
       background: var(--accent);
@@ -108,28 +126,35 @@
       font-weight: 500;
       font-size: 0.85rem;
     }
+
     button:hover {
       background: var(--accent-soft);
     }
+
     button.secondary {
       background: #111827;
       border-color: #4b5563;
     }
+
     button.secondary:hover {
       background: #1f2937;
     }
+
     button.danger {
       background: var(--danger);
       border-color: var(--danger);
     }
+
     button.danger:hover {
       background: var(--danger-soft);
     }
+
     button.small {
       padding: 0.22rem 0.45rem;
       font-size: 0.7rem;
       margin-right: 0.25rem;
     }
+
     .actions-row {
       display: flex;
       flex-wrap: wrap;
@@ -137,36 +162,49 @@
       gap: 0.5rem;
       margin-top: 0.4rem;
     }
+
+    .actions-row > button {
+      flex: 0 0 auto;
+    }
+
     .status {
       font-size: 0.75rem;
       color: var(--text-muted);
     }
+
     .muted {
       font-size: 0.75rem;
       color: var(--text-muted);
     }
+
     .table-wrapper {
       margin-top: 0.4rem;
       overflow-x: auto;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.75rem;
       text-transform: uppercase;
     }
-    th, td {
+
+    th,
+    td {
       padding: 0.35rem 0.35rem;
       border-bottom: 1px solid var(--border);
       text-align: left;
       white-space: nowrap;
     }
+
     th {
       background: #020617;
     }
+
     tr:hover td {
       background: #020617;
     }
+
     .batch-header {
       display: flex;
       justify-content: space-between;
@@ -176,22 +214,24 @@
       border: 1px solid var(--border);
       margin-bottom: 0.4rem;
       font-size: 0.78rem;
+      gap: 0.5rem;
+      flex-wrap: wrap;
     }
-    .batch-header span {
-      display: block;
-    }
+
     .tab-row {
       display: flex;
       gap: 0.4rem;
       margin-bottom: 0.5rem;
       flex-wrap: wrap;
     }
+
     .tab-btn {
       background: #111827;
       border-color: #4b5563;
       font-size: 0.8rem;
       padding: 0.3rem 0.6rem;
     }
+
     .tab-btn.active {
       background: var(--accent);
       border-color: var(--accent);
@@ -201,22 +241,28 @@
       header {
         gap: 0.5rem;
       }
+
       header h1 {
         font-size: 1rem;
       }
+
       .actions-row {
         flex-direction: column;
         align-items: stretch;
       }
+
       .actions-row > button {
         width: 100%;
       }
+
       button.small {
-        width: auto; /* keep small buttons small inside tables */
+        width: auto;
       }
+
+      /* hide ID column on small screens to avoid crowding */
       th:nth-child(1),
       td:nth-child(1) {
-        display: none; /* hide ID column on very small screens */
+        display: none;
       }
     }
   </style>
@@ -228,7 +274,7 @@
   </header>
 
   <main>
-    <!-- Add / Edit form -->
+    <!-- ADD / EDIT FORM -->
     <section class="card">
       <h2 id="form-title">ADD ITEM</h2>
       <form id="item-form">
@@ -251,7 +297,6 @@
           <label for="item-details">DETAILS</label>
           <textarea id="item-details" class="upper" placeholder="GRADE, BRAND, ETC."></textarea>
         </div>
-
         <div class="actions-row">
           <button type="submit" id="submit-btn">ADD TO BATCH</button>
           <button type="button" id="cancel-edit-btn" class="secondary" style="display:none;">CANCEL</button>
@@ -260,10 +305,12 @@
       </form>
     </section>
 
-    <!-- Batch list (staff + admin) -->
+    <!-- CURRENT BATCH -->
     <section class="card">
       <h2>CURRENT BATCH (NOT UPLOADED)</h2>
-      <p class="muted" id="batch-info">ADD ITEMS ABOVE. THEY WILL APPEAR HERE UNTIL YOU UPLOAD THE BATCH.</p>
+      <p class="muted" id="batch-info">
+        ADD ITEMS ABOVE. THEY WILL APPEAR HERE UNTIL YOU UPLOAD THE BATCH.
+      </p>
       <div class="table-wrapper">
         <table>
           <thead>
@@ -285,7 +332,7 @@
       </div>
     </section>
 
-    <!-- Admin panel -->
+    <!-- ADMIN PANEL -->
     <section class="card" id="admin-card" style="display:none;">
       <h2>ADMIN PANEL</h2>
       <div class="tab-row">
@@ -293,14 +340,16 @@
         <button type="button" class="tab-btn" data-tab="items">ALL ITEMS</button>
       </div>
 
-      <!-- Batches tab -->
+      <!-- BATCH TAB -->
       <div id="admin-batches-tab">
         <div class="muted" id="batch-list-info">LOADING…</div>
         <div id="batch-list" style="margin-top:0.5rem;"></div>
         <div id="batch-items-wrapper" style="margin-top:0.7rem; display:none;">
           <div class="actions-row" style="margin-bottom:0.3rem;">
             <span class="muted" id="selected-batch-label">NO BATCH SELECTED.</span>
-            <button type="button" id="approve-batch-btn" class="secondary">APPROVE &amp; NOTIFY</button>
+            <button type="button" id="approve-batch-btn" class="secondary">
+              APPROVE &amp; NOTIFY
+            </button>
           </div>
           <div class="table-wrapper">
             <table>
@@ -321,7 +370,7 @@
         </div>
       </div>
 
-      <!-- All items tab -->
+      <!-- ITEMS TAB -->
       <div id="admin-items-tab" style="display:none;">
         <div class="muted" id="count-info">LOADING…</div>
         <div class="table-wrapper" style="margin-top:0.4rem;">
@@ -354,7 +403,7 @@
     const FILE_PATH = "data/inventory.json";
     const BRANCH = "main";
     const ADMIN_PASSWORD = "admin123";
-    const ADMIN_PHONE = "917588756668"; // WhatsApp phone (country code + number)
+    const ADMIN_PHONE = "917588756668";
 
     // ===== STATE =====
     let currentRole = "staff";
@@ -382,7 +431,6 @@
     const batchBody = document.getElementById("batch-body");
     const uploadBatchBtn = document.getElementById("upload-batch-btn");
     const batchStatus = document.getElementById("batch-status");
-
     const nameList = document.getElementById("name-list");
 
     const adminCard = document.getElementById("admin-card");
@@ -400,7 +448,7 @@
     const countInfo = document.getElementById("count-info");
     const inventoryBody = document.getElementById("inventory-body");
 
-    // ===== UTIL =====
+    // ===== UTILS =====
     function setStatus(msg) {
       statusText.textContent = msg.toUpperCase();
     }
@@ -419,15 +467,31 @@
     }
 
     async function getBackendToken() {
-      const res = await fetch(BACKEND_URL, { method: "POST" });
-      if (!res.ok) throw new Error("BACKEND TOKEN REQUEST FAILED");
-      const data = await res.json();
-      if (!data.token) throw new Error("BACKEND DID NOT RETURN TOKEN");
-      return data.token;
+      // Returns token string or null (NO POPUP)
+      try {
+        const res = await fetch(BACKEND_URL, { method: "POST" });
+        if (!res.ok) {
+          console.warn("BACKEND /get-token HTTP ERROR:", res.status);
+          return null;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (!data.token) {
+          console.warn("BACKEND /get-token RETURNED NO TOKEN");
+          return null;
+        }
+        return data.token;
+      } catch (err) {
+        console.error("BACKEND /get-token FAILED:", err);
+        return null;
+      }
     }
 
     async function githubRequest(path, options = {}) {
       const token = await getBackendToken();
+      if (!token) {
+        throw new Error("BACKEND TOKEN REQUEST FAILED");
+      }
+
       const res = await fetch(`https://api.github.com${path}`, {
         ...options,
         headers: {
@@ -437,6 +501,7 @@
           ...(options.headers || {})
         }
       });
+
       if (!res.ok) {
         const text = await res.text();
         throw new Error(`GITHUB ERROR ${res.status}: ${text}`);
@@ -451,6 +516,7 @@
       itemDetailsInput.value = "";
       batchEditIndex = null;
       adminEditId = null;
+
       if (currentRole === "admin") {
         submitBtn.textContent = "UPDATE ITEM";
         formTitle.textContent = "EDIT ITEM (ADMIN)";
@@ -466,44 +532,38 @@
         roleBadge.textContent = "ADMIN";
         roleBadge.className = "badge badge-admin";
         adminCard.style.display = "block";
-        submitBtn.textContent = "UPDATE ITEM";
-        formTitle.textContent = "EDIT ITEM (ADMIN)";
       } else {
         roleBadge.textContent = "STAFF";
         roleBadge.className = "badge badge-staff";
         adminCard.style.display = "none";
-        submitBtn.textContent = "ADD TO BATCH";
-        formTitle.textContent = "ADD ITEM";
       }
       renderBatch();
       renderAdminViews();
     }
 
-    // ===== LOAD & SAVE INVENTORY =====
+    // ===== LOAD / SAVE INVENTORY =====
     async function loadInventory() {
       try {
         setStatus("LOADING FROM GITHUB…");
         const data = await githubRequest(
           `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(FILE_PATH)}?ref=${BRANCH}`
         );
+
         currentSha = data.sha;
         const decoded = atob(data.content.replace(/\n/g, ""));
         inventory = decoded.trim() ? JSON.parse(decoded) : [];
+
         populateNameList();
         renderAdminViews();
         setStatus("LOADED");
       } catch (err) {
         console.error("ERROR LOADING INVENTORY:", err);
-        if (err.message.includes("404")) {
-          inventory = [];
-          currentSha = null;
-          populateNameList();
-          renderAdminViews();
-          setStatus("FILE NOT FOUND, STARTING EMPTY");
-        } else {
-          setStatus("ERROR LOADING INVENTORY");
-          alert("ERROR LOADING INVENTORY: " + err.message);
-        }
+        // FAIL GRACEFULLY: NO POPUP, JUST WORK OFFLINE
+        inventory = [];
+        currentSha = null;
+        populateNameList();
+        renderAdminViews();
+        setStatus("WORKING OFFLINE (INVENTORY NOT LOADED)");
       }
     }
 
@@ -518,23 +578,19 @@
 
       const data = await githubRequest(
         `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(FILE_PATH)}`,
-        {
-          method: "PUT",
-          body: JSON.stringify(body)
-        }
+        { method: "PUT", body: JSON.stringify(body) }
       );
 
       currentSha = data.content.sha;
     }
 
-    // ===== NAME DROPDOWN =====
     function populateNameList() {
       const names = new Set();
-      inventory.forEach(it => {
+      inventory.forEach((it) => {
         if (it.name) names.add(String(it.name).toUpperCase());
       });
       nameList.innerHTML = "";
-      names.forEach(name => {
+      names.forEach((name) => {
         const opt = document.createElement("option");
         opt.value = name;
         nameList.appendChild(opt);
@@ -544,11 +600,14 @@
     // ===== BATCH (STAFF) =====
     function renderBatch() {
       batchBody.innerHTML = "";
+
       if (!batchItems.length) {
-        batchBody.innerHTML = `<tr><td colspan="6" class="muted">NO ITEMS IN BATCH.</td></tr>`;
+        batchBody.innerHTML =
+          '<tr><td colspan="6" class="muted">NO ITEMS IN BATCH.</td></tr>';
         batchStatus.textContent = "";
         return;
       }
+
       batchItems.forEach((item, index) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -560,8 +619,7 @@
           <td>
             <button class="small secondary" data-action="edit-batch" data-index="${index}">EDIT</button>
             <button class="small danger" data-action="remove-batch" data-index="${index}">REMOVE</button>
-          </td>
-        `;
+          </td>`;
         batchBody.appendChild(tr);
       });
     }
@@ -570,6 +628,7 @@
       const btn = e.target;
       if (!btn.dataset.action) return;
       const idx = Number(btn.dataset.index);
+
       if (btn.dataset.action === "edit-batch") {
         const item = batchItems[idx];
         batchEditIndex = idx;
@@ -592,14 +651,16 @@
         batchStatus.textContent = "NO ITEMS IN BATCH.";
         return;
       }
+
       try {
         setStatus("UPLOADING BATCH…");
         batchStatus.textContent = "UPLOADING…";
+
         const batchTime = new Date().toISOString();
 
-        await loadInventory(); // refresh latest
+        await loadInventory();
 
-        const enriched = batchItems.map(item => ({
+        const enriched = batchItems.map((item) => ({
           ...item,
           batchTime,
           batchStatus: "PENDING"
@@ -611,7 +672,8 @@
 
         batchItems = [];
         renderBatch();
-        batchStatus.textContent = "BATCH UPLOADED AT " + formatDate(batchTime);
+        batchStatus.textContent =
+          "BATCH UPLOADED AT " + formatDate(batchTime);
         setStatus("BATCH UPLOADED");
       } catch (err) {
         console.error("BATCH UPLOAD FAILED:", err);
@@ -624,7 +686,7 @@
     // ===== ADMIN VIEWS =====
     function groupByBatch() {
       const groups = {};
-      inventory.forEach(item => {
+      inventory.forEach((item) => {
         const key = item.batchTime || item.timestamp || "UNKNOWN";
         if (!groups[key]) groups[key] = [];
         groups[key].push(item);
@@ -643,7 +705,6 @@
         return db - da;
       });
 
-      // ---- Batches list ----
       batchList.innerHTML = "";
       if (!keys.length) {
         batchListInfo.textContent = "NO BATCHES FOUND.";
@@ -651,30 +712,28 @@
         batchListInfo.textContent = `${keys.length} BATCH(ES)`;
       }
 
-      keys.forEach(k => {
+      keys.forEach((k) => {
         const items = groups[k];
         const status = items[0].batchStatus || "PENDING";
-        const header = document.createElement("div");
-        header.className = "batch-header";
-        header.innerHTML = `
+        const div = document.createElement("div");
+        div.className = "batch-header";
+        div.innerHTML = `
           <span>BATCH: ${formatDate(k)}</span>
           <span>ITEMS: ${items.length}</span>
           <span>STATUS: ${status}</span>
-          <span>
-            <button class="small secondary" data-action="view-batch" data-key="${k}">VIEW</button>
-          </span>
-        `;
-        batchList.appendChild(header);
+          <span><button class="small secondary" data-action="view-batch" data-key="${k}">VIEW</button></span>`;
+        batchList.appendChild(div);
       });
 
-      // ---- All items tab ----
+      // ALL ITEMS TAB
       inventoryBody.innerHTML = "";
       if (!inventory.length) {
         countInfo.textContent = "NO ITEMS IN INVENTORY.";
-        inventoryBody.innerHTML = `<tr><td colspan="8" class="muted">NO ITEMS.</td></tr>`;
+        inventoryBody.innerHTML =
+          '<tr><td colspan="8" class="muted">NO ITEMS.</td></tr>';
       } else {
         countInfo.textContent = `${inventory.length} ITEMS`;
-        inventory.forEach(item => {
+        inventory.forEach((item) => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${item.id || "-"}</td>
@@ -687,13 +746,11 @@
             <td>
               <button class="small secondary" data-action="edit-item" data-id="${item.id}">EDIT</button>
               <button class="small danger" data-action="delete-item" data-id="${item.id}">DELETE</button>
-            </td>
-          `;
+            </td>`;
           inventoryBody.appendChild(tr);
         });
       }
 
-      // If a batch is currently selected, re-render its items
       if (selectedBatchKey && groups[selectedBatchKey]) {
         renderSelectedBatchItems(selectedBatchKey, groups[selectedBatchKey]);
       } else {
@@ -715,9 +772,14 @@
 
     function renderSelectedBatchItems(batchKey, items) {
       batchItemsWrapper.style.display = "block";
-      selectedBatchLabel.textContent = `BATCH: ${formatDate(batchKey)} • ${items.length} ITEM(S) • STATUS: ${(items[0].batchStatus || "PENDING").toUpperCase()}`;
+      selectedBatchLabel.textContent = `BATCH: ${formatDate(
+        batchKey
+      )} • ${items.length} ITEM(S) • STATUS: ${(items[0].batchStatus ||
+        "PENDING"
+      ).toUpperCase()}`;
+
       adminBatchBody.innerHTML = "";
-      items.forEach(item => {
+      items.forEach((item) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${item.id || "-"}</td>
@@ -729,46 +791,45 @@
           <td>
             <button class="small secondary" data-action="edit-item" data-id="${item.id}">EDIT</button>
             <button class="small danger" data-action="delete-item" data-id="${item.id}">DELETE</button>
-          </td>
-        `;
+          </td>`;
         adminBatchBody.appendChild(tr);
       });
     }
 
-    // Approve & notify
+    // APPROVE & NOTIFY
     approveBatchBtn.addEventListener("click", async () => {
       if (!selectedBatchKey) {
         alert("NO BATCH SELECTED.");
         return;
       }
+
       const groups = groupByBatch();
       const items = groups[selectedBatchKey];
       if (!items || !items.length) {
         alert("BATCH HAS NO ITEMS.");
         return;
       }
-      if (!confirm("APPROVE THIS BATCH AND SEND WHATSAPP NOTIFICATION?")) return;
+
+      if (
+        !confirm("APPROVE THIS BATCH AND SEND WHATSAPP NOTIFICATION (BACKEND STUB)?")
+      )
+        return;
 
       try {
         setStatus("APPROVING BATCH…");
-        // Mark items as APPROVED
-        inventory.forEach(it => {
-          if (it.batchTime === selectedBatchKey) {
-            it.batchStatus = "APPROVED";
-          }
+
+        inventory.forEach((it) => {
+          if (it.batchTime === selectedBatchKey) it.batchStatus = "APPROVED";
         });
         await saveInventory();
         await loadInventory();
 
-        // After reload, get fresh items for this batch
         const freshGroups = groupByBatch();
         const freshItems = freshGroups[selectedBatchKey] || [];
-
-        // Call backend notify
         const payload = {
           phone: ADMIN_PHONE,
           batchTime: selectedBatchKey,
-          items: freshItems.map(it => ({
+          items: freshItems.map((it) => ({
             name: it.name,
             quantity: it.quantity,
             group: it.group,
@@ -790,7 +851,7 @@
       }
     });
 
-    // ===== ADMIN TABLE ACTIONS =====
+    // ADMIN TABLE ACTIONS
     adminBatchBody.addEventListener("click", handleAdminTableClick);
     inventoryBody.addEventListener("click", handleAdminTableClick);
 
@@ -800,10 +861,12 @@
       if (!btn.dataset.action || !id) return;
 
       if (btn.dataset.action === "edit-item") {
-        const item = inventory.find(it => it.id === id);
+        const item = inventory.find((it) => it.id === id);
         if (!item) return alert("ITEM NOT FOUND.");
+
         currentRole = "admin";
         updateRoleUI();
+
         adminEditId = id;
         itemNameInput.value = (item.name || "").toUpperCase();
         itemQtyInput.value = item.quantity ?? "";
@@ -815,15 +878,18 @@
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else if (btn.dataset.action === "delete-item") {
         if (!confirm("DELETE THIS ITEM?")) return;
+
         try {
           setStatus("DELETING ITEM…");
-          await loadInventory(); // refresh latest
-          const idx = inventory.findIndex(it => it.id === id);
+          await loadInventory();
+
+          const idx = inventory.findIndex((it) => it.id === id);
           if (idx === -1) {
             alert("ITEM NOT FOUND AFTER REFRESH.");
             setStatus("ITEM NOT FOUND");
             return;
           }
+
           inventory.splice(idx, 1);
           await saveInventory();
           await loadInventory();
@@ -836,7 +902,7 @@
       }
     }
 
-    // ===== FORM SUBMIT =====
+    // FORM SUBMIT
     itemForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -853,16 +919,19 @@
       const now = new Date().toISOString();
 
       if (currentRole === "staff") {
-        // staff: handle batch only
         const baseItem = {
-          id: batchEditIndex === null ? generateId() : batchItems[batchEditIndex].id,
+          id:
+            batchEditIndex === null
+              ? generateId()
+              : batchItems[batchEditIndex].id,
           name,
           quantity: qty,
           group,
           details,
-          timestamp: batchEditIndex === null
-            ? now
-            : (batchItems[batchEditIndex].timestamp || now),
+          timestamp:
+            batchEditIndex === null
+              ? now
+              : batchItems[batchEditIndex].timestamp || now,
           updatedAt: now
         };
 
@@ -873,26 +942,29 @@
           batchItems[batchEditIndex] = baseItem;
           setStatus("BATCH ITEM UPDATED");
         }
+
         renderBatch();
         resetForm();
         return;
       }
 
-      // admin: update existing item
       if (currentRole === "admin") {
         if (!adminEditId) {
           alert("SELECT AN ITEM TO EDIT FROM ADMIN TABLE.");
           return;
         }
+
         try {
           setStatus("UPDATING ITEM…");
-          await loadInventory(); // refresh latest
-          const idx = inventory.findIndex(it => it.id === adminEditId);
+          await loadInventory();
+
+          const idx = inventory.findIndex((it) => it.id === adminEditId);
           if (idx === -1) {
             alert("ITEM NOT FOUND AFTER REFRESH.");
             setStatus("ITEM NOT FOUND");
             return;
           }
+
           inventory[idx] = {
             ...inventory[idx],
             name,
@@ -901,6 +973,7 @@
             details,
             updatedAt: now
           };
+
           await saveInventory();
           await loadInventory();
           resetForm();
@@ -915,7 +988,7 @@
 
     cancelEditBtn.addEventListener("click", () => resetForm());
 
-    // ===== ADMIN LOGIN VIA TITLE CLICK =====
+    // ADMIN LOGIN VIA TITLE
     appTitle.addEventListener("click", () => {
       if (currentRole === "admin") {
         currentRole = "staff";
@@ -923,21 +996,23 @@
         updateRoleUI();
         return;
       }
+
       const pwd = prompt("ENTER ADMIN PASSWORD:");
       if (!pwd) return;
       if (pwd !== ADMIN_PASSWORD) {
         alert("WRONG PASSWORD.");
         return;
       }
+
       currentRole = "admin";
       updateRoleUI();
       loadInventory();
     });
 
-    // ===== TABS =====
-    tabButtons.forEach(btn => {
+    // TABS
+    tabButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
-        tabButtons.forEach(b => b.classList.remove("active"));
+        tabButtons.forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
         const tab = btn.dataset.tab;
         if (tab === "batches") {
@@ -950,11 +1025,11 @@
       });
     });
 
-    // ===== INIT =====
+    // INIT
     (async function init() {
-      updateRoleUI();      // staff UI
-      renderBatch();       // empty batch
-      await loadInventory(); // underlying data
+      updateRoleUI();
+      renderBatch();
+      await loadInventory();
     })();
   </script>
 </body>
