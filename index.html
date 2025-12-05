@@ -621,19 +621,87 @@
 
     <script>
         // ============================================
-        // CONFIGURATION
+        // CONFIGURATION - UPDATE THESE VALUES
         // ============================================
         const CONFIG = {
+            // Your GitHub username (all lowercase)
             GITHUB_USERNAME: 'unique205',
+            
+            // ⚠️ REPLACE THIS WITH YOUR NEW 40-CHARACTER TOKEN
+            // Go to GitHub → Settings → Developer settings → Personal access tokens
+            // Generate new token (classic) with "repo" permission
             GITHUB_TOKEN: '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',
+            
             DATA_REPO: 'inventory-data',
             DATA_FILE: 'data/inventory.json',
             BRANCH: 'main',
             ADMIN_PASSWORD: 'admin123'
         };
 
-        // Default groups (user can add more in admin panel)
-        let GROUPS = ['RAW MATERIAL', 'FINISHED GOODS', 'TOOLS', 'CONSUMABLES', 'PACKAGING'];
+        // ============================================
+        // VERIFY CONFIGURATION
+        // ============================================
+        function validateConfig() {
+            console.log('🔧 Validating configuration...');
+            
+            if (!CONFIG.GITHUB_USERNAME || CONFIG.GITHUB_USERNAME === 'YOUR_GITHUB_USERNAME_HERE') {
+                showError('❌ Please set your GitHub username in CONFIG');
+                return false;
+            }
+            
+            if (!CONFIG.GITHUB_TOKEN || CONFIG.GITHUB_TOKEN.includes('REPLACE')) {
+                showError('❌ Please generate and add your GitHub token in CONFIG');
+                showTokenHelp();
+                return false;
+            }
+            
+            if (CONFIG.GITHUB_TOKEN.length !== 40 || !CONFIG.GITHUB_TOKEN.startsWith('ghp_')) {
+                showError('❌ Invalid GitHub token format. Token should be 40 characters starting with "ghp_"');
+                showTokenHelp();
+                return false;
+            }
+            
+            console.log('✅ Configuration valid');
+            return true;
+        }
+
+        function showTokenHelp() {
+            const help = `
+                <div style="background: #fee2e2; border: 2px solid #dc2626; border-radius: 8px; padding: 15px; margin: 10px 0;">
+                    <h4 style="color: #dc2626; margin-top: 0;">How to get GitHub Token:</h4>
+                    <ol style="margin: 10px 0; padding-left: 20px;">
+                        <li>Go to <a href="https://github.com/settings/tokens" target="_blank">GitHub Tokens</a></li>
+                        <li>Click "Generate new token" → "Generate new token (classic)"</li>
+                        <li>Set expiration to "No expiration"</li>
+                        <li>Select ONLY the "repo" scope</li>
+                        <li>Click "Generate token"</li>
+                        <li>COPY the 40-character token (starts with ghp_)</li>
+                        <li>Replace the GITHUB_TOKEN value above</li>
+                    </ol>
+                    <p><strong>Important:</strong> Token should look like: ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</p>
+                </div>
+            `;
+            
+            const container = document.createElement('div');
+            container.innerHTML = help;
+            document.querySelector('.container').prepend(container);
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = `
+                background: #fee2e2;
+                color: #dc2626;
+                padding: 12px;
+                border-radius: 6px;
+                margin: 10px 0;
+                border: 1px solid #dc2626;
+                font-weight: 600;
+            `;
+            errorDiv.textContent = message;
+            document.querySelector('.container').prepend(errorDiv);
+            console.error(message);
+        }
 
         // ============================================
         // APPLICATION STATE
@@ -643,12 +711,17 @@
         let isOnline = navigator.onLine;
         let syncInProgress = false;
         let adminMode = false;
+        let GROUPS = ['RAW MATERIAL', 'FINISHED GOODS', 'TOOLS', 'CONSUMABLES', 'PACKAGING'];
 
         // ============================================
         // GITHUB DATABASE FUNCTIONS
         // ============================================
         class GitHubDB {
             constructor() {
+                if (!validateConfig()) {
+                    throw new Error('Invalid configuration');
+                }
+                
                 this.baseURL = 'https://api.github.com';
                 this.currentSHA = null;
                 this.headers = {
@@ -656,6 +729,51 @@
                     'Accept': 'application/vnd.github.v3+json',
                     'Content-Type': 'application/json'
                 };
+                this.initialized = false;
+            }
+
+            async initialize() {
+                if (this.initialized) return true;
+                
+                try {
+                    console.log('🔌 Testing GitHub connection...');
+                    
+                    // Test connection by getting repository info
+                    const testUrl = `${this.baseURL}/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}`;
+                    const testResponse = await fetch(testUrl, { headers: this.headers });
+                    
+                    if (testResponse.status === 404) {
+                        throw new Error(`Repository not found: ${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}. Make sure it exists and is PUBLIC.`);
+                    }
+                    
+                    if (!testResponse.ok) {
+                        const errorData = await testResponse.json();
+                        throw new Error(`GitHub API error (${testResponse.status}): ${errorData.message || 'Unknown error'}`);
+                    }
+                    
+                    // Try to get the data file
+                    await this.getFileSHA();
+                    
+                    this.initialized = true;
+                    console.log('✅ GitHub connection successful');
+                    return true;
+                    
+                } catch (error) {
+                    console.error('❌ GitHub initialization failed:', error);
+                    
+                    // Provide specific error messages
+                    if (error.message.includes('401') || error.message.includes('Bad credentials')) {
+                        showError('❌ Invalid GitHub token. Please generate a new token with "repo" permissions.');
+                    } else if (error.message.includes('404')) {
+                        showError(`❌ Repository not found: ${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}. Please create this repository.`);
+                    } else if (error.message.includes('403')) {
+                        showError('❌ Access forbidden. Make sure your token has "repo" permissions and the repository is PUBLIC.');
+                    } else {
+                        showError(`❌ Connection failed: ${error.message}`);
+                    }
+                    
+                    return false;
+                }
             }
 
             async getFileSHA() {
@@ -663,8 +781,16 @@
                 
                 try {
                     const response = await fetch(url, { headers: this.headers });
-                    if (response.status === 404) return null;
-                    if (!response.ok) throw new Error(`GitHub API error: ${response.status}`);
+                    
+                    if (response.status === 404) {
+                        console.log('📄 Data file not found (first time setup)');
+                        return null;
+                    }
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`GitHub API error ${response.status}: ${errorText}`);
+                    }
                     
                     const data = await response.json();
                     this.currentSHA = data.sha;
@@ -676,52 +802,89 @@
             }
 
             async readAll() {
+                if (!this.initialized) {
+                    await this.initialize();
+                }
+                
                 const url = `${this.baseURL}/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/${CONFIG.DATA_FILE}?ref=${CONFIG.BRANCH}`;
                 
                 try {
+                    console.log('📥 Reading data from GitHub...');
                     const response = await fetch(url, { headers: this.headers });
-                    if (response.status === 404) return [];
-                    if (!response.ok) throw new Error(`GitHub API error: ${response.status}`);
+                    
+                    if (response.status === 404) {
+                        console.log('No data file found, returning empty array');
+                        return [];
+                    }
+                    
+                    if (!response.ok) {
+                        throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+                    }
                     
                     const data = await response.json();
                     this.currentSHA = data.sha;
                     
+                    // Decode base64 content
                     const content = atob(data.content.replace(/\n/g, ''));
-                    return JSON.parse(content);
+                    
+                    try {
+                        const parsed = JSON.parse(content);
+                        console.log(`✅ Read ${parsed.length} items from GitHub`);
+                        return parsed;
+                    } catch (parseError) {
+                        console.error('Invalid JSON in data file:', parseError);
+                        return [];
+                    }
                 } catch (error) {
-                    console.error('Failed to read data:', error);
+                    console.error('Failed to read data from GitHub:', error);
                     throw error;
                 }
             }
 
             async writeAll(data) {
+                if (!this.initialized) {
+                    await this.initialize();
+                }
+                
                 const sha = this.currentSHA || await this.getFileSHA();
                 const url = `${this.baseURL}/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/${CONFIG.DATA_FILE}`;
                 
+                // Convert data to pretty JSON
                 const jsonString = JSON.stringify(data, null, 2);
                 const content = btoa(unescape(encodeURIComponent(jsonString)));
                 
                 const body = {
-                    message: `Inventory update ${new Date().toLocaleString()}`,
+                    message: `📦 Inventory update ${new Date().toLocaleString()}`,
                     content: content,
                     branch: CONFIG.BRANCH
                 };
                 
-                if (sha) body.sha = sha;
-                
-                const response = await fetch(url, {
-                    method: 'PUT',
-                    headers: this.headers,
-                    body: JSON.stringify(body)
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`GitHub API error: ${response.status}`);
+                if (sha) {
+                    body.sha = sha;
                 }
                 
-                const result = await response.json();
-                this.currentSHA = result.content.sha;
-                return result;
+                try {
+                    console.log('📤 Writing data to GitHub...');
+                    const response = await fetch(url, {
+                        method: 'PUT',
+                        headers: this.headers,
+                        body: JSON.stringify(body)
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(`GitHub API error (${response.status}): ${errorData.message || 'Unknown error'}`);
+                    }
+                    
+                    const result = await response.json();
+                    this.currentSHA = result.content.sha;
+                    
+                    console.log(`✅ Successfully wrote ${data.length} items to GitHub`);
+                    return result;
+                } catch (error) {
+                    console.error('Failed to write data to GitHub:', error);
+                    throw error;
+                }
             }
 
             async deleteAll() {
@@ -729,16 +892,40 @@
             }
         }
 
-        const gitHubDB = new GitHubDB();
-
         // ============================================
         // INITIALIZATION
         // ============================================
         document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Inventory App Initializing...');
+            
+            // Validate configuration first
+            if (!validateConfig()) {
+                return;
+            }
+            
+            // Initialize GitHub DB
+            let gitHubDB;
+            try {
+                gitHubDB = new GitHubDB();
+                const initialized = await gitHubDB.initialize();
+                
+                if (!initialized) {
+                    showError('❌ Failed to initialize GitHub connection. Check your configuration.');
+                    return;
+                }
+            } catch (error) {
+                showError(`❌ Initialization error: ${error.message}`);
+                return;
+            }
+            
             // Load groups from localStorage
             const savedGroups = localStorage.getItem('inventory_groups');
             if (savedGroups) {
-                GROUPS = JSON.parse(savedGroups);
+                try {
+                    GROUPS = JSON.parse(savedGroups);
+                } catch (e) {
+                    console.log('Using default groups');
+                }
             }
             updateGroupSelect();
             renderGroupsList();
@@ -747,24 +934,25 @@
             loadLocalData();
             
             // Setup event listeners
-            setupEventListeners();
+            setupEventListeners(gitHubDB);
             
             // Update UI
             updateUI();
+            updateConnectionStatus();
             
             // Try to sync if online
             if (isOnline) {
-                await syncWithGitHub();
-            } else {
-                updateConnectionStatus();
+                await syncWithGitHub(gitHubDB);
             }
             
             // Auto-sync every 2 minutes if online
             setInterval(async () => {
                 if (isOnline && !syncInProgress && offlineQueue.length > 0) {
-                    await syncWithGitHub();
+                    await syncWithGitHub(gitHubDB);
                 }
             }, 2 * 60 * 1000);
+            
+            console.log('✅ App initialized successfully');
         });
 
         // ============================================
@@ -775,6 +963,7 @@
             if (saved) {
                 try {
                     inventory = JSON.parse(saved);
+                    console.log(`📁 Loaded ${inventory.length} items from localStorage`);
                 } catch (error) {
                     inventory = [];
                 }
@@ -784,6 +973,7 @@
             if (queue) {
                 try {
                     offlineQueue = JSON.parse(queue);
+                    console.log(`📦 Loaded ${offlineQueue.length} items in offline queue`);
                 } catch (error) {
                     offlineQueue = [];
                 }
@@ -802,15 +992,19 @@
         // ============================================
         // SYNC FUNCTIONS
         // ============================================
-        async function syncWithGitHub() {
+        async function syncWithGitHub(gitHubDB) {
             if (syncInProgress || !isOnline) return;
             
             syncInProgress = true;
             updateConnectionStatus('syncing');
             
             try {
+                console.log('🔄 Starting sync with GitHub...');
+                
                 // Push offline changes
                 if (offlineQueue.length > 0) {
+                    console.log(`📤 Pushing ${offlineQueue.length} offline items to GitHub...`);
+                    
                     const remoteData = await gitHubDB.readAll();
                     
                     // Merge data
@@ -832,21 +1026,25 @@
                     offlineQueue = [];
                     inventory = remoteData;
                     saveLocalData();
+                    
+                    console.log('✅ Offline items synced to GitHub');
+                } else {
+                    // Just pull latest data
+                    console.log('📥 Pulling latest data from GitHub...');
+                    const remoteData = await gitHubDB.readAll();
+                    inventory = remoteData;
+                    saveLocalData();
                 }
-                
-                // Pull latest data
-                const remoteData = await gitHubDB.readAll();
-                inventory = remoteData;
-                saveLocalData();
                 
                 updateUI();
                 updateConnectionStatus('online');
                 
                 // Show success message
                 showMessage('✅ Synced with GitHub');
+                console.log('✅ Sync completed successfully');
                 
             } catch (error) {
-                console.error('Sync failed:', error);
+                console.error('❌ Sync failed:', error);
                 updateConnectionStatus('offline');
                 showMessage('❌ Sync failed - Using local data');
             } finally {
@@ -857,7 +1055,7 @@
         // ============================================
         // CORE FUNCTIONS
         // ============================================
-        function addItem() {
+        async function addItem(gitHubDB) {
             const name = document.getElementById('nameInput').value.trim().toUpperCase();
             const quantity = parseInt(document.getElementById('quantityInput').value) || 0;
             const group = document.getElementById('groupInput').value;
@@ -891,7 +1089,7 @@
                 details: details,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
-                synced: !isOnline, // false if online (will sync), true if offline
+                synced: !isOnline,
                 pending: !isOnline
             };
             
@@ -910,9 +1108,8 @@
             // Handle sync
             if (isOnline) {
                 try {
-                    // Try immediate sync
                     offlineQueue.push(newItem);
-                    syncWithGitHub();
+                    await syncWithGitHub(gitHubDB);
                 } catch (error) {
                     newItem.pending = true;
                     offlineQueue.push(newItem);
@@ -920,7 +1117,6 @@
                     showMessage('📱 Saved locally (sync failed)');
                 }
             } else {
-                // Offline mode
                 newItem.pending = true;
                 offlineQueue.push(newItem);
                 saveLocalData();
@@ -930,7 +1126,7 @@
             updateUI();
         }
 
-        function deleteItem(itemId) {
+        function deleteItem(itemId, gitHubDB) {
             if (!confirm('Delete this item?')) return;
             
             const itemIndex = inventory.findIndex(item => item.id === itemId);
@@ -953,8 +1149,8 @@
             saveLocalData();
             updateUI();
             
-            if (isOnline) {
-                syncWithGitHub();
+            if (isOnline && gitHubDB) {
+                syncWithGitHub(gitHubDB);
             }
         }
 
@@ -977,7 +1173,7 @@
             }
             
             suggestions.innerHTML = matches.map(item => `
-                <div class="suggestion-item" onclick="fillSuggestion('${item.id}')">
+                <div class="suggestion-item" onclick="window.fillSuggestion('${item.id}')">
                     <strong>${item.name}</strong><br>
                     <small>${item.group} • Qty: ${item.quantity}</small>
                 </div>
@@ -1012,7 +1208,7 @@
             container.innerHTML = GROUPS.map(group => `
                 <div style="background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px;">
                     ${group}
-                    <button onclick="deleteGroup('${group}')" style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 0.875rem;">×</button>
+                    <button onclick="window.deleteGroup('${group}')" style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 0.875rem;">×</button>
                 </div>
             `).join('');
         }
@@ -1086,7 +1282,7 @@
                     </div>
                     <div class="item-details">${item.details || '-'}</div>
                     <div class="text-right item-actions">
-                        <button onclick="deleteItem('${item.id}')" class="icon-btn">🗑️</button>
+                        <button onclick="window.deleteItem('${item.id}', window.gitHubDB)" class="icon-btn">🗑️</button>
                     </div>
                 </div>
             `).join('');
@@ -1122,22 +1318,19 @@
             }
         }
 
-        function updateGroupSelect() {
-            const select = document.getElementById('groupInput');
-            select.innerHTML = '<option value="">Select Group</option>' +
-                GROUPS.map(group => `<option value="${group}">${group}</option>`).join('');
-        }
-
         // ============================================
         // EVENT LISTENERS
         // ============================================
-        function setupEventListeners() {
+        function setupEventListeners(gitHubDB) {
+            // Store gitHubDB globally for use in inline functions
+            window.gitHubDB = gitHubDB;
+            
             // Add item
-            document.getElementById('addBtn').addEventListener('click', addItem);
+            document.getElementById('addBtn').addEventListener('click', () => addItem(gitHubDB));
             
             // Enter key in name field
             document.getElementById('nameInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') addItem();
+                if (e.key === 'Enter') addItem(gitHubDB);
             });
             
             // Type-ahead suggestions
@@ -1146,7 +1339,7 @@
             // Sync button
             document.getElementById('syncBtn').addEventListener('click', () => {
                 if (isOnline) {
-                    syncWithGitHub();
+                    syncWithGitHub(gitHubDB);
                 } else {
                     showMessage('You are offline');
                 }
@@ -1176,12 +1369,12 @@
             document.getElementById('importBtn').addEventListener('click', () => {
                 document.getElementById('importFile').click();
             });
-            document.getElementById('importFile').addEventListener('change', importData);
+            document.getElementById('importFile').addEventListener('change', (e) => importData(e, gitHubDB));
             
             // Delete all
             document.getElementById('deleteAllBtn').addEventListener('click', showDeleteModal);
             document.getElementById('cancelDeleteBtn').addEventListener('click', hideDeleteModal);
-            document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDeleteAll);
+            document.getElementById('confirmDeleteBtn').addEventListener('click', () => confirmDeleteAll(gitHubDB));
             document.getElementById('confirmDeleteInput').addEventListener('input', (e) => {
                 document.getElementById('confirmDeleteBtn').disabled = e.target.value !== 'DELETE ALL';
             });
@@ -1190,7 +1383,7 @@
             window.addEventListener('online', () => {
                 isOnline = true;
                 updateConnectionStatus();
-                syncWithGitHub();
+                syncWithGitHub(gitHubDB);
             });
             
             window.addEventListener('offline', () => {
@@ -1236,7 +1429,7 @@
             }
         }
 
-        async function importData(event) {
+        async function importData(event, gitHubDB) {
             const file = event.target.files[0];
             if (!file) return;
             
@@ -1265,7 +1458,7 @@
                         saveLocalData();
                         
                         if (isOnline) {
-                            await syncWithGitHub();
+                            await syncWithGitHub(gitHubDB);
                         } else {
                             updateUI();
                         }
@@ -1297,12 +1490,12 @@
             document.getElementById('deleteModal').classList.remove('show');
         }
 
-        async function confirmDeleteAll() {
+        async function confirmDeleteAll(gitHubDB) {
             hideDeleteModal();
             
             try {
                 // Clear from GitHub
-                if (isOnline) {
+                if (isOnline && gitHubDB) {
                     await gitHubDB.deleteAll();
                 }
                 
