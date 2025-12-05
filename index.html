@@ -4,166 +4,226 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>📦 Inventory System</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📦</text></svg>">
-    
     <style>
-        /* RESET & BASE */
+        /* SIMPLE STYLES */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.4; }
-        .container { max-width: 1000px; margin: 0 auto; padding: 12px; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
         
         /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
-        .header h1 { font-size: 1.5rem; font-weight: 600; color: #2563eb; display: flex; align-items: center; gap: 8px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { color: #2c3e50; margin-bottom: 10px; }
         
-        /* SETUP MODAL */
-        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
-        .modal-content { background: white; border-radius: 8px; padding: 24px; max-width: 500px; width: 100%; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); }
-        .modal h3 { margin-bottom: 15px; color: #2563eb; }
-        .modal p { margin-bottom: 10px; color: #64748b; }
-        .modal ol { margin: 10px 0 20px 20px; }
-        .modal li { margin-bottom: 5px; }
-        .modal input { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 4px; margin: 10px 0; }
-        .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+        /* SETUP SCREEN */
+        .setup-screen { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .setup-screen h2 { color: #2c3e50; margin-bottom: 20px; }
+        .setup-steps { background: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+        .setup-steps ol { margin-left: 20px; }
+        .setup-steps li { margin-bottom: 10px; }
+        
+        /* TOKEN INPUT */
+        .token-input { margin: 20px 0; }
+        .token-input label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .token-input input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 5px; font-size: 16px; }
+        .token-input input:focus { border-color: #3498db; outline: none; }
         
         /* BUTTONS */
-        .btn { padding: 8px 16px; border: none; border-radius: 4px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .btn-primary { background: #2563eb; color: white; }
-        .btn-primary:hover { background: #1d4ed8; }
-        .btn-secondary { background: #64748b; color: white; }
-        .btn-secondary:hover { background: #475569; }
+        .btn { padding: 12px 24px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin: 5px; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-primary:hover { background: #2980b9; }
+        .btn-secondary { background: #95a5a6; color: white; }
+        .btn-danger { background: #e74c3c; color: white; }
         
-        /* STATUS */
-        .status-bar { background: #f1f5f9; padding: 8px 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #64748b; }
-        .status-badge { padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
-        .status-online { background: #10b981; color: white; }
-        .status-offline { background: #ef4444; color: white; }
+        /* LOGIN SCREEN */
+        .login-screen { text-align: center; padding: 40px; }
+        .login-buttons { display: flex; flex-direction: column; gap: 15px; max-width: 300px; margin: 30px auto; }
+        .login-btn { padding: 15px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }
+        .staff-btn { background: #3498db; color: white; }
+        .admin-btn { background: #2c3e50; color: white; }
         
-        /* ADD FORM */
-        .add-form { background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
-        .form-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .form-group { display: flex; flex-direction: column; }
-        .form-label { font-size: 0.75rem; font-weight: 600; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
-        input, select { width: 100%; padding: 8px 10px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.875rem; }
-        input:focus, select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
-        #nameInput, #detailsInput { text-transform: uppercase; }
+        /* STAFF INTERFACE */
+        .staff-form { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #2c3e50; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .form-row { display: flex; gap: 15px; }
+        .form-row .form-group { flex: 1; }
         
-        /* INVENTORY TABLE */
-        .inventory-table { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
-        .table-header { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr; background: #f1f5f9; padding: 12px 15px; font-weight: 600; font-size: 0.75rem; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #e2e8f0; }
-        .table-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 0.5fr; padding: 12px 15px; border-bottom: 1px solid #e2e8f0; align-items: center; }
-        .table-row:hover { background: #f8fafc; }
-        .item-name { font-weight: 600; text-transform: uppercase; font-size: 0.875rem; }
-        .item-quantity { font-weight: 700; color: #2563eb; text-align: center; }
-        .item-group { background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+        /* SUGGESTIONS */
+        .suggestions { border: 1px solid #ddd; background: white; max-height: 200px; overflow-y: auto; margin-top: 5px; display: none; }
+        .suggestion { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; }
+        .suggestion:hover { background: #f5f5f5; }
         
-        /* UTILITY */
-        .hidden { display: none !important; }
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
+        /* SUCCESS MESSAGE */
+        .success { background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-top: 15px; text-align: center; }
         
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .form-row { grid-template-columns: 1fr; }
-            .table-header, .table-row { grid-template-columns: 2fr 1fr 1fr 0.5fr; }
-            .item-details { display: none; }
-        }
+        /* ADMIN INTERFACE */
+        .inventory-table { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 20px; }
+        .table-header { display: grid; grid-template-columns: 3fr 1fr 1fr 2fr 1fr; background: #34495e; color: white; padding: 15px; font-weight: bold; }
+        .table-row { display: grid; grid-template-columns: 3fr 1fr 1fr 2fr 1fr; padding: 12px 15px; border-bottom: 1px solid #eee; align-items: center; }
+        .table-row:hover { background: #f9f9f9; }
+        
+        /* ADMIN CONTROLS */
+        .admin-controls { display: flex; gap: 10px; margin: 20px 0; }
+        
+        /* STATUS MESSAGES */
+        .error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .info { background: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        
+        /* HIDDEN */
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- HEADER -->
-        <div class="header">
-            <h1><span>📦</span> Inventory System</h1>
-        </div>
-
-        <!-- SETUP MODAL (Shows on first run) -->
-        <div id="setupModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <h3>🔐 Setup Required</h3>
-                <p>This app needs a GitHub token to store your inventory data.</p>
-                
-                <p><strong>Step 1: Generate Token</strong></p>
+        <!-- SETUP SCREEN (First time only) -->
+        <div id="setupScreen" class="setup-screen hidden">
+            <h2>🔧 Initial Setup Required</h2>
+            
+            <div class="setup-steps">
+                <p><strong>Step 1: Create GitHub Token</strong></p>
                 <ol>
-                    <li>Go to <a href="https://github.com/settings/tokens" target="_blank">GitHub Tokens</a></li>
-                    <li>Click <strong>"Generate new token"</strong></li>
-                    <li>Token name: <code>Inventory-App</code></li>
-                    <li>Expiration: <code>90 days</code> (recommended)</li>
-                    <li>Select repositories: <code>inventory-data</code></li>
-                    <li>Permissions: <strong>Contents: Read and write</strong></li>
+                    <li>Go to: <a href="https://github.com/settings/tokens" target="_blank">GitHub Tokens</a></li>
+                    <li>Click "Generate new token" → "Generate new token (classic)"</li>
+                    <li>Token name: <code>inventory-system</code></li>
+                    <li>Expiration: <strong>No expiration</strong> (select this!)</li>
+                    <li>Select scopes: Check <strong>ONLY "repo"</strong></li>
                     <li>Click "Generate token"</li>
-                    <li><strong>COPY the token</strong> (starts with github_pat_)</li>
+                    <li><strong>COPY THE TOKEN</strong> (starts with ghp_)</li>
                 </ol>
+            </div>
+            
+            <div class="token-input">
+                <label>Paste your GitHub token here:</label>
+                <input type="text" id="githubToken" placeholder="Paste token starting with ghp_...">
+                <p style="font-size: 14px; color: #666; margin-top: 5px;">
+                    Token is stored ONLY in your browser. Never shared with anyone.
+                </p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="saveToken()">✅ Save Token & Continue</button>
+                <button class="btn btn-secondary" onclick="skipForNow()">⏭️ Skip for now (Offline Mode)</button>
+            </div>
+        </div>
+
+        <!-- LOGIN SCREEN -->
+        <div id="loginScreen" class="login-screen hidden">
+            <h1>📦 Inventory System</h1>
+            <p>Select user type:</p>
+            
+            <div class="login-buttons">
+                <button class="login-btn staff-btn" onclick="loginAsStaff()">
+                    <h3>👷 STAFF USER</h3>
+                    <p>• Add new items only<br>• Cannot view inventory<br>• Simple interface</p>
+                </button>
                 
-                <p><strong>Step 2: Paste Token Here</strong></p>
-                <input type="text" id="tokenInput" placeholder="Paste your GitHub token here">
-                <p style="font-size: 0.75rem; color: #64748b;">Token is stored ONLY in your browser, never sent to any server.</p>
+                <button class="login-btn admin-btn" onclick="loginAsAdmin()">
+                    <h3>👑 ADMIN USER</h3>
+                    <p>• Full access to all data<br>• View/Edit/Delete items<br>• Password protected</p>
+                </button>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <button class="btn btn-secondary" onclick="changeToken()">🔑 Change GitHub Token</button>
+            </div>
+        </div>
+
+        <!-- STAFF INTERFACE -->
+        <div id="staffInterface" class="hidden">
+            <div class="header">
+                <h1>➕ Add Inventory Item</h1>
+                <p>Staff Mode: You can only add items. Admin can view/edit inventory.</p>
+            </div>
+            
+            <div id="staffError" class="error hidden"></div>
+            
+            <div class="staff-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>ITEM NAME *</label>
+                        <input type="text" id="itemName" placeholder="Type item name..." oninput="showSuggestions()" autocapitalize="characters">
+                        <div id="suggestionsBox" class="suggestions"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>QUANTITY *</label>
+                        <input type="number" id="itemQuantity" placeholder="0" min="0">
+                    </div>
+                </div>
                 
-                <div class="modal-buttons">
-                    <button id="saveTokenBtn" class="btn btn-primary">Save Token</button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>GROUP *</label>
+                        <select id="itemGroup">
+                            <option value="">Select Group</option>
+                            <option value="RAW MATERIAL">RAW MATERIAL</option>
+                            <option value="FINISHED GOODS">FINISHED GOODS</option>
+                            <option value="TOOLS">TOOLS</option>
+                            <option value="CONSUMABLES">CONSUMABLES</option>
+                            <option value="PACKAGING">PACKAGING</option>
+                            <option value="SPARE PARTS">SPARE PARTS</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>DETAILS (Optional)</label>
+                        <input type="text" id="itemDetails" placeholder="Brand, size, etc..." autocapitalize="characters">
+                    </div>
                 </div>
+                
+                <button class="btn btn-primary" onclick="addItem()">➕ ADD ITEM</button>
+                
+                <div id="successMessage" class="success hidden">
+                    ✅ Item added successfully!
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-secondary" onclick="logout()">← Back to Login</button>
             </div>
         </div>
 
-        <!-- STATUS BAR -->
-        <div class="status-bar">
-            <div class="stats">
-                <span id="totalCount">0 items</span>
-                <span id="pendingCount" class="hidden">• <span id="pendingNum">0</span> pending</span>
+        <!-- ADMIN INTERFACE -->
+        <div id="adminInterface" class="hidden">
+            <div class="header">
+                <h1>📋 Inventory Management</h1>
+                <p>Admin Mode: Full access to all inventory data</p>
             </div>
-            <div id="connectionStatus" class="status-badge status-online">Online</div>
-        </div>
-
-        <!-- ADD FORM -->
-        <div class="add-form">
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Item Name</label>
-                    <input type="text" id="nameInput" placeholder="Type name..." autocapitalize="characters">
+            
+            <div id="adminError" class="error hidden"></div>
+            
+            <div class="admin-controls">
+                <button class="btn btn-primary" onclick="loadInventory()">🔄 Refresh Data</button>
+                <button class="btn btn-secondary" onclick="exportData()">📥 Export Data</button>
+                <button class="btn btn-danger" onclick="showDeleteAll()">🗑️ Delete All</button>
+                <button class="btn btn-secondary" onclick="logout()" style="margin-left: auto;">← Logout</button>
+            </div>
+            
+            <div class="inventory-table">
+                <div class="table-header">
+                    <div>ITEM NAME</div>
+                    <div>QUANTITY</div>
+                    <div>GROUP</div>
+                    <div>DETAILS</div>
+                    <div>ACTION</div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Quantity</label>
-                    <input type="number" id="quantityInput" placeholder="0" min="0">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Group</label>
-                    <select id="groupInput">
-                        <option value="">Select Group</option>
-                        <option value="RAW MATERIAL">RAW MATERIAL</option>
-                        <option value="FINISHED GOODS">FINISHED GOODS</option>
-                        <option value="TOOLS">TOOLS</option>
-                        <option value="CONSUMABLES">CONSUMABLES</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Details</label>
-                    <input type="text" id="detailsInput" placeholder="Details..." autocapitalize="characters">
+                <div id="inventoryList">
+                    <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+                        <p>Click "Refresh Data" to load inventory...</p>
+                    </div>
                 </div>
             </div>
-            <button id="addBtn" class="btn btn-primary" style="width: 100%;">➕ Add Item</button>
-        </div>
-
-        <!-- INVENTORY TABLE -->
-        <div class="inventory-table">
-            <div class="table-header">
-                <div>ITEM NAME</div>
-                <div class="text-center">QUANTITY</div>
-                <div class="text-center">GROUP</div>
-                <div>DETAILS</div>
-                <div class="text-right">ACTIONS</div>
-            </div>
-            <div id="inventoryList">
-                <div style="text-align: center; padding: 40px 20px; color: #64748b;">
-                    <div style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;">📭</div>
-                    <p>No inventory items yet</p>
-                    <p>Add your first item above</p>
+            
+            <!-- DELETE CONFIRMATION -->
+            <div id="deleteConfirm" class="hidden" style="background: #fee; padding: 20px; border-radius: 5px; margin-top: 20px;">
+                <h3 style="color: #c0392b;">⚠️ Delete All Items?</h3>
+                <p>This will delete ALL inventory items permanently.</p>
+                <p>Type <strong>DELETE ALL</strong> to confirm:</p>
+                <input type="text" id="confirmDelete" placeholder="Type DELETE ALL" style="width: 100%; padding: 10px; margin: 10px 0;">
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-danger" onclick="confirmDeleteAll()" disabled>Delete Everything</button>
+                    <button class="btn btn-secondary" onclick="cancelDelete()">Cancel</button>
                 </div>
             </div>
-        </div>
-        
-        <!-- SETTINGS BUTTON -->
-        <div style="text-align: center; margin-top: 20px;">
-            <button id="settingsBtn" class="btn btn-secondary">⚙️ Settings</button>
         </div>
     </div>
 
@@ -171,200 +231,403 @@
         // ============================================
         // CONFIGURATION
         // ============================================
-        const CONFIG = {
-            GITHUB_USERNAME: 'unique205',
-            DATA_REPO: 'inventory-data',
-            DATA_FILE: 'data/inventory.json',
-            BRANCH: 'main',
-            ADMIN_PASSWORD: 'admin123'
-        };
-
-        // Application state
-        let inventory = [];
-        let offlineQueue = [];
-        let isOnline = navigator.onLine;
+        
+        // Your GitHub username
+        const GITHUB_USERNAME = 'unique205';
+        
+        // Repository name
+        const REPO_NAME = 'inventory-data';
+        
+        // Data file path
+        const DATA_FILE = 'data/inventory.json';
+        
+        // Admin password (change this!)
+        const ADMIN_PASSWORD = 'admin123';
+        
+        // ============================================
+        // APPLICATION STATE
+        // ============================================
+        let currentUser = null; // 'staff' or 'admin'
         let githubToken = null;
-
+        let allItems = [];
+        
         // ============================================
         // INITIALIZATION
         // ============================================
-        document.addEventListener('DOMContentLoaded', async () => {
-            console.log('🚀 Starting app...');
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Inventory System Starting...');
             
             // Check if token exists in localStorage
-            githubToken = localStorage.getItem('github_token');
+            githubToken = localStorage.getItem('inventory_github_token');
             
             if (!githubToken) {
-                // Show setup modal
-                showSetupModal();
+                // Show setup screen
+                showScreen('setupScreen');
             } else {
-                // Token exists, initialize app
-                initializeApp();
+                // Show login screen
+                showScreen('loginScreen');
             }
-            
-            setupEventListeners();
         });
-
+        
         // ============================================
-        // SETUP MODAL
+        // SCREEN MANAGEMENT
         // ============================================
-        function showSetupModal() {
-            const modal = document.getElementById('setupModal');
-            modal.style.display = 'flex';
+        function showScreen(screenId) {
+            // Hide all screens
+            document.getElementById('setupScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('staffInterface').classList.add('hidden');
+            document.getElementById('adminInterface').classList.add('hidden');
             
-            document.getElementById('saveTokenBtn').addEventListener('click', saveToken);
+            // Show requested screen
+            document.getElementById(screenId).classList.remove('hidden');
             
-            // Also allow Enter key
-            document.getElementById('tokenInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') saveToken();
-            });
+            // Clear errors
+            document.getElementById('staffError').classList.add('hidden');
+            document.getElementById('adminError').classList.add('hidden');
+            document.getElementById('successMessage').classList.add('hidden');
         }
-
+        
+        // ============================================
+        // TOKEN MANAGEMENT
+        // ============================================
         function saveToken() {
-            const tokenInput = document.getElementById('tokenInput');
+            const tokenInput = document.getElementById('githubToken');
             const token = tokenInput.value.trim();
             
             if (!token) {
-                alert('Please enter a token');
+                alert('Please enter a GitHub token');
                 return;
             }
             
-            if (!token.startsWith('github_pat_') && !token.startsWith('ghp_')) {
-                if (!confirm('Token should start with github_pat_ or ghp_. Are you sure this is correct?')) {
+            if (!token.startsWith('ghp_')) {
+                if (!confirm('Token should start with "ghp_". Are you sure this is correct?')) {
                     return;
                 }
             }
             
             // Save to localStorage
-            localStorage.setItem('github_token', token);
+            localStorage.setItem('inventory_github_token', token);
             githubToken = token;
             
-            // Hide modal
-            document.getElementById('setupModal').style.display = 'none';
-            
-            // Initialize app
-            initializeApp();
-        }
-
-        // ============================================
-        // APP INITIALIZATION
-        // ============================================
-        async function initializeApp() {
-            console.log('🔌 Testing GitHub connection...');
-            
             // Test the token
-            const isValid = await testGitHubToken();
-            
-            if (isValid) {
-                // Load data
-                loadLocalData();
-                updateUI();
-                
-                if (isOnline) {
-                    await syncWithGitHub();
-                }
-                
-                console.log('✅ App ready');
-            } else {
-                // Token is invalid, clear it and show setup again
-                localStorage.removeItem('github_token');
-                githubToken = null;
-                showSetupModal();
-                alert('Invalid token. Please generate a new one.');
-            }
+            testGitHubToken();
         }
-
+        
+        function skipForNow() {
+            // Use offline mode
+            githubToken = null;
+            showScreen('loginScreen');
+            showMessage('info', 'Using offline mode. Data will be saved locally only.');
+        }
+        
+        function changeToken() {
+            localStorage.removeItem('inventory_github_token');
+            githubToken = null;
+            showScreen('setupScreen');
+        }
+        
         async function testGitHubToken() {
             try {
-                const testUrl = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}`;
-                const response = await fetch(testUrl, {
+                const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}`;
+                const response = await fetch(url, {
                     headers: {
                         'Authorization': `token ${githubToken}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
                 
-                if (response.status === 401 || response.status === 403) {
-                    return false;
+                if (response.ok) {
+                    showScreen('loginScreen');
+                    showMessage('info', '✅ GitHub connection successful!');
+                } else if (response.status === 401 || response.status === 403) {
+                    alert('Invalid token. Please generate a new one.');
+                    changeToken();
+                } else if (response.status === 404) {
+                    alert(`Repository not found: ${GITHUB_USERNAME}/${REPO_NAME}\n\nPlease create this repository first.`);
                 }
-                
-                return response.ok;
             } catch (error) {
-                console.error('Token test failed:', error);
-                return false;
+                alert('Connection failed. Please check your internet and try again.');
             }
         }
-
+        
         // ============================================
-        // GITHUB OPERATIONS
+        // LOGIN FUNCTIONS
         // ============================================
-        async function syncWithGitHub() {
-            if (!isOnline || !githubToken) return;
+        function loginAsStaff() {
+            currentUser = 'staff';
+            showScreen('staffInterface');
             
-            updateStatus('Syncing...', 'syncing');
-            
-            try {
-                // Push offline changes
-                if (offlineQueue.length > 0) {
-                    await pushToGitHub();
-                }
-                
-                // Pull latest data
-                await pullFromGitHub();
-                
-                updateStatus('Online', 'online');
-                showMessage('✅ Synced with GitHub');
-                
-            } catch (error) {
-                console.error('Sync failed:', error);
-                updateStatus('Sync failed', 'offline');
-                showMessage('❌ Sync failed - Using local data');
+            // Load items for suggestions
+            loadItemsForSuggestions();
+        }
+        
+        function loginAsAdmin() {
+            const password = prompt('Enter admin password:');
+            if (password === ADMIN_PASSWORD) {
+                currentUser = 'admin';
+                showScreen('adminInterface');
+            } else {
+                alert('Incorrect password');
             }
         }
-
-        async function pushToGitHub() {
-            // Read current data
-            let remoteData = [];
-            try {
-                remoteData = await readFromGitHub();
-            } catch (e) {
-                // File doesn't exist yet, start with empty array
-                remoteData = [];
+        
+        function logout() {
+            currentUser = null;
+            showScreen('loginScreen');
+        }
+        
+        // ============================================
+        // STAFF FUNCTIONS
+        // ============================================
+        async function addItem() {
+            // Get form values
+            const name = document.getElementById('itemName').value.trim().toUpperCase();
+            const quantity = parseInt(document.getElementById('itemQuantity').value) || 0;
+            const group = document.getElementById('itemGroup').value;
+            const details = document.getElementById('itemDetails').value.trim().toUpperCase();
+            
+            // Validate
+            if (!name) {
+                showMessage('error', 'Please enter item name');
+                document.getElementById('itemName').focus();
+                return;
+            }
+            if (!quantity || quantity < 0) {
+                showMessage('error', 'Please enter valid quantity');
+                document.getElementById('itemQuantity').focus();
+                return;
+            }
+            if (!group) {
+                showMessage('error', 'Please select a group');
+                document.getElementById('itemGroup').focus();
+                return;
             }
             
-            // Merge offline changes
-            offlineQueue.forEach(item => {
-                if (item._delete) {
-                    const index = remoteData.findIndex(i => i.id === item.id);
-                    if (index !== -1) remoteData.splice(index, 1);
+            // Create item
+            const newItem = {
+                id: 'item_' + Date.now(),
+                name: name,
+                quantity: quantity,
+                group: group,
+                details: details,
+                addedBy: 'staff',
+                timestamp: new Date().toISOString()
+            };
+            
+            try {
+                if (githubToken) {
+                    // Save to GitHub
+                    await saveItemToGitHub(newItem);
+                    showMessage('success', `✅ ${name} added to inventory!`);
                 } else {
-                    const existingIndex = remoteData.findIndex(i => i.id === item.id);
-                    if (existingIndex === -1) {
-                        remoteData.unshift(item); // New items on top
-                    } else {
-                        remoteData[existingIndex] = item;
-                    }
+                    // Save locally (offline mode)
+                    saveItemLocally(newItem);
+                    showMessage('success', `✅ ${name} saved locally (offline mode)`);
                 }
+                
+                // Clear form
+                document.getElementById('itemName').value = '';
+                document.getElementById('itemQuantity').value = '';
+                document.getElementById('itemDetails').value = '';
+                document.getElementById('itemGroup').value = '';
+                document.getElementById('itemName').focus();
+                document.getElementById('suggestionsBox').style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('error', 'Failed to save item. Please try again.');
+            }
+        }
+        
+        // ============================================
+        // SUGGESTIONS SYSTEM
+        // ============================================
+        async function loadItemsForSuggestions() {
+            try {
+                if (githubToken) {
+                    const data = await readFromGitHub();
+                    allItems = data;
+                } else {
+                    // Try to load from local storage
+                    const localData = localStorage.getItem('inventory_local_data');
+                    allItems = localData ? JSON.parse(localData) : [];
+                }
+            } catch (error) {
+                allItems = [];
+            }
+        }
+        
+        function showSuggestions() {
+            const search = document.getElementById('itemName').value.toUpperCase();
+            const box = document.getElementById('suggestionsBox');
+            
+            if (search.length < 2) {
+                box.style.display = 'none';
+                return;
+            }
+            
+            const matches = allItems.filter(item => 
+                item.name.includes(search)
+            ).slice(0, 5);
+            
+            if (matches.length === 0) {
+                box.style.display = 'none';
+                return;
+            }
+            
+            box.innerHTML = matches.map(item => `
+                <div class="suggestion" onclick="selectSuggestion('${item.name.replace(/'/g, "\\'")}', '${item.group}', '${(item.details || '').replace(/'/g, "\\'")}')">
+                    <strong>${item.name}</strong><br>
+                    <small>Group: ${item.group} | Last: ${item.quantity}</small>
+                </div>
+            `).join('');
+            
+            box.style.display = 'block';
+        }
+        
+        function selectSuggestion(name, group, details) {
+            document.getElementById('itemName').value = name;
+            document.getElementById('itemGroup').value = group;
+            document.getElementById('itemDetails').value = details || '';
+            document.getElementById('suggestionsBox').style.display = 'none';
+            document.getElementById('itemQuantity').focus();
+        }
+        
+        // ============================================
+        // ADMIN FUNCTIONS
+        // ============================================
+        async function loadInventory() {
+            try {
+                let data;
+                if (githubToken) {
+                    data = await readFromGitHub();
+                } else {
+                    const localData = localStorage.getItem('inventory_local_data');
+                    data = localData ? JSON.parse(localData) : [];
+                }
+                
+                displayInventory(data);
+                showMessage('info', `✅ Loaded ${data.length} items`);
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('error', 'Failed to load inventory. Please check your connection.');
+            }
+        }
+        
+        function displayInventory(items) {
+            const container = document.getElementById('inventoryList');
+            
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+                        <p>No inventory items found.</p>
+                        <p>Staff can add items using Staff Mode.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = items.map(item => `
+                <div class="table-row">
+                    <div><strong>${item.name}</strong></div>
+                    <div>${item.quantity}</div>
+                    <div>${item.group}</div>
+                    <div>${item.details || '-'}</div>
+                    <div>
+                        <button onclick="deleteItem('${item.id}')" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        async function deleteItem(itemId) {
+            if (!confirm('Delete this item?')) return;
+            
+            try {
+                if (githubToken) {
+                    const allData = await readFromGitHub();
+                    const newData = allData.filter(item => item.id !== itemId);
+                    await writeToGitHub(newData);
+                } else {
+                    const localData = localStorage.getItem('inventory_local_data');
+                    const allData = localData ? JSON.parse(localData) : [];
+                    const newData = allData.filter(item => item.id !== itemId);
+                    localStorage.setItem('inventory_local_data', JSON.stringify(newData));
+                }
+                
+                loadInventory();
+                showMessage('info', '✅ Item deleted');
+            } catch (error) {
+                showMessage('error', '❌ Failed to delete item');
+            }
+        }
+        
+        function showDeleteAll() {
+            document.getElementById('deleteConfirm').classList.remove('hidden');
+            document.getElementById('confirmDelete').value = '';
+            document.getElementById('confirmDelete').focus();
+            
+            document.getElementById('confirmDelete').addEventListener('input', function() {
+                const deleteBtn = document.querySelector('#deleteConfirm .btn-danger');
+                deleteBtn.disabled = this.value !== 'DELETE ALL';
             });
-            
-            // Write back
-            await writeToGitHub(remoteData);
-            
-            // Update local
-            inventory = remoteData;
-            offlineQueue = [];
-            saveLocalData();
         }
-
-        async function pullFromGitHub() {
-            const remoteData = await readFromGitHub();
-            inventory = remoteData;
-            saveLocalData();
-            updateUI();
+        
+        function cancelDelete() {
+            document.getElementById('deleteConfirm').classList.add('hidden');
         }
-
+        
+        async function confirmDeleteAll() {
+            try {
+                if (githubToken) {
+                    await writeToGitHub([]);
+                } else {
+                    localStorage.setItem('inventory_local_data', '[]');
+                }
+                
+                loadInventory();
+                document.getElementById('deleteConfirm').classList.add('hidden');
+                showMessage('info', '✅ All items deleted');
+            } catch (error) {
+                showMessage('error', '❌ Failed to delete items');
+            }
+        }
+        
+        function exportData() {
+            try {
+                let data;
+                if (githubToken) {
+                    // In real implementation, this would fetch and export
+                    data = { message: "Export feature requires GitHub connection" };
+                } else {
+                    const localData = localStorage.getItem('inventory_local_data');
+                    data = localData ? JSON.parse(localData) : [];
+                }
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `inventory-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                showMessage('info', '✅ Data exported as JSON file');
+            } catch (error) {
+                showMessage('error', '❌ Failed to export data');
+            }
+        }
+        
+        // ============================================
+        // DATA STORAGE FUNCTIONS
+        // ============================================
         async function readFromGitHub() {
-            const url = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/${CONFIG.DATA_FILE}`;
+            if (!githubToken) throw new Error('No GitHub token');
+            
+            const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${DATA_FILE}`;
             
             const response = await fetch(url, {
                 headers: {
@@ -374,25 +637,26 @@
             });
             
             if (response.status === 404) {
-                return []; // File doesn't exist yet
+                return []; // No data yet
             }
             
             if (!response.ok) {
-                throw new Error(`GitHub read error: ${response.status}`);
+                throw new Error(`GitHub error: ${response.status}`);
             }
             
             const data = await response.json();
             const content = atob(data.content.replace(/\n/g, ''));
             return JSON.parse(content);
         }
-
+        
         async function writeToGitHub(data) {
-            const url = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.DATA_REPO}/contents/${CONFIG.DATA_FILE}`;
+            if (!githubToken) throw new Error('No GitHub token');
             
-            // First, get current SHA
+            // Get current SHA
             let sha = null;
             try {
-                const infoResponse = await fetch(url, {
+                const infoUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${DATA_FILE}`;
+                const infoResponse = await fetch(infoUrl, {
                     headers: {
                         'Authorization': `token ${githubToken}`,
                         'Accept': 'application/vnd.github.v3+json'
@@ -403,14 +667,16 @@
                     sha = info.sha;
                 }
             } catch (e) {
-                // File doesn't exist, no SHA needed
+                // File doesn't exist yet
             }
             
+            const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${DATA_FILE}`;
             const content = btoa(JSON.stringify(data, null, 2));
+            
             const body = {
-                message: `Inventory update ${new Date().toLocaleString()}`,
+                message: `Inventory update: ${currentUser} ${new Date().toLocaleString()}`,
                 content: content,
-                branch: CONFIG.BRANCH
+                branch: 'main'
             };
             
             if (sha) {
@@ -430,302 +696,87 @@
             if (!response.ok) {
                 throw new Error(`GitHub write error: ${response.status}`);
             }
-            
-            return await response.json();
         }
-
-        // ============================================
-        // LOCAL DATA MANAGEMENT
-        // ============================================
-        function loadLocalData() {
-            const saved = localStorage.getItem('inventory_data');
-            if (saved) {
-                try {
-                    inventory = JSON.parse(saved);
-                } catch (e) {
-                    inventory = [];
-                }
-            }
-            
-            const queue = localStorage.getItem('inventory_queue');
-            if (queue) {
-                try {
-                    offlineQueue = JSON.parse(queue);
-                } catch (e) {
-                    offlineQueue = [];
-                }
-            }
-        }
-
-        function saveLocalData() {
-            localStorage.setItem('inventory_data', JSON.stringify(inventory));
-            localStorage.setItem('inventory_queue', JSON.stringify(offlineQueue));
-        }
-
-        // ============================================
-        // CORE FUNCTIONS
-        // ============================================
-        async function addItem() {
-            const name = document.getElementById('nameInput').value.trim().toUpperCase();
-            const quantity = parseInt(document.getElementById('quantityInput').value) || 0;
-            const group = document.getElementById('groupInput').value;
-            const details = document.getElementById('detailsInput').value.trim().toUpperCase();
-            
-            if (!name || !quantity || !group) {
-                showMessage('Please fill all required fields');
-                return;
-            }
-            
-            const newItem = {
-                id: 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                name: name,
-                quantity: quantity,
-                group: group,
-                details: details,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                synced: false,
-                pending: true
-            };
-            
-            // Add to top of list
-            inventory.unshift(newItem);
-            
-            // Clear form
-            document.getElementById('nameInput').value = '';
-            document.getElementById('quantityInput').value = '';
-            document.getElementById('detailsInput').value = '';
-            document.getElementById('nameInput').focus();
-            
-            // Save locally
-            offlineQueue.push(newItem);
-            saveLocalData();
-            
-            // Update UI
-            updateUI();
-            
-            // Try to sync
-            if (isOnline && githubToken) {
-                await syncWithGitHub();
-            } else {
-                showMessage('📴 Saved offline');
-            }
-        }
-
-        async function deleteItem(itemId) {
-            if (!confirm('Delete this item?')) return;
-            
-            const itemIndex = inventory.findIndex(item => item.id === itemId);
-            if (itemIndex === -1) return;
-            
-            const item = inventory[itemIndex];
-            inventory.splice(itemIndex, 1);
-            
-            if (item.synced) {
-                offlineQueue.push({
-                    id: itemId,
-                    _delete: true,
-                    name: item.name
-                });
-            }
-            
-            saveLocalData();
-            updateUI();
-            
-            if (isOnline && githubToken) {
-                await syncWithGitHub();
-            }
-        }
-
-        // ============================================
-        // UI FUNCTIONS
-        // ============================================
-        function updateUI() {
-            updateInventoryList();
-            updateStats();
-        }
-
-        function updateInventoryList() {
-            const container = document.getElementById('inventoryList');
-            
-            if (inventory.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 40px 20px; color: #64748b;">
-                        <div style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;">📭</div>
-                        <p>No inventory items yet</p>
-                        <p>Add your first item above</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            container.innerHTML = inventory.map(item => `
-                <div class="table-row">
-                    <div class="item-name">${item.name}</div>
-                    <div class="item-quantity">${item.quantity}</div>
-                    <div class="text-center"><span class="item-group">${item.group}</span></div>
-                    <div>${item.details || '-'}</div>
-                    <div class="text-right">
-                        <button onclick="deleteItem('${item.id}')" style="background: none; border: 1px solid #e2e8f0; border-radius: 4px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer;">🗑️</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function updateStats() {
-            document.getElementById('totalCount').textContent = `${inventory.length} items`;
-            
-            const pendingItems = offlineQueue.length;
-            const pendingCount = document.getElementById('pendingCount');
-            const pendingNum = document.getElementById('pendingNum');
-            
-            if (pendingItems > 0) {
-                pendingCount.classList.remove('hidden');
-                pendingNum.textContent = pendingItems;
-            } else {
-                pendingCount.classList.add('hidden');
-            }
-        }
-
-        function updateStatus(text, type) {
-            const element = document.getElementById('connectionStatus');
-            element.textContent = text;
-            element.className = 'status-badge ' + (type === 'online' ? 'status-online' : type === 'offline' ? 'status-offline' : 'status-syncing');
-        }
-
-        // ============================================
-        // EVENT LISTENERS
-        // ============================================
-        function setupEventListeners() {
-            document.getElementById('addBtn').addEventListener('click', addItem);
-            document.getElementById('nameInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') addItem();
-            });
-            
-            document.getElementById('settingsBtn').addEventListener('click', () => {
-                const action = prompt('Settings:\n1. Change GitHub token\n2. Clear all data\n3. Export data\n\nEnter 1, 2, or 3:');
-                
-                if (action === '1') {
-                    // Change token
-                    const newToken = prompt('Enter new GitHub token:');
-                    if (newToken) {
-                        localStorage.setItem('github_token', newToken);
-                        githubToken = newToken;
-                        alert('Token updated. App will restart.');
-                        location.reload();
-                    }
-                } else if (action === '2') {
-                    // Clear data
-                    if (confirm('Clear ALL local data?')) {
-                        localStorage.clear();
-                        alert('Data cleared. App will restart.');
-                        location.reload();
-                    }
-                } else if (action === '3') {
-                    // Export data
-                    exportData();
-                }
-            });
-            
-            window.addEventListener('online', () => {
-                isOnline = true;
-                updateStatus('Online', 'online');
-                if (githubToken) {
-                    syncWithGitHub();
-                }
-            });
-            
-            window.addEventListener('offline', () => {
-                isOnline = false;
-                updateStatus('Offline', 'offline');
-            });
-        }
-
-        // ============================================
-        // DATA EXPORT
-        // ============================================
-        function exportData() {
+        
+        async function saveItemToGitHub(newItem) {
+            // Read existing
+            let existingData = [];
             try {
-                const data = {
-                    version: '1.0',
-                    exportedAt: new Date().toISOString(),
-                    inventory: inventory
-                };
-                
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `inventory-backup-${new Date().toISOString().split('T')[0]}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                
-                URL.revokeObjectURL(url);
-                
-                showMessage('✅ Backup exported');
-            } catch (error) {
-                showMessage('❌ Export failed');
+                existingData = await readFromGitHub();
+            } catch (e) {
+                existingData = [];
             }
+            
+            // Check if exists
+            const existingIndex = existingData.findIndex(item => 
+                item.name === newItem.name && item.group === newItem.group
+            );
+            
+            if (existingIndex !== -1) {
+                // Update quantity
+                existingData[existingIndex].quantity += newItem.quantity;
+                existingData[existingIndex].updatedAt = new Date().toISOString();
+            } else {
+                // Add new
+                existingData.unshift(newItem);
+            }
+            
+            // Save back
+            await writeToGitHub(existingData);
         }
-
+        
+        function saveItemLocally(newItem) {
+            // Read local data
+            const localData = localStorage.getItem('inventory_local_data');
+            let existingData = localData ? JSON.parse(localData) : [];
+            
+            // Check if exists
+            const existingIndex = existingData.findIndex(item => 
+                item.name === newItem.name && item.group === newItem.group
+            );
+            
+            if (existingIndex !== -1) {
+                existingData[existingIndex].quantity += newItem.quantity;
+            } else {
+                existingData.unshift(newItem);
+            }
+            
+            // Save back
+            localStorage.setItem('inventory_local_data', JSON.stringify(existingData));
+        }
+        
         // ============================================
-        // MESSAGE FUNCTIONS
+        // UTILITY FUNCTIONS
         // ============================================
-        function showMessage(message) {
-            // Remove existing
-            const existing = document.querySelector('.message-toast');
-            if (existing) existing.remove();
+        function showMessage(type, message) {
+            const staffError = document.getElementById('staffError');
+            const adminError = document.getElementById('adminError');
+            const successMsg = document.getElementById('successMessage');
             
-            // Create new
-            const messageEl = document.createElement('div');
-            messageEl.className = 'message-toast';
-            messageEl.textContent = message;
-            messageEl.style.cssText = `
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                background: ${message.includes('✅') ? '#10b981' : '#ef4444'};
-                color: white;
-                padding: 10px 20px;
-                border-radius: 4px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                z-index: 1000;
-                font-size: 0.875rem;
-                animation: slideIn 0.3s ease-out;
-            `;
+            // Hide all
+            staffError.classList.add('hidden');
+            adminError.classList.add('hidden');
+            successMsg.classList.add('hidden');
             
-            document.body.appendChild(messageEl);
-            
-            setTimeout(() => {
-                if (messageEl.parentNode) {
-                    messageEl.style.animation = 'slideOut 0.3s ease-out forwards';
-                    setTimeout(() => {
-                        if (messageEl.parentNode) {
-                            messageEl.parentNode.removeChild(messageEl);
-                        }
-                    }, 300);
+            if (type === 'success') {
+                successMsg.innerHTML = message;
+                successMsg.classList.remove('hidden');
+                setTimeout(() => {
+                    successMsg.classList.add('hidden');
+                }, 3000);
+            } else if (type === 'error') {
+                if (currentUser === 'staff') {
+                    staffError.innerHTML = message;
+                    staffError.classList.remove('hidden');
+                } else {
+                    adminError.innerHTML = message;
+                    adminError.classList.remove('hidden');
                 }
-            }, 3000);
+            } else if (type === 'info') {
+                // Simple alert for info
+                alert(message);
+            }
         }
-
-        // Add animation styles
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes slideOut {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Make functions globally available
-        window.deleteItem = deleteItem;
     </script>
 </body>
 </html>
