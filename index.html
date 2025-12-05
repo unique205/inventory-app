@@ -1,762 +1,108 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Inventory System</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card: #020617;
-      --border: #1f2937;
-      --accent: #4f46e5;
-      --accent-soft: #6366f1;
-      --danger: #b91c1c;
-      --danger-soft: #dc2626;
-      --text-main: #e5e7eb;
-      --text-muted: #9ca3af;
-    }
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--text-main);
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0.75rem 1rem;
-      border-bottom: 1px solid var(--border);
-      background: #020617;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 1.1rem;
-      cursor: pointer;
-      user-select: none;
-    }
-    header h1 span {
-      font-size: 0.7rem;
-      opacity: 0.7;
-    }
-    .badge {
-      padding: 0.2rem 0.6rem;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      border: 1px solid #4b5563;
-      background: #111827;
-    }
-    .badge-staff {
-      border-color: #3b82f6;
-      color: #bfdbfe;
-    }
-    .badge-admin {
-      border-color: #22c55e;
-      color: #bbf7d0;
-    }
+// index.js - inventory backend with GitHub App token + batch notification stub
 
-    main {
-      max-width: 1040px;
-      margin: 1rem auto 2rem;
-      padding: 0 0.75rem;
-    }
-    .card {
-      background: var(--card);
-      border-radius: 0.75rem;
-      border: 1px solid var(--border);
-      padding: 0.9rem 0.9rem 1.1rem;
-      margin-bottom: 1rem;
-    }
-    .card h2 {
-      margin: 0 0 0.6rem;
-      font-size: 1rem;
-    }
+const express = require("express");
+const cors = require("cors");
+const dotenv = require("dotenv");
+const { createAppAuth } = require("@octokit/auth-app");
 
-    label {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      display: block;
-      margin-bottom: 0.15rem;
-    }
+dotenv.config();
 
-    .field-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 0.6rem;
-      margin-bottom: 0.6rem;
-    }
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-    input, textarea, button {
-      font: inherit;
-      border-radius: 0.4rem;
-      border: 1px solid #374151;
-      background: #020617;
-      color: var(--text-main);
-      padding: 0.4rem 0.55rem;
-    }
-    input.upper, textarea.upper {
-      text-transform: uppercase;
-    }
-    textarea {
-      min-height: 50px;
-      resize: vertical;
-    }
-    button {
-      cursor: pointer;
-      background: var(--accent);
-      border-color: var(--accent);
-      font-weight: 500;
-      font-size: 0.85rem;
-    }
-    button:hover {
-      background: var(--accent-soft);
-    }
-    button.secondary {
-      background: #111827;
-      border-color: #4b5563;
-    }
-    button.secondary:hover {
-      background: #1f2937;
-    }
-    button.danger {
-      background: var(--danger);
-      border-color: var(--danger);
-    }
-    button.danger:hover {
-      background: var(--danger-soft);
-    }
-    button.small {
-      padding: 0.22rem 0.45rem;
-      font-size: 0.7rem;
-      margin-right: 0.25rem;
-    }
-    .actions-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 0.4rem;
-    }
-    .status {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
+// ===== CONFIG FROM ENV =====
+// Make sure these are set in Render environment
+const APP_ID = process.env.GITHUB_APP_ID;
+const PRIVATE_KEY = process.env.GITHUB_PRIVATE_KEY?.replace(/\\n/g, "\n");
+const INSTALLATION_ID = process.env.GITHUB_INSTALLATION_ID;
 
-    .muted {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
+// Basic safety check
+if (!APP_ID || !PRIVATE_KEY || !INSTALLATION_ID) {
+  console.warn(
+    "⚠️ Missing GitHub App config. Please set GITHUB_APP_ID, GITHUB_PRIVATE_KEY, GITHUB_INSTALLATION_ID."
+  );
+}
 
-    .table-wrapper {
-      margin-top: 0.4rem;
-      overflow-x: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-    }
-    th, td {
-      padding: 0.35rem 0.35rem;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-      white-space: nowrap;
-    }
-    th {
-      background: #020617;
-      position: sticky;
-      top: 48px;
-      z-index: 5;
-    }
-    tr:hover td {
-      background: #020617;
-    }
-    .batch-header-row td {
-      background: #020617;
-      border-bottom-color: #4b5563;
-      font-weight: 600;
-      font-size: 0.78rem;
-    }
+app.use(cors());
+app.use(express.json());
 
-    @media (max-width: 640px) {
-      header {
-        flex-direction: row;
-        align-items: center;
-      }
-      header h1 {
-        max-width: 70%;
-      }
-      th:nth-child(1),
-      td:nth-child(1) {
-        display: none; /* hide ID column on small screens */
-      }
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1 id="app-title">INVENTORY SYSTEM<br><span>(tap title for ADMIN login)</span></h1>
-    <span id="role-badge" class="badge badge-staff">STAFF</span>
-  </header>
+// Simple health check
+app.get("/", (req, res) => {
+  res.send("Inventory backend is running ✅");
+});
 
-  <main>
-    <!-- Add / Edit form (used for staff batch + admin edit) -->
-    <section class="card">
-      <h2 id="form-title">ADD ITEM</h2>
-      <form id="item-form">
-        <input type="hidden" id="edit-mode" value="" />
-        <div class="field-row">
-          <div>
-            <label for="item-name">ITEM NAME *</label>
-            <input id="item-name" class="upper" list="name-list" autocomplete="off" required />
-            <datalist id="name-list"></datalist>
-          </div>
-          <div>
-            <label for="item-qty">QUANTITY *</label>
-            <input id="item-qty" type="number" min="0" step="1" required />
-          </div>
-          <div>
-            <label for="item-group">GROUP</label>
-            <input id="item-group" class="upper" placeholder="E.G. RAW MATERIAL" />
-          </div>
-        </div>
-        <div>
-          <label for="item-details">DETAILS</label>
-          <textarea id="item-details" class="upper" placeholder="GRADE, BRAND, ETC."></textarea>
-        </div>
-
-        <div class="actions-row">
-          <div>
-            <button type="submit" id="submit-btn">ADD TO BATCH</button>
-            <button type="button" id="cancel-edit-btn" class="secondary" style="display:none;">
-              CANCEL
-            </button>
-          </div>
-          <div class="status">
-            STATUS: <span id="status-text">IDLE</span>
-          </div>
-        </div>
-      </form>
-    </section>
-
-    <!-- Batch list (not uploaded yet) -->
-    <section class="card">
-      <h2>BATCH (NOT UPLOADED YET)</h2>
-      <p class="muted" id="batch-info">ADD ITEMS ABOVE. THEY WILL APPEAR IN THIS LIST UNTIL YOU UPLOAD THE BATCH.</p>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>NAME</th>
-              <th>QTY</th>
-              <th>GROUP</th>
-              <th>DETAILS</th>
-              <th>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody id="batch-body"></tbody>
-        </table>
-      </div>
-      <div class="actions-row" style="margin-top:0.6rem;">
-        <button type="button" id="upload-batch-btn" class="secondary">UPLOAD BATCH</button>
-        <span class="muted" id="batch-status"></span>
-      </div>
-    </section>
-
-    <!-- Full inventory (admin only) -->
-    <section class="card" id="inventory-card" style="display:none;">
-      <h2>ALL INVENTORY (ADMIN)</h2>
-      <div class="muted" id="count-info">LOADING…</div>
-      <div class="table-wrapper" style="margin-top:0.4rem;">
-        <table id="inventory-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>NAME</th>
-              <th>QTY</th>
-              <th>GROUP</th>
-              <th>DETAILS</th>
-              <th>BATCH TIME</th>
-              <th>UPDATED AT</th>
-              <th>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody id="inventory-body"></tbody>
-        </table>
-      </div>
-    </section>
-  </main>
-
-  <script>
-    // ===== CONFIG =====
-    const BACKEND_URL = "https://inventory-backend-s4sv.onrender.com/get-token";
-    const REPO_OWNER = "unique205";
-    const REPO_NAME = "inventory-data";
-    const FILE_PATH = "data/inventory.json";
-    const BRANCH = "main";
-    const ADMIN_PASSWORD = "admin123"; // change if you want
-
-    // ===== STATE =====
-    let currentRole = "staff"; // default staff
-    let inventory = [];
-    let currentSha = null;
-    let batchItems = [];
-    let batchEditIndex = null;
-    let adminEditId = null;
-
-    // ===== DOM =====
-    const roleBadge = document.getElementById("role-badge");
-    const appTitle = document.getElementById("app-title");
-
-    const itemForm = document.getElementById("item-form");
-    const itemNameInput = document.getElementById("item-name");
-    const itemQtyInput = document.getElementById("item-qty");
-    const itemGroupInput = document.getElementById("item-group");
-    const itemDetailsInput = document.getElementById("item-details");
-    const submitBtn = document.getElementById("submit-btn");
-    const cancelEditBtn = document.getElementById("cancel-edit-btn");
-    const formTitle = document.getElementById("form-title");
-    const statusText = document.getElementById("status-text");
-
-    const batchBody = document.getElementById("batch-body");
-    const uploadBatchBtn = document.getElementById("upload-batch-btn");
-    const batchStatus = document.getElementById("batch-status");
-
-    const inventoryCard = document.getElementById("inventory-card");
-    const inventoryBody = document.getElementById("inventory-body");
-    const countInfo = document.getElementById("count-info");
-    const nameList = document.getElementById("name-list");
-
-    // ===== UTILS =====
-    function setStatus(msg) {
-      statusText.textContent = msg.toUpperCase();
-    }
-
-    function generateId() {
-      const ts = Date.now();
-      const rand = Math.random().toString(36).substring(2, 8);
-      return `ITEM_${ts}_${rand.toUpperCase()}`;
-    }
-
-    function formatDate(iso) {
-      if (!iso) return "-";
-      const d = new Date(iso);
-      if (Number.isNaN(d.getTime())) return iso.toUpperCase();
-      return d.toLocaleString().toUpperCase();
-    }
-
-    async function getBackendToken() {
-      const res = await fetch(BACKEND_URL, { method: "POST" });
-      if (!res.ok) throw new Error("BACKEND TOKEN REQUEST FAILED");
-      const data = await res.json();
-      if (!data.token) throw new Error("BACKEND DID NOT RETURN TOKEN");
-      return data.token;
-    }
-
-    async function githubRequest(path, options = {}) {
-      const token = await getBackendToken();
-      const res = await fetch(`https://api.github.com${path}`, {
-        ...options,
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Accept": "application/vnd.github+json",
-          "Content-Type": "application/json",
-          ...(options.headers || {})
-        }
-      });
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`GITHUB ERROR ${res.status}: ${text}`);
-      }
-      return res.json();
-    }
-
-    function resetForm() {
-      itemNameInput.value = "";
-      itemQtyInput.value = "";
-      itemGroupInput.value = "";
-      itemDetailsInput.value = "";
-      batchEditIndex = null;
-      adminEditId = null;
-      submitBtn.textContent = currentRole === "admin" ? "UPDATE ITEM" : "ADD TO BATCH";
-      cancelEditBtn.style.display = "none";
-      formTitle.textContent = currentRole === "admin" ? "EDIT ITEM (ADMIN)" : "ADD ITEM";
-    }
-
-    function updateRoleUI() {
-      if (currentRole === "admin") {
-        roleBadge.textContent = "ADMIN";
-        roleBadge.className = "badge badge-admin";
-        inventoryCard.style.display = "block";
-        submitBtn.textContent = adminEditId ? "UPDATE ITEM" : "UPDATE ITEM";
-        formTitle.textContent = adminEditId ? "EDIT ITEM (ADMIN)" : "EDIT ITEM (ADMIN)";
-      } else {
-        roleBadge.textContent = "STAFF";
-        roleBadge.className = "badge badge-staff";
-        inventoryCard.style.display = "none";
-        submitBtn.textContent = "ADD TO BATCH";
-        formTitle.textContent = "ADD ITEM";
-      }
-      renderInventory(); // will auto-hide actions if staff
-    }
-
-    // ===== LOAD & SAVE INVENTORY =====
-    async function loadInventory() {
-      try {
-        setStatus("LOADING FROM GITHUB…");
-        const data = await githubRequest(
-          `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(FILE_PATH)}?ref=${BRANCH}`
-        );
-        currentSha = data.sha;
-        const decoded = atob(data.content.replace(/\n/g, ""));
-        inventory = decoded.trim() ? JSON.parse(decoded) : [];
-        renderInventory();
-        populateNameList();
-        setStatus("LOADED");
-      } catch (err) {
-        console.error("ERROR LOADING INVENTORY:", err);
-        if (err.message.includes("404")) {
-          inventory = [];
-          currentSha = null;
-          renderInventory();
-          populateNameList();
-          setStatus("FILE NOT FOUND, STARTING EMPTY");
-        } else {
-          setStatus("ERROR LOADING INVENTORY");
-          alert("ERROR LOADING INVENTORY: " + err.message);
-        }
-      }
-    }
-
-    async function saveInventory() {
-      const content = btoa(JSON.stringify(inventory, null, 2));
-      const body = {
-        message: "UPDATE INVENTORY.JSON FROM INVENTORY-APP",
-        content,
-        branch: BRANCH
-      };
-      if (currentSha) body.sha = currentSha;
-
-      const data = await githubRequest(
-        `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(FILE_PATH)}`,
-        {
-          method: "PUT",
-          body: JSON.stringify(body)
-        }
-      );
-
-      currentSha = data.content.sha;
-    }
-
-    // ===== NAME DROPDOWN =====
-    function populateNameList() {
-      const names = new Set();
-      inventory.forEach(it => {
-        if (it.name) names.add(String(it.name).toUpperCase());
-      });
-      nameList.innerHTML = "";
-      names.forEach(name => {
-        const opt = document.createElement("option");
-        opt.value = name;
-        nameList.appendChild(opt);
-      });
-    }
-
-    // ===== BATCH RENDER =====
-    function renderBatch() {
-      batchBody.innerHTML = "";
-      if (!batchItems.length) {
-        batchBody.innerHTML = `<tr><td colspan="6" class="muted">NO ITEMS IN BATCH.</td></tr>`;
-        batchStatus.textContent = "";
-        return;
-      }
-      batchItems.forEach((item, index) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${item.id}</td>
-          <td>${item.name}</td>
-          <td>${item.quantity}</td>
-          <td>${item.group || ""}</td>
-          <td>${item.details || ""}</td>
-          <td>
-            <button class="small secondary" data-action="edit-batch" data-index="${index}">EDIT</button>
-            <button class="small danger" data-action="remove-batch" data-index="${index}">REMOVE</button>
-          </td>
-        `;
-        batchBody.appendChild(tr);
-      });
-    }
-
-    batchBody.addEventListener("click", (e) => {
-      const btn = e.target;
-      if (!btn.dataset.action) return;
-      const idx = Number(btn.dataset.index);
-      if (btn.dataset.action === "edit-batch") {
-        const item = batchItems[idx];
-        batchEditIndex = idx;
-        itemNameInput.value = item.name;
-        itemQtyInput.value = item.quantity;
-        itemGroupInput.value = item.group || "";
-        itemDetailsInput.value = item.details || "";
-        submitBtn.textContent = "UPDATE BATCH ITEM";
-        cancelEditBtn.style.display = "inline-block";
-        formTitle.textContent = "EDIT BATCH ITEM";
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      } else if (btn.dataset.action === "remove-batch") {
-        batchItems.splice(idx, 1);
-        renderBatch();
-      }
+// ===== /get-token: return installation access token =====
+app.post("/get-token", async (req, res) => {
+  try {
+    const auth = createAppAuth({
+      appId: APP_ID,
+      privateKey: PRIVATE_KEY,
+      installationId: INSTALLATION_ID,
     });
 
-    // ===== INVENTORY RENDER (ADMIN) =====
-    function renderInventory() {
-      if (currentRole !== "admin") {
-        countInfo.textContent = `${inventory.length} ITEMS (ADMIN ONLY)`;
-        return;
-      }
+    const installationAuthentication = await auth({ type: "installation" });
 
-      inventoryBody.innerHTML = "";
+    res.json({ token: installationAuthentication.token });
+  } catch (err) {
+    console.error("Error getting installation token:", err);
+    res.status(500).json({ error: "Failed to get installation token" });
+  }
+});
 
-      if (!inventory.length) {
-        countInfo.textContent = "NO ITEMS IN INVENTORY.";
-        inventoryBody.innerHTML = `<tr><td colspan="8" class="muted">NO ITEMS.</td></tr>`;
-        return;
-      }
+// ===== /notify-batch: stub for WhatsApp notification =====
+// Frontend sends: { phone, batchTime, items: [{name, quantity, group, details}, ...] }
+app.post("/notify-batch", async (req, res) => {
+  try {
+    const { phone, batchTime, items } = req.body || {};
 
-      countInfo.textContent = `${inventory.length} ITEMS`;
-
-      const groups = {};
-      inventory.forEach(item => {
-        const key = item.batchTime || item.timestamp || "UNKNOWN BATCH";
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(item);
-      });
-
-      const keys = Object.keys(groups).sort((a, b) => {
-        const da = new Date(a);
-        const db = new Date(b);
-        if (isNaN(da) || isNaN(db)) return 0;
-        return db - da;
-      });
-
-      keys.forEach(batchKey => {
-        const batchLabel = formatDate(batchKey);
-        const headerRow = document.createElement("tr");
-        headerRow.className = "batch-header-row";
-        headerRow.innerHTML = `<td colspan="8">BATCH: ${batchLabel}</td>`;
-        inventoryBody.appendChild(headerRow);
-
-        groups[batchKey].forEach(item => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${item.id || "-"}</td>
-            <td>${item.name || ""}</td>
-            <td>${item.quantity ?? ""}</td>
-            <td>${item.group || ""}</td>
-            <td>${item.details || ""}</td>
-            <td>${formatDate(item.batchTime || item.timestamp)}</td>
-            <td>${formatDate(item.updatedAt || item.timestamp)}</td>
-            <td>
-              <button class="small secondary" data-action="edit-item" data-id="${item.id}">EDIT</button>
-              <button class="small danger" data-action="delete-item" data-id="${item.id}">DELETE</button>
-            </td>
-          `;
-          inventoryBody.appendChild(tr);
-        });
-      });
+    if (!phone || !items || !Array.isArray(items) || !items.length) {
+      return res.status(400).json({ error: "Invalid payload" });
     }
 
-    inventoryBody.addEventListener("click", async (e) => {
-      const btn = e.target;
-      if (!btn.dataset.action) return;
-      const id = btn.dataset.id;
-      if (!id) return;
+    // Message text (you can format however you like)
+    const lines = [];
+    lines.push(`BATCH TIME: ${batchTime}`);
+    lines.push("ITEMS:");
+    for (const item of items) {
+      const line = [
+        item.name || "",
+        `QTY: ${item.quantity ?? ""}`,
+        item.group ? `GROUP: ${item.group}` : "",
+        item.details ? `DETAILS: ${item.details}` : "",
+      ]
+        .filter(Boolean)
+        .join(" | ");
+      lines.push(line);
+    }
+    const messageText = lines.join("\n");
 
-      if (btn.dataset.action === "edit-item") {
-        const item = inventory.find(it => it.id === id);
-        if (!item) return alert("ITEM NOT FOUND.");
-        adminEditId = id;
-        currentRole = "admin";
-        updateRoleUI();
-        itemNameInput.value = (item.name || "").toUpperCase();
-        itemQtyInput.value = item.quantity ?? "";
-        itemGroupInput.value = (item.group || "").toUpperCase();
-        itemDetailsInput.value = (item.details || "").toUpperCase();
-        submitBtn.textContent = "UPDATE ITEM";
-        cancelEditBtn.style.display = "inline-block";
-        formTitle.textContent = "EDIT ITEM (ADMIN)";
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      } else if (btn.dataset.action === "delete-item") {
-        if (!confirm("DELETE THIS ITEM?")) return;
-        try {
-          setStatus("DELETING ITEM…");
-          await loadInventory(); // refresh latest
-          const idx = inventory.findIndex(it => it.id === id);
-          if (idx === -1) {
-            alert("ITEM NOT FOUND AFTER REFRESH.");
-            setStatus("ITEM NOT FOUND");
-            return;
-          }
-          inventory.splice(idx, 1);
-          await saveInventory();
-          await loadInventory();
-          setStatus("ITEM DELETED");
-        } catch (err) {
-          console.error("DELETE FAILED:", err);
-          setStatus("ERROR DELETING");
-          alert("ERROR DELETING ITEM: " + err.message);
-        }
-      }
-    });
+    // === PLACEHOLDER ===
+    console.log("==== BATCH NOTIFICATION REQUEST ====");
+    console.log("To phone:", phone);
+    console.log("Message:\n", messageText);
+    console.log("====================================");
 
-    // ===== FORM SUBMIT =====
-    itemForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    // TODO: integrate real WhatsApp sending here.
+    // Example (pseudo):
+    //
+    // await axios.post("https://graph.facebook.com/v19.0/<PHONE_NUMBER_ID>/messages", {
+    //   messaging_product: "whatsapp",
+    //   to: phone,
+    //   type: "text",
+    //   text: { body: messageText },
+    // }, {
+    //   headers: { Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}` }
+    // });
+    //
+    // or Twilio's WhatsApp API.
 
-      const name = itemNameInput.value.trim().toUpperCase();
-      const qty = Number(itemQtyInput.value || 0);
-      const group = itemGroupInput.value.trim().toUpperCase();
-      const details = itemDetailsInput.value.trim().toUpperCase();
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("Error in /notify-batch:", err);
+    res.status(500).json({ error: "Failed to process batch notification" });
+  }
+});
 
-      if (!name || Number.isNaN(qty)) {
-        alert("NAME AND QUANTITY ARE REQUIRED.");
-        return;
-      }
-
-      const now = new Date().toISOString();
-
-      // STAFF: update batch only
-      if (currentRole === "staff") {
-        const baseItem = {
-          id: batchEditIndex === null ? generateId() : batchItems[batchEditIndex].id,
-          name,
-          quantity: qty,
-          group,
-          details,
-          timestamp: batchEditIndex === null
-            ? now
-            : (batchItems[batchEditIndex].timestamp || now),
-          updatedAt: now
-        };
-
-        if (batchEditIndex === null) {
-          batchItems.push(baseItem);
-          setStatus("ITEM ADDED TO BATCH");
-        } else {
-          batchItems[batchEditIndex] = baseItem;
-          setStatus("BATCH ITEM UPDATED");
-        }
-        renderBatch();
-        resetForm();
-        return;
-      }
-
-      // ADMIN: edit existing inventory item
-      if (currentRole === "admin") {
-        if (!adminEditId) {
-          alert("SELECT AN ITEM FROM INVENTORY TO EDIT.");
-          return;
-        }
-        try {
-          setStatus("UPDATING ITEM…");
-          await loadInventory(); // refresh latest
-          const idx = inventory.findIndex(it => it.id === adminEditId);
-          if (idx === -1) {
-            alert("ITEM NOT FOUND AFTER REFRESH.");
-            setStatus("ITEM NOT FOUND");
-            return;
-          }
-          inventory[idx] = {
-            ...inventory[idx],
-            name,
-            quantity: qty,
-            group,
-            details,
-            updatedAt: now
-          };
-          await saveInventory();
-          await loadInventory();
-          resetForm();
-          setStatus("ITEM UPDATED");
-        } catch (err) {
-          console.error("SAVE FAILED:", err);
-          setStatus("ERROR SAVING");
-          alert("ERROR SAVING: " + err.message);
-        }
-      }
-    });
-
-    cancelEditBtn.addEventListener("click", () => resetForm());
-
-    // ===== UPLOAD BATCH =====
-    uploadBatchBtn.addEventListener("click", async () => {
-      if (!batchItems.length) {
-        batchStatus.textContent = "NO ITEMS IN BATCH.";
-        return;
-      }
-      try {
-        setStatus("UPLOADING BATCH…");
-        batchStatus.textContent = "UPLOADING…";
-        const batchTime = new Date().toISOString();
-
-        await loadInventory(); // refresh latest from GitHub
-
-        const enriched = batchItems.map(item => ({
-          ...item,
-          batchTime
-        }));
-
-        inventory = inventory.concat(enriched);
-        await saveInventory();
-        await loadInventory();
-
-        batchItems = [];
-        renderBatch();
-        batchStatus.textContent = "BATCH UPLOADED AT " + formatDate(batchTime);
-        setStatus("BATCH UPLOADED");
-      } catch (err) {
-        console.error("BATCH UPLOAD FAILED:", err);
-        batchStatus.textContent = "ERROR UPLOADING BATCH.";
-        setStatus("ERROR UPLOADING");
-        alert("ERROR UPLOADING BATCH: " + err.message);
-      }
-    });
-
-    // ===== ADMIN LOGIN (TITLE CLICK) =====
-    appTitle.addEventListener("click", () => {
-      if (currentRole === "admin") {
-        // toggle back to staff
-        currentRole = "staff";
-        resetForm();
-        updateRoleUI();
-        return;
-      }
-      const pwd = prompt("ENTER ADMIN PASSWORD:");
-      if (!pwd) return;
-      if (pwd !== ADMIN_PASSWORD) {
-        alert("WRONG PASSWORD.");
-        return;
-      }
-      currentRole = "admin";
-      updateRoleUI();
-      loadInventory(); // ensure fresh view
-    });
-
-    // ===== INIT =====
-    (async function init() {
-      updateRoleUI();       // set initial UI (staff)
-      renderBatch();        // show empty batch
-      await loadInventory(); // load underlying inventory (for name dropdown, etc.)
-    })();
-  </script>
-</body>
-</html>
+app.listen(PORT, () => {
+  console.log(`Backend running on port ${PORT}`);
+});
