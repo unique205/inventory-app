@@ -5,246 +5,289 @@
   <title>Inventory System</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    :root {
+      --bg: #0f172a;
+      --card: #020617;
+      --border: #1f2937;
+      --accent: #4f46e5;
+      --accent-soft: #6366f1;
+      --danger: #b91c1c;
+      --danger-soft: #dc2626;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+    }
+    * {
+      box-sizing: border-box;
+    }
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       margin: 0;
-      padding: 0;
-      background: #0f172a;
-      color: #e5e7eb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
     }
     header {
-      background: #111827;
-      padding: 1rem 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #1f2937;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: #020617;
       position: sticky;
       top: 0;
       z-index: 10;
     }
     header h1 {
       margin: 0;
-      font-size: 1.25rem;
+      font-size: 1.1rem;
+      cursor: pointer;
+      user-select: none;
     }
-    .role-area {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-      font-size: 0.9rem;
+    header h1 span {
+      font-size: 0.7rem;
+      opacity: 0.7;
     }
-    select, input, button, textarea {
+    .badge {
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      border: 1px solid #4b5563;
+      background: #111827;
+    }
+    .badge-staff {
+      border-color: #3b82f6;
+      color: #bfdbfe;
+    }
+    .badge-admin {
+      border-color: #22c55e;
+      color: #bbf7d0;
+    }
+
+    main {
+      max-width: 1040px;
+      margin: 1rem auto 2rem;
+      padding: 0 0.75rem;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      padding: 0.9rem 0.9rem 1.1rem;
+      margin-bottom: 1rem;
+    }
+    .card h2 {
+      margin: 0 0 0.6rem;
+      font-size: 1rem;
+    }
+
+    label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+    }
+
+    input, textarea, button {
       font: inherit;
-      border-radius: 0.375rem;
+      border-radius: 0.4rem;
       border: 1px solid #374151;
       background: #020617;
-      color: #e5e7eb;
-      padding: 0.4rem 0.6rem;
+      color: var(--text-main);
+      padding: 0.4rem 0.55rem;
+    }
+    input.upper, textarea.upper {
+      text-transform: uppercase;
+    }
+    textarea {
+      min-height: 50px;
+      resize: vertical;
     }
     button {
       cursor: pointer;
-      background: #4f46e5;
-      border-color: #4f46e5;
+      background: var(--accent);
+      border-color: var(--accent);
       font-weight: 500;
+      font-size: 0.85rem;
     }
     button:hover {
-      background: #6366f1;
+      background: var(--accent-soft);
     }
     button.secondary {
       background: #111827;
       border-color: #4b5563;
     }
-    main {
-      max-width: 1100px;
-      margin: 1.5rem auto;
-      padding: 0 1rem 2rem;
+    button.secondary:hover {
+      background: #1f2937;
     }
-    .card {
-      background: #020617;
-      border-radius: 0.75rem;
-      border: 1px solid #1f2937;
-      padding: 1rem 1.25rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.8);
+    button.danger {
+      background: var(--danger);
+      border-color: var(--danger);
     }
-    .card h2 {
-      margin-top: 0;
-      font-size: 1.1rem;
-      margin-bottom: 0.75rem;
+    button.danger:hover {
+      background: var(--danger-soft);
     }
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 0.75rem;
-      margin-bottom: 0.75rem;
-    }
-    label {
-      font-size: 0.8rem;
-      color: #9ca3af;
-      display: block;
-      margin-bottom: 0.2rem;
-    }
-    textarea {
-      min-height: 60px;
-      resize: vertical;
+    button.small {
+      padding: 0.22rem 0.45rem;
+      font-size: 0.7rem;
+      margin-right: 0.25rem;
     }
     .actions-row {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 0.5rem;
-      gap: 1rem;
       flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
     }
     .status {
-      font-size: 0.8rem;
-      color: #9ca3af;
+      font-size: 0.75rem;
+      color: var(--text-muted);
     }
-    .status span {
-      font-weight: 500;
+
+    .muted {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .table-wrapper {
+      margin-top: 0.4rem;
+      overflow-x: auto;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.85rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
     }
     th, td {
-      border-bottom: 1px solid #1f2937;
-      padding: 0.4rem 0.5rem;
+      padding: 0.35rem 0.35rem;
+      border-bottom: 1px solid var(--border);
       text-align: left;
+      white-space: nowrap;
     }
     th {
       background: #020617;
       position: sticky;
-      top: 54px; /* below header */
+      top: 48px;
       z-index: 5;
     }
     tr:hover td {
       background: #020617;
     }
-    .badge {
-      padding: 0.15rem 0.45rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      background: #111827;
-      border: 1px solid #4b5563;
+    .batch-header-row td {
+      background: #020617;
+      border-bottom-color: #4b5563;
+      font-weight: 600;
+      font-size: 0.78rem;
     }
-    .badge-admin {
-      background: rgba(34, 197, 94, 0.1);
-      border-color: #22c55e;
-      color: #bbf7d0;
-    }
-    .badge-staff {
-      background: rgba(59, 130, 246, 0.1);
-      border-color: #3b82f6;
-      color: #bfdbfe;
-    }
-    .btn-small {
-      font-size: 0.75rem;
-      padding: 0.25rem 0.45rem;
-      margin-right: 0.25rem;
-    }
-    .danger {
-      background: #b91c1c;
-      border-color: #b91c1c;
-    }
-    .danger:hover {
-      background: #dc2626;
-    }
-    .muted {
-      color: #9ca3af;
-      font-size: 0.8rem;
-    }
-    @media (max-width: 768px) {
+
+    @media (max-width: 640px) {
+      header {
+        flex-direction: row;
+        align-items: center;
+      }
+      header h1 {
+        max-width: 70%;
+      }
       th:nth-child(1),
       td:nth-child(1) {
-        display: none; /* hide ID on small screens */
+        display: none; /* hide ID column on small screens */
       }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Inventory System</h1>
-    <div class="role-area">
-      <span>Role:</span>
-      <select id="role-select">
-        <option value="staff">Staff</option>
-        <option value="admin">Admin</option>
-      </select>
-      <input
-        type="password"
-        id="admin-password"
-        placeholder="Admin password"
-        style="display:none;"
-      />
-      <button id="set-role-btn" class="secondary">Set</button>
-      <span id="current-role-label" class="badge badge-staff">Staff</span>
-    </div>
+    <h1 id="app-title">INVENTORY SYSTEM<br><span>(tap title for ADMIN login)</span></h1>
+    <span id="role-badge" class="badge badge-staff">STAFF</span>
   </header>
 
   <main>
-    <!-- Add / Edit Item -->
+    <!-- Add / Edit form (used for staff batch + admin edit) -->
     <section class="card">
-      <h2 id="form-title">Add Item</h2>
+      <h2 id="form-title">ADD ITEM</h2>
       <form id="item-form">
-        <input type="hidden" id="edit-index" value="" />
-        <div class="form-grid">
+        <input type="hidden" id="edit-mode" value="" />
+        <div class="field-row">
           <div>
-            <label for="item-name">Item Name *</label>
-            <input id="item-name" required autocomplete="off" />
+            <label for="item-name">ITEM NAME *</label>
+            <input id="item-name" class="upper" list="name-list" autocomplete="off" required />
+            <datalist id="name-list"></datalist>
           </div>
           <div>
-            <label for="item-qty">Quantity *</label>
+            <label for="item-qty">QUANTITY *</label>
             <input id="item-qty" type="number" min="0" step="1" required />
           </div>
           <div>
-            <label for="item-group">Group</label>
-            <input id="item-group" placeholder="e.g. RAW MATERIAL" />
-          </div>
-          <div>
-            <label for="item-addedby">Added By</label>
-            <input id="item-addedby" placeholder="staff / admin" />
+            <label for="item-group">GROUP</label>
+            <input id="item-group" class="upper" placeholder="E.G. RAW MATERIAL" />
           </div>
         </div>
         <div>
-          <label for="item-details">Details</label>
-          <textarea id="item-details" placeholder="Describe item (grade, brand, etc.)"></textarea>
+          <label for="item-details">DETAILS</label>
+          <textarea id="item-details" class="upper" placeholder="GRADE, BRAND, ETC."></textarea>
         </div>
+
         <div class="actions-row">
           <div>
-            <button type="submit" id="submit-btn">Save Item</button>
+            <button type="submit" id="submit-btn">ADD TO BATCH</button>
             <button type="button" id="cancel-edit-btn" class="secondary" style="display:none;">
-              Cancel Edit
+              CANCEL
             </button>
           </div>
-          <div class="status" id="status-area">
-            Status: <span id="status-text">Idle</span>
+          <div class="status">
+            STATUS: <span id="status-text">IDLE</span>
           </div>
         </div>
       </form>
-      <p class="muted">
-        • Staff can only <strong>add</strong> items.<br>
-        • Admin can <strong>view, edit & delete</strong> items (password protected).
-      </p>
     </section>
 
-    <!-- Inventory Table -->
+    <!-- Batch list (not uploaded yet) -->
     <section class="card">
-      <h2>Inventory Items</h2>
-      <div class="muted" id="count-info">Loading...</div>
-      <div style="overflow-x: auto; margin-top: 0.5rem;">
+      <h2>BATCH (NOT UPLOADED YET)</h2>
+      <p class="muted" id="batch-info">ADD ITEMS ABOVE. THEY WILL APPEAR IN THIS LIST UNTIL YOU UPLOAD THE BATCH.</p>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>NAME</th>
+              <th>QTY</th>
+              <th>GROUP</th>
+              <th>DETAILS</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="batch-body"></tbody>
+        </table>
+      </div>
+      <div class="actions-row" style="margin-top:0.6rem;">
+        <button type="button" id="upload-batch-btn" class="secondary">UPLOAD BATCH</button>
+        <span class="muted" id="batch-status"></span>
+      </div>
+    </section>
+
+    <!-- Full inventory (admin only) -->
+    <section class="card" id="inventory-card" style="display:none;">
+      <h2>ALL INVENTORY (ADMIN)</h2>
+      <div class="muted" id="count-info">LOADING…</div>
+      <div class="table-wrapper" style="margin-top:0.4rem;">
         <table id="inventory-table">
           <thead>
             <tr>
               <th>ID</th>
-              <th>Name</th>
-              <th>Qty</th>
-              <th>Group</th>
-              <th>Details</th>
-              <th>Added By</th>
-              <th>Updated At</th>
-              <th id="actions-header">Actions</th>
+              <th>NAME</th>
+              <th>QTY</th>
+              <th>GROUP</th>
+              <th>DETAILS</th>
+              <th>BATCH TIME</th>
+              <th>UPDATED AT</th>
+              <th>ACTIONS</th>
             </tr>
           </thead>
           <tbody id="inventory-body"></tbody>
@@ -254,73 +297,73 @@
   </main>
 
   <script>
-    // ====== CONFIG ======
+    // ===== CONFIG =====
     const BACKEND_URL = "https://inventory-backend-s4sv.onrender.com/get-token";
     const REPO_OWNER = "unique205";
     const REPO_NAME = "inventory-data";
     const FILE_PATH = "data/inventory.json";
     const BRANCH = "main";
-    const ADMIN_PASSWORD = "admin123"; // change this to your secret
+    const ADMIN_PASSWORD = "admin123"; // change if you want
 
-    // ====== STATE ======
-    let currentRole = "staff";
+    // ===== STATE =====
+    let currentRole = "staff"; // default staff
     let inventory = [];
     let currentSha = null;
+    let batchItems = [];
+    let batchEditIndex = null;
+    let adminEditId = null;
 
-    // ====== DOM ELEMENTS ======
-    const roleSelect = document.getElementById("role-select");
-    const adminPasswordInput = document.getElementById("admin-password");
-    const setRoleBtn = document.getElementById("set-role-btn");
-    const currentRoleLabel = document.getElementById("current-role-label");
+    // ===== DOM =====
+    const roleBadge = document.getElementById("role-badge");
+    const appTitle = document.getElementById("app-title");
 
     const itemForm = document.getElementById("item-form");
-    const editIndexInput = document.getElementById("edit-index");
     const itemNameInput = document.getElementById("item-name");
     const itemQtyInput = document.getElementById("item-qty");
     const itemGroupInput = document.getElementById("item-group");
-    const itemAddedByInput = document.getElementById("item-addedby");
     const itemDetailsInput = document.getElementById("item-details");
     const submitBtn = document.getElementById("submit-btn");
     const cancelEditBtn = document.getElementById("cancel-edit-btn");
     const formTitle = document.getElementById("form-title");
-
     const statusText = document.getElementById("status-text");
-    const countInfo = document.getElementById("count-info");
-    const inventoryBody = document.getElementById("inventory-body");
-    const actionsHeader = document.getElementById("actions-header");
 
-    // ====== UTILS ======
+    const batchBody = document.getElementById("batch-body");
+    const uploadBatchBtn = document.getElementById("upload-batch-btn");
+    const batchStatus = document.getElementById("batch-status");
+
+    const inventoryCard = document.getElementById("inventory-card");
+    const inventoryBody = document.getElementById("inventory-body");
+    const countInfo = document.getElementById("count-info");
+    const nameList = document.getElementById("name-list");
+
+    // ===== UTILS =====
     function setStatus(msg) {
-      statusText.textContent = msg;
+      statusText.textContent = msg.toUpperCase();
     }
 
     function generateId() {
       const ts = Date.now();
       const rand = Math.random().toString(36).substring(2, 8);
-      return `item_${ts}_${rand}`;
+      return `ITEM_${ts}_${rand.toUpperCase()}`;
     }
 
     function formatDate(iso) {
       if (!iso) return "-";
-      try {
-        const d = new Date(iso);
-        return d.toLocaleString();
-      } catch {
-        return iso;
-      }
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return iso.toUpperCase();
+      return d.toLocaleString().toUpperCase();
     }
 
     async function getBackendToken() {
       const res = await fetch(BACKEND_URL, { method: "POST" });
-      if (!res.ok) throw new Error("Backend token request failed");
+      if (!res.ok) throw new Error("BACKEND TOKEN REQUEST FAILED");
       const data = await res.json();
-      if (!data.token) throw new Error("Backend did not return token");
+      if (!data.token) throw new Error("BACKEND DID NOT RETURN TOKEN");
       return data.token;
     }
 
     async function githubRequest(path, options = {}) {
       const token = await getBackendToken();
-
       const res = await fetch(`https://api.github.com${path}`, {
         ...options,
         headers: {
@@ -330,49 +373,74 @@
           ...(options.headers || {})
         }
       });
-
       if (!res.ok) {
         const text = await res.text();
-        throw new Error(`GitHub error ${res.status}: ${text}`);
+        throw new Error(`GITHUB ERROR ${res.status}: ${text}`);
       }
       return res.json();
     }
 
-    // ====== LOAD INVENTORY ======
+    function resetForm() {
+      itemNameInput.value = "";
+      itemQtyInput.value = "";
+      itemGroupInput.value = "";
+      itemDetailsInput.value = "";
+      batchEditIndex = null;
+      adminEditId = null;
+      submitBtn.textContent = currentRole === "admin" ? "UPDATE ITEM" : "ADD TO BATCH";
+      cancelEditBtn.style.display = "none";
+      formTitle.textContent = currentRole === "admin" ? "EDIT ITEM (ADMIN)" : "ADD ITEM";
+    }
+
+    function updateRoleUI() {
+      if (currentRole === "admin") {
+        roleBadge.textContent = "ADMIN";
+        roleBadge.className = "badge badge-admin";
+        inventoryCard.style.display = "block";
+        submitBtn.textContent = adminEditId ? "UPDATE ITEM" : "UPDATE ITEM";
+        formTitle.textContent = adminEditId ? "EDIT ITEM (ADMIN)" : "EDIT ITEM (ADMIN)";
+      } else {
+        roleBadge.textContent = "STAFF";
+        roleBadge.className = "badge badge-staff";
+        inventoryCard.style.display = "none";
+        submitBtn.textContent = "ADD TO BATCH";
+        formTitle.textContent = "ADD ITEM";
+      }
+      renderInventory(); // will auto-hide actions if staff
+    }
+
+    // ===== LOAD & SAVE INVENTORY =====
     async function loadInventory() {
       try {
-        setStatus("Loading from GitHub…");
-
+        setStatus("LOADING FROM GITHUB…");
         const data = await githubRequest(
           `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(FILE_PATH)}?ref=${BRANCH}`
         );
-
         currentSha = data.sha;
         const decoded = atob(data.content.replace(/\n/g, ""));
         inventory = decoded.trim() ? JSON.parse(decoded) : [];
-
         renderInventory();
-        setStatus("Loaded");
+        populateNameList();
+        setStatus("LOADED");
       } catch (err) {
-        console.error("Error loading inventory:", err);
+        console.error("ERROR LOADING INVENTORY:", err);
         if (err.message.includes("404")) {
           inventory = [];
           currentSha = null;
           renderInventory();
-          setStatus("File not found, starting empty");
+          populateNameList();
+          setStatus("FILE NOT FOUND, STARTING EMPTY");
         } else {
-          setStatus("Error loading inventory");
-          alert("Error loading inventory: " + err.message);
+          setStatus("ERROR LOADING INVENTORY");
+          alert("ERROR LOADING INVENTORY: " + err.message);
         }
       }
     }
 
-    // ====== SAVE INVENTORY ======
     async function saveInventory() {
       const content = btoa(JSON.stringify(inventory, null, 2));
-
       const body = {
-        message: "Update inventory.json from inventory-app",
+        message: "UPDATE INVENTORY.JSON FROM INVENTORY-APP",
         content,
         branch: BRANCH
       };
@@ -389,218 +457,305 @@
       currentSha = data.content.sha;
     }
 
-    // ====== RENDER INVENTORY TABLE ======
-    function renderInventory() {
-      inventoryBody.innerHTML = "";
-
-      countInfo.textContent = inventory.length
-        ? `${inventory.length} items`
-        : "No items yet";
-
-      inventory.forEach((item, index) => {
-        const tr = document.createElement("tr");
-
-        const tdId = document.createElement("td");
-        tdId.textContent = item.id || "-";
-        tr.appendChild(tdId);
-
-        const tdName = document.createElement("td");
-        tdName.textContent = item.name || "";
-        tr.appendChild(tdName);
-
-        const tdQty = document.createElement("td");
-        tdQty.textContent = item.quantity ?? "";
-        tr.appendChild(tdQty);
-
-        const tdGroup = document.createElement("td");
-        tdGroup.textContent = item.group || "";
-        tr.appendChild(tdGroup);
-
-        const tdDetails = document.createElement("td");
-        tdDetails.textContent = item.details || "";
-        tr.appendChild(tdDetails);
-
-        const tdAdded = document.createElement("td");
-        tdAdded.textContent = item.addedBy || "";
-        tr.appendChild(tdAdded);
-
-        const tdUpdated = document.createElement("td");
-        tdUpdated.textContent = formatDate(item.updatedAt || item.timestamp);
-        tr.appendChild(tdUpdated);
-
-        const tdActions = document.createElement("td");
-        if (currentRole === "admin") {
-          const editBtn = document.createElement("button");
-          editBtn.textContent = "Edit";
-          editBtn.className = "btn-small";
-          editBtn.addEventListener("click", () => startEditItem(index));
-          tdActions.appendChild(editBtn);
-
-          const delBtn = document.createElement("button");
-          delBtn.textContent = "Delete";
-          delBtn.className = "btn-small danger";
-          delBtn.addEventListener("click", () => deleteItem(index));
-          tdActions.appendChild(delBtn);
-        } else {
-          tdActions.textContent = "-";
-          tdActions.className = "muted";
-        }
-
-        tr.appendChild(tdActions);
-        inventoryBody.appendChild(tr);
+    // ===== NAME DROPDOWN =====
+    function populateNameList() {
+      const names = new Set();
+      inventory.forEach(it => {
+        if (it.name) names.add(String(it.name).toUpperCase());
+      });
+      nameList.innerHTML = "";
+      names.forEach(name => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        nameList.appendChild(opt);
       });
     }
 
-    // ====== ROLE HANDLING ======
-    function updateRoleDisplay() {
-      if (currentRole === "admin") {
-        currentRoleLabel.textContent = "Admin";
-        currentRoleLabel.className = "badge badge-admin";
-      } else {
-        currentRoleLabel.textContent = "Staff";
-        currentRoleLabel.className = "badge badge-staff";
-      }
-      renderInventory();
-    }
-
-    setRoleBtn.addEventListener("click", () => {
-      const selected = roleSelect.value;
-      if (selected === "admin") {
-        adminPasswordInput.style.display = "inline-block";
-        const pwd = adminPasswordInput.value.trim();
-        if (!pwd) {
-          alert("Enter admin password");
-          return;
-        }
-        if (pwd !== ADMIN_PASSWORD) {
-          alert("Wrong password");
-          adminPasswordInput.value = "";
-          roleSelect.value = "staff";
-          currentRole = "staff";
-        } else {
-          currentRole = "admin";
-          adminPasswordInput.value = "";
-        }
-      } else {
-        adminPasswordInput.style.display = "none";
-        currentRole = "staff";
-      }
-      updateRoleDisplay();
-    });
-
-    roleSelect.addEventListener("change", () => {
-      if (roleSelect.value === "admin") {
-        adminPasswordInput.style.display = "inline-block";
-      } else {
-        adminPasswordInput.style.display = "none";
-      }
-    });
-
-    // ====== FORM HANDLERS ======
-    function resetForm() {
-      editIndexInput.value = "";
-      itemNameInput.value = "";
-      itemQtyInput.value = "";
-      itemGroupInput.value = "";
-      itemAddedByInput.value = "";
-      itemDetailsInput.value = "";
-      submitBtn.textContent = "Save Item";
-      cancelEditBtn.style.display = "none";
-      formTitle.textContent = "Add Item";
-    }
-
-    function startEditItem(index) {
-      const item = inventory[index];
-      editIndexInput.value = index;
-      itemNameInput.value = item.name || "";
-      itemQtyInput.value = item.quantity ?? "";
-      itemGroupInput.value = item.group || "";
-      itemAddedByInput.value = item.addedBy || "";
-      itemDetailsInput.value = item.details || "";
-      submitBtn.textContent = "Update Item";
-      cancelEditBtn.style.display = "inline-block";
-      formTitle.textContent = "Edit Item";
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    async function deleteItem(index) {
-      if (currentRole !== "admin") {
-        alert("Only admin can delete items.");
+    // ===== BATCH RENDER =====
+    function renderBatch() {
+      batchBody.innerHTML = "";
+      if (!batchItems.length) {
+        batchBody.innerHTML = `<tr><td colspan="6" class="muted">NO ITEMS IN BATCH.</td></tr>`;
+        batchStatus.textContent = "";
         return;
       }
-      const item = inventory[index];
-      if (!confirm(`Delete item "${item.name}"?`)) return;
-
-      try {
-        setStatus("Deleting item…");
-        inventory.splice(index, 1);
-        await saveInventory();
-        renderInventory();
-        setStatus("Item deleted");
-      } catch (err) {
-        console.error("Delete failed:", err);
-        setStatus("Error deleting item");
-        alert("Error deleting item: " + err.message);
-      }
+      batchItems.forEach((item, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${item.id}</td>
+          <td>${item.name}</td>
+          <td>${item.quantity}</td>
+          <td>${item.group || ""}</td>
+          <td>${item.details || ""}</td>
+          <td>
+            <button class="small secondary" data-action="edit-batch" data-index="${index}">EDIT</button>
+            <button class="small danger" data-action="remove-batch" data-index="${index}">REMOVE</button>
+          </td>
+        `;
+        batchBody.appendChild(tr);
+      });
     }
 
+    batchBody.addEventListener("click", (e) => {
+      const btn = e.target;
+      if (!btn.dataset.action) return;
+      const idx = Number(btn.dataset.index);
+      if (btn.dataset.action === "edit-batch") {
+        const item = batchItems[idx];
+        batchEditIndex = idx;
+        itemNameInput.value = item.name;
+        itemQtyInput.value = item.quantity;
+        itemGroupInput.value = item.group || "";
+        itemDetailsInput.value = item.details || "";
+        submitBtn.textContent = "UPDATE BATCH ITEM";
+        cancelEditBtn.style.display = "inline-block";
+        formTitle.textContent = "EDIT BATCH ITEM";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (btn.dataset.action === "remove-batch") {
+        batchItems.splice(idx, 1);
+        renderBatch();
+      }
+    });
+
+    // ===== INVENTORY RENDER (ADMIN) =====
+    function renderInventory() {
+      if (currentRole !== "admin") {
+        countInfo.textContent = `${inventory.length} ITEMS (ADMIN ONLY)`;
+        return;
+      }
+
+      inventoryBody.innerHTML = "";
+
+      if (!inventory.length) {
+        countInfo.textContent = "NO ITEMS IN INVENTORY.";
+        inventoryBody.innerHTML = `<tr><td colspan="8" class="muted">NO ITEMS.</td></tr>`;
+        return;
+      }
+
+      countInfo.textContent = `${inventory.length} ITEMS`;
+
+      const groups = {};
+      inventory.forEach(item => {
+        const key = item.batchTime || item.timestamp || "UNKNOWN BATCH";
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(item);
+      });
+
+      const keys = Object.keys(groups).sort((a, b) => {
+        const da = new Date(a);
+        const db = new Date(b);
+        if (isNaN(da) || isNaN(db)) return 0;
+        return db - da;
+      });
+
+      keys.forEach(batchKey => {
+        const batchLabel = formatDate(batchKey);
+        const headerRow = document.createElement("tr");
+        headerRow.className = "batch-header-row";
+        headerRow.innerHTML = `<td colspan="8">BATCH: ${batchLabel}</td>`;
+        inventoryBody.appendChild(headerRow);
+
+        groups[batchKey].forEach(item => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${item.id || "-"}</td>
+            <td>${item.name || ""}</td>
+            <td>${item.quantity ?? ""}</td>
+            <td>${item.group || ""}</td>
+            <td>${item.details || ""}</td>
+            <td>${formatDate(item.batchTime || item.timestamp)}</td>
+            <td>${formatDate(item.updatedAt || item.timestamp)}</td>
+            <td>
+              <button class="small secondary" data-action="edit-item" data-id="${item.id}">EDIT</button>
+              <button class="small danger" data-action="delete-item" data-id="${item.id}">DELETE</button>
+            </td>
+          `;
+          inventoryBody.appendChild(tr);
+        });
+      });
+    }
+
+    inventoryBody.addEventListener("click", async (e) => {
+      const btn = e.target;
+      if (!btn.dataset.action) return;
+      const id = btn.dataset.id;
+      if (!id) return;
+
+      if (btn.dataset.action === "edit-item") {
+        const item = inventory.find(it => it.id === id);
+        if (!item) return alert("ITEM NOT FOUND.");
+        adminEditId = id;
+        currentRole = "admin";
+        updateRoleUI();
+        itemNameInput.value = (item.name || "").toUpperCase();
+        itemQtyInput.value = item.quantity ?? "";
+        itemGroupInput.value = (item.group || "").toUpperCase();
+        itemDetailsInput.value = (item.details || "").toUpperCase();
+        submitBtn.textContent = "UPDATE ITEM";
+        cancelEditBtn.style.display = "inline-block";
+        formTitle.textContent = "EDIT ITEM (ADMIN)";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (btn.dataset.action === "delete-item") {
+        if (!confirm("DELETE THIS ITEM?")) return;
+        try {
+          setStatus("DELETING ITEM…");
+          await loadInventory(); // refresh latest
+          const idx = inventory.findIndex(it => it.id === id);
+          if (idx === -1) {
+            alert("ITEM NOT FOUND AFTER REFRESH.");
+            setStatus("ITEM NOT FOUND");
+            return;
+          }
+          inventory.splice(idx, 1);
+          await saveInventory();
+          await loadInventory();
+          setStatus("ITEM DELETED");
+        } catch (err) {
+          console.error("DELETE FAILED:", err);
+          setStatus("ERROR DELETING");
+          alert("ERROR DELETING ITEM: " + err.message);
+        }
+      }
+    });
+
+    // ===== FORM SUBMIT =====
     itemForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      if (!itemNameInput.value.trim()) {
-        alert("Item name is required");
+      const name = itemNameInput.value.trim().toUpperCase();
+      const qty = Number(itemQtyInput.value || 0);
+      const group = itemGroupInput.value.trim().toUpperCase();
+      const details = itemDetailsInput.value.trim().toUpperCase();
+
+      if (!name || Number.isNaN(qty)) {
+        alert("NAME AND QUANTITY ARE REQUIRED.");
         return;
       }
 
       const now = new Date().toISOString();
-      const index = editIndexInput.value;
 
-      const baseItem = {
-        name: itemNameInput.value.trim().toUpperCase(),
-        quantity: Number(itemQtyInput.value || 0),
-        group: itemGroupInput.value.trim().toUpperCase(),
-        details: itemDetailsInput.value.trim(),
-        addedBy: itemAddedByInput.value.trim() || currentRole,
-      };
+      // STAFF: update batch only
+      if (currentRole === "staff") {
+        const baseItem = {
+          id: batchEditIndex === null ? generateId() : batchItems[batchEditIndex].id,
+          name,
+          quantity: qty,
+          group,
+          details,
+          timestamp: batchEditIndex === null
+            ? now
+            : (batchItems[batchEditIndex].timestamp || now),
+          updatedAt: now
+        };
 
-      try {
-        if (index === "") {
-          const newItem = {
-            id: generateId(),
-            ...baseItem,
-            timestamp: now,
-            updatedAt: now
-          };
-          setStatus("Adding item…");
-          inventory.push(newItem);
+        if (batchEditIndex === null) {
+          batchItems.push(baseItem);
+          setStatus("ITEM ADDED TO BATCH");
         } else {
-          const existing = inventory[Number(index)];
-          const updatedItem = {
-            ...existing,
-            ...baseItem,
+          batchItems[batchEditIndex] = baseItem;
+          setStatus("BATCH ITEM UPDATED");
+        }
+        renderBatch();
+        resetForm();
+        return;
+      }
+
+      // ADMIN: edit existing inventory item
+      if (currentRole === "admin") {
+        if (!adminEditId) {
+          alert("SELECT AN ITEM FROM INVENTORY TO EDIT.");
+          return;
+        }
+        try {
+          setStatus("UPDATING ITEM…");
+          await loadInventory(); // refresh latest
+          const idx = inventory.findIndex(it => it.id === adminEditId);
+          if (idx === -1) {
+            alert("ITEM NOT FOUND AFTER REFRESH.");
+            setStatus("ITEM NOT FOUND");
+            return;
+          }
+          inventory[idx] = {
+            ...inventory[idx],
+            name,
+            quantity: qty,
+            group,
+            details,
             updatedAt: now
           };
-          setStatus("Updating item…");
-          inventory[Number(index)] = updatedItem;
+          await saveInventory();
+          await loadInventory();
+          resetForm();
+          setStatus("ITEM UPDATED");
+        } catch (err) {
+          console.error("SAVE FAILED:", err);
+          setStatus("ERROR SAVING");
+          alert("ERROR SAVING: " + err.message);
         }
-
-        await saveInventory();
-        renderInventory();
-        resetForm();
-        setStatus("Saved");
-      } catch (err) {
-        console.error("Save failed:", err);
-        setStatus("Error saving");
-        alert("Error saving: " + err.message);
       }
     });
 
     cancelEditBtn.addEventListener("click", () => resetForm());
 
-    // ====== INIT ======
+    // ===== UPLOAD BATCH =====
+    uploadBatchBtn.addEventListener("click", async () => {
+      if (!batchItems.length) {
+        batchStatus.textContent = "NO ITEMS IN BATCH.";
+        return;
+      }
+      try {
+        setStatus("UPLOADING BATCH…");
+        batchStatus.textContent = "UPLOADING…";
+        const batchTime = new Date().toISOString();
+
+        await loadInventory(); // refresh latest from GitHub
+
+        const enriched = batchItems.map(item => ({
+          ...item,
+          batchTime
+        }));
+
+        inventory = inventory.concat(enriched);
+        await saveInventory();
+        await loadInventory();
+
+        batchItems = [];
+        renderBatch();
+        batchStatus.textContent = "BATCH UPLOADED AT " + formatDate(batchTime);
+        setStatus("BATCH UPLOADED");
+      } catch (err) {
+        console.error("BATCH UPLOAD FAILED:", err);
+        batchStatus.textContent = "ERROR UPLOADING BATCH.";
+        setStatus("ERROR UPLOADING");
+        alert("ERROR UPLOADING BATCH: " + err.message);
+      }
+    });
+
+    // ===== ADMIN LOGIN (TITLE CLICK) =====
+    appTitle.addEventListener("click", () => {
+      if (currentRole === "admin") {
+        // toggle back to staff
+        currentRole = "staff";
+        resetForm();
+        updateRoleUI();
+        return;
+      }
+      const pwd = prompt("ENTER ADMIN PASSWORD:");
+      if (!pwd) return;
+      if (pwd !== ADMIN_PASSWORD) {
+        alert("WRONG PASSWORD.");
+        return;
+      }
+      currentRole = "admin";
+      updateRoleUI();
+      loadInventory(); // ensure fresh view
+    });
+
+    // ===== INIT =====
     (async function init() {
-      updateRoleDisplay();
-      await loadInventory();
+      updateRoleUI();       // set initial UI (staff)
+      renderBatch();        // show empty batch
+      await loadInventory(); // load underlying inventory (for name dropdown, etc.)
     })();
   </script>
 </body>
