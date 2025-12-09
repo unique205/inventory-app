@@ -238,13 +238,13 @@
       border-color: var(--accent);
     }
 
-    /* Highlight for searched items */
+    /* Highlight searched rows */
     tr.highlight-row td {
       background: #111827;
       border-bottom-color: var(--accent-soft);
     }
 
-    /* Item name suggestions */
+    /* Name suggestions */
     .name-input-wrapper {
       position: relative;
     }
@@ -300,6 +300,7 @@
       height: 100%;
       object-fit: cover;
       display: block;
+      cursor: zoom-in;
     }
 
     .image-thumb button {
@@ -324,7 +325,7 @@
       20% { transform: translateX(-1px) rotate(-5deg); }
       40% { transform: translateX(1px) rotate(5deg); }
       60% { transform: translateX(-1px) rotate(-5deg); }
-      80% { transform: translateX(1px) rotate(5deg); }
+      80% { transform: translateX(1px) rotate(0); }
       100% { transform: translateX(0) rotate(0); }
     }
 
@@ -361,7 +362,97 @@
       margin-top: 0.6rem;
     }
 
-    /* ===== SMALL SCREENS ===== */
+    /* IMAGE VIEWER (full screen) */
+    #image-viewer {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 70;
+      color: #e5e7eb;
+    }
+
+    .image-viewer-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 100vw;
+      max-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem;
+      box-sizing: border-box;
+    }
+
+    .viewer-top-row {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 0.3rem;
+    }
+
+    .viewer-close {
+      font-size: 1.1rem;
+      line-height: 1;
+      padding: 0.25rem 0.6rem;
+    }
+
+    .viewer-main {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .viewer-nav {
+      height: 38px;
+      min-width: 38px;
+      font-size: 1.2rem;
+    }
+
+    .viewer-image-wrapper {
+      position: relative;
+      flex: 1;
+      max-width: 90vw;
+      max-height: 75vh;
+      overflow: hidden;
+      touch-action: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #020617;
+      border-radius: 0.5rem;
+      border: 1px solid #374151;
+    }
+
+    #viewer-image {
+      max-width: 100%;
+      max-height: 100%;
+      transform-origin: center center;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .viewer-footer {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.4rem;
+      font-size: 0.8rem;
+    }
+
+    #viewer-delete-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     @media (max-width: 640px) {
       header {
         gap: 0.5rem;
@@ -395,6 +486,15 @@
         flex-direction: column;
         gap: 0.25rem;
       }
+
+      .viewer-main {
+        gap: 0.25rem;
+      }
+
+      .viewer-nav {
+        min-width: 32px;
+        height: 32px;
+      }
     }
 
     @media (min-width: 641px) {
@@ -411,7 +511,7 @@
   </header>
 
   <main>
-    <!-- STAFF ADD + BATCH (moves into admin panel when admin logs in) -->
+    <!-- STAFF ADD + BATCH -->
     <div id="staff-batch-wrapper">
       <!-- ADD / EDIT FORM -->
       <section class="card">
@@ -522,7 +622,7 @@
         <button type="button" class="tab-btn admin-main-tab" data-tab="items">ALL ITEMS</button>
       </div>
 
-      <!-- ADMIN ADD ITEMS TAB (reuses staff add+batch UI) -->
+      <!-- ADMIN ADD ITEMS TAB (reuses staff UI) -->
       <div id="admin-add-tab" style="display:none;">
         <div id="admin-add-container"></div>
       </div>
@@ -586,7 +686,7 @@
         <div id="batch-list" style="margin-top:0.4rem;"></div>
       </div>
 
-      <!-- ADMIN ALL ITEMS TAB (reports) -->
+      <!-- ADMIN ALL ITEMS TAB -->
       <div id="admin-items-tab" style="display:none;">
         <div class="muted" id="count-info">LOADING…</div>
 
@@ -676,7 +776,7 @@
         <textarea id="modal-details" class="upper"></textarea>
       </div>
 
-      <!-- ADMIN IMAGE CONTROL -->
+      <!-- ADMIN IMAGES -->
       <div style="margin-top:0.6rem;">
         <label>IMAGES (ADMIN CAN ADD / REMOVE)</label>
         <div class="actions-row" style="margin-top:0.25rem;">
@@ -711,6 +811,26 @@
     </div>
   </div>
 
+  <!-- FULL-SCREEN IMAGE VIEWER (STAFF + ADMIN) -->
+  <div id="image-viewer">
+    <div class="image-viewer-inner">
+      <div class="viewer-top-row">
+        <button type="button" id="viewer-close-btn" class="secondary small viewer-close">&times;</button>
+      </div>
+      <div class="viewer-main">
+        <button type="button" id="viewer-prev-btn" class="secondary small viewer-nav">&#8249;</button>
+        <div class="viewer-image-wrapper" id="viewer-wrapper">
+          <img id="viewer-image" src="" alt="IMAGE" />
+        </div>
+        <button type="button" id="viewer-next-btn" class="secondary small viewer-nav">&#8250;</button>
+      </div>
+      <div class="viewer-footer">
+        <span id="viewer-counter" class="muted"></span>
+        <button type="button" id="viewer-delete-btn" class="danger small">DELETE (X)</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ===== CONFIG =====
     const BACKEND_URL = "https://inventory-backend-s4sv.onrender.com/get-token";
@@ -733,13 +853,11 @@
     let adminEditId = null;
     let selectedBatchKey = null;
 
-    // images
     let imagesStore = [];
     let imagesSha = null;
     let formImages = [];
     let modalImages = [];
 
-    // Search/filter
     let batchSearchName = "";
     let batchSearchDate = "";
     let itemSearchTerm = "";
@@ -750,17 +868,24 @@
     let reportStatusFilter = "ALL";
     let reportBatchNameFilter = "";
 
-    // modal
     let modalEditId = null;
+
+    // IMAGE VIEWER STATE
+    const viewerState = {
+      source: null, // "form" | "modal"
+      images: [],
+      index: 0,
+      deletable: false,
+      onChange: null // callback(newImagesArray)
+    };
 
     // ===== DOM =====
     const appTitle = document.getElementById("app-title");
     const roleBadge = document.getElementById("role-badge");
-
     const mainEl = document.querySelector("main");
     const staffBatchWrapper = document.getElementById("staff-batch-wrapper");
 
-    // form
+    // staff form
     const itemForm = document.getElementById("item-form");
     const itemNameInput = document.getElementById("item-name");
     const itemQtyInput = document.getElementById("item-qty");
@@ -781,7 +906,6 @@
     const imageList = document.getElementById("item-images-list");
     const imageStatusText = document.getElementById("image-status-text");
 
-    // batch
     const batchBody = document.getElementById("batch-body");
     const uploadBatchBtn = document.getElementById("upload-batch-btn");
     const batchStatus = document.getElementById("batch-status");
@@ -820,7 +944,7 @@
     const reportStatusSelect = document.getElementById("report-status");
     const reportBatchInput = document.getElementById("report-batch");
 
-    // modal DOM
+    // admin edit modal DOM
     const editModal = document.getElementById("edit-modal");
     const modalNameInput = document.getElementById("modal-name");
     const modalQtyInput = document.getElementById("modal-qty");
@@ -834,6 +958,16 @@
     const modalCaptureInput = document.getElementById("modal-capture-input");
     const modalImagesList = document.getElementById("modal-images-list");
     const modalImageStatus = document.getElementById("modal-image-status");
+
+    // image viewer DOM
+    const imageViewer = document.getElementById("image-viewer");
+    const viewerCloseBtn = document.getElementById("viewer-close-btn");
+    const viewerPrevBtn = document.getElementById("viewer-prev-btn");
+    const viewerNextBtn = document.getElementById("viewer-next-btn");
+    const viewerDeleteBtn = document.getElementById("viewer-delete-btn");
+    const viewerImage = document.getElementById("viewer-image");
+    const viewerCounter = document.getElementById("viewer-counter");
+    const viewerWrapper = document.getElementById("viewer-wrapper");
 
     // ===== UTILS =====
     function setStatus(msg) {
@@ -983,117 +1117,25 @@
       } catch {}
     }
 
-    // ===== PWA REGISTER =====
-    function registerPWA() {
-      if (!("serviceWorker" in navigator)) return;
-
-      try {
-        const manifest = {
-          name: "Inventory System",
-          short_name: "Inventory",
-          start_url: ".",
-          display: "standalone",
-          background_color: "#020617",
-          theme_color: "#020617",
-          icons: []
-        };
-        const blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
-        const manifestURL = URL.createObjectURL(blob);
-        const link = document.createElement("link");
-        link.rel = "manifest";
-        link.href = manifestURL;
-        document.head.appendChild(link);
-      } catch {}
-
-      const swCode = `
-        const CACHE_NAME = 'inventory-app-v1';
-        const OFFLINE_URLS = ['.', self.location.href];
-        self.addEventListener('install', (event) => {
-          event.waitUntil(
-            caches.open(CACHE_NAME)
-              .then((cache) => cache.addAll(OFFLINE_URLS))
-              .then(() => self.skipWaiting())
-          );
-        });
-        self.addEventListener('activate', (event) => {
-          event.waitUntil(
-            caches.keys().then((keys) =>
-              Promise.all(keys.map((key) => (key === CACHE_NAME ? null : caches.delete(key))))
-            ).then(() => self.clients.claim())
-          );
-        });
-        self.addEventListener('fetch', (event) => {
-          const req = event.request;
-          if (req.method !== 'GET') return;
-          event.respondWith(
-            caches.match(req).then((cached) => {
-              if (cached) return cached;
-              return fetch(req).then((res) => {
-                const resClone = res.clone();
-                caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
-                return res;
-              }).catch(() => caches.match('.'));
-            })
-          );
-        });
-      `;
-      try {
-        const blob = new Blob([swCode], { type: "text/javascript" });
-        const swUrl = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(swUrl).catch(() => {});
-      } catch {}
-    }
-
-    // ===== INVENTORY LOAD/SAVE + BACKUP =====
+    // ===== LOAD/SAVE INVENTORY =====
     async function loadInventory() {
       try {
         setStatus("LOADING FROM GITHUB…");
         const data = await githubRequest(
           `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(FILE_PATH)}?ref=${BRANCH}`
         );
-
         currentSha = data.sha;
         const decoded = atob(data.content.replace(/\n/g, ""));
         inventory = decoded.trim() ? JSON.parse(decoded) : [];
-
-        try {
-          localStorage.setItem("inventory_cache", JSON.stringify(inventory));
-          localStorage.removeItem("inventory_pending_save");
-        } catch {}
-
         renderAdminViews();
         setStatus("LOADED");
       } catch (err) {
         console.error("ERROR LOADING INVENTORY:", err);
-        currentSha = null;
-        try {
-          const cached = localStorage.getItem("inventory_cache");
-          if (cached) {
-            inventory = JSON.parse(cached);
-            renderAdminViews();
-            setStatus("OFFLINE – USING CACHED INVENTORY");
-            return;
-          }
-        } catch {}
         inventory = [];
+        currentSha = null;
         renderAdminViews();
-        setStatus("WORKING OFFLINE (NO CACHE)");
+        setStatus("WORKING OFFLINE");
       }
-    }
-
-    async function createBackup(snapshot) {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-      const backupPath = `backups/inventory-${timestamp}.json`;
-      const content = btoa(snapshot);
-      const body = {
-        message: `BACKUP INVENTORY ${timestamp}`,
-        content,
-        branch: BRANCH
-      };
-      await githubRequest(
-        `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(backupPath)}`,
-        { method: "PUT", body: JSON.stringify(body) }
-      );
     }
 
     async function saveInventory() {
@@ -1106,52 +1148,14 @@
       };
       if (currentSha) body.sha = currentSha;
 
-      try {
-        const data = await githubRequest(
-          `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(FILE_PATH)}`,
-          { method: "PUT", body: JSON.stringify(body) }
-        );
-        currentSha = data.content.sha;
-
-        try {
-          localStorage.setItem("inventory_cache", snapshot);
-          localStorage.removeItem("inventory_pending_save");
-        } catch {}
-
-        try {
-          await createBackup(snapshot);
-        } catch (e) {
-          console.warn("BACKUP FAILED:", e);
-        }
-      } catch (err) {
-        console.error("SAVE INVENTORY FAILED:", err);
-        try {
-          localStorage.setItem("inventory_cache", snapshot);
-          localStorage.setItem("inventory_pending_save", JSON.stringify({ snapshot, ts: Date.now() }));
-        } catch {}
-        throw err;
-      }
+      const data = await githubRequest(
+        `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(FILE_PATH)}`,
+        { method: "PUT", body: JSON.stringify(body) }
+      );
+      currentSha = data.content.sha;
     }
 
-    window.addEventListener("online", () => {
-      try {
-        const pendingStr = localStorage.getItem("inventory_pending_save");
-        if (!pendingStr) return;
-        const data = JSON.parse(pendingStr);
-        if (!data || !data.snapshot) return;
-        inventory = JSON.parse(data.snapshot);
-        saveInventory()
-          .then(() => {
-            localStorage.removeItem("inventory_pending_save");
-            loadInventory();
-          })
-          .catch((err) => console.error("RESYNC FAILED:", err));
-      } catch (e) {
-        console.error("RESYNC ERROR:", e);
-      }
-    });
-
-    // ===== IMAGES LOAD/SAVE =====
+    // ===== LOAD/SAVE IMAGES =====
     async function loadImages() {
       try {
         const data = await githubRequest(
@@ -1160,20 +1164,10 @@
         imagesSha = data.sha;
         const decoded = atob(data.content.replace(/\n/g, ""));
         imagesStore = decoded.trim() ? JSON.parse(decoded) : [];
-        try {
-          localStorage.setItem("images_cache", JSON.stringify(imagesStore));
-        } catch {}
       } catch (err) {
         console.warn("LOAD IMAGES FAILED:", err);
-        imagesSha = null;
-        try {
-          const cached = localStorage.getItem("images_cache");
-          if (cached) {
-            imagesStore = JSON.parse(cached);
-            return;
-          }
-        } catch {}
         imagesStore = [];
+        imagesSha = null;
       }
     }
 
@@ -1192,9 +1186,6 @@
         { method: "PUT", body: JSON.stringify(body) }
       );
       imagesSha = data.content.sha;
-      try {
-        localStorage.setItem("images_cache", snapshot);
-      } catch {}
     }
 
     function getImagesForItem(itemId) {
@@ -1209,29 +1200,30 @@
       else imagesStore[idx] = payload;
     }
 
-    // ===== BATCH UI =====
+    // ===== BATCH (STAFF) =====
     function renderBatch() {
       batchBody.innerHTML = "";
 
       if (!batchItems.length) {
         batchBody.innerHTML =
           '<tr><td colspan="6" class="muted">NO ITEMS IN BATCH.</td></tr>';
-      } else {
-        batchItems.forEach((item, index) => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${item.id}</td>
-            <td>${item.name}</td>
-            <td>${item.quantity}</td>
-            <td>${item.group || ""}</td>
-            <td>${item.details || ""}</td>
-            <td class="actions-cell">
-              <button class="small secondary" data-action="edit-batch" data-index="${index}">EDIT</button>
-              <button class="small danger" data-action="remove-batch" data-index="${index}">REMOVE</button>
-            </td>`;
-          batchBody.appendChild(tr);
-        });
+        return;
       }
+
+      batchItems.forEach((item, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${item.id}</td>
+          <td>${item.name}</td>
+          <td>${item.quantity}</td>
+          <td>${item.group || ""}</td>
+          <td>${item.details || ""}</td>
+          <td class="actions-cell">
+            <button class="small secondary" data-action="edit-batch" data-index="${index}">EDIT</button>
+            <button class="small danger" data-action="remove-batch" data-index="${index}">REMOVE</button>
+          </td>`;
+        batchBody.appendChild(tr);
+      });
     }
 
     batchBody.addEventListener("click", (e) => {
@@ -1307,7 +1299,7 @@
       }
     });
 
-    // ===== IMAGE UI & COMPRESSION (STAFF FORM) =====
+    // ===== IMAGE THUMBS (FORM) =====
     function renderFormImages() {
       if (!imageList) return;
       if (!formImages.length) {
@@ -1318,11 +1310,11 @@
 
       const wrap = document.createElement("div");
       wrap.className = "image-thumbs";
-      formImages.forEach((img) => {
+      formImages.forEach((img, index) => {
         const div = document.createElement("div");
         div.className = "image-thumb";
         div.innerHTML = `
-          <img src="${img.dataUrl}" alt="">
+          <img src="${img.dataUrl}" alt="" data-view-source="form" data-view-index="${index}">
           <button type="button" class="danger small" data-img-id="${img.id}">X</button>
         `;
         wrap.appendChild(div);
@@ -1340,7 +1332,6 @@
       captureImageInput.click();
     });
 
-    // Compress image to <= maxSizeBytes using canvas (JPEG)
     async function compressImageFile(file, maxSizeBytes) {
       const dataUrl = await new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -1560,7 +1551,6 @@
         return db - da;
       });
 
-      // counts
       let pendingCount = 0;
       let approvedCount = 0;
       keys.forEach((k) => {
@@ -1576,7 +1566,6 @@
         else pendingBadge.classList.remove("bell-alert");
       }
 
-      // BATCH LIST
       batchList.innerHTML = "";
       let shownCount = 0;
 
@@ -1785,7 +1774,7 @@
       });
     }
 
-    // APPROVE
+    // APPROVE & WHATSAPP
     approveBatchBtn.addEventListener("click", async () => {
       if (!selectedBatchKey) {
         alert("NO BATCH SELECTED.");
@@ -1834,8 +1823,7 @@
       }
     });
 
-    // SEND WHATSAPP
-    function buildBatchWhatsAppMessage(_batchTimeIso, items) {
+    function buildBatchWhatsAppMessage(items) {
       const lines = items.map((it) => {
         const parts = [
           (it.name || "").toString().toUpperCase(),
@@ -1877,12 +1865,12 @@
         return;
       }
 
-      const message = buildBatchWhatsAppMessage(null, items);
+      const message = buildBatchWhatsAppMessage(items);
       const opened = openWhatsAppForBatch(message);
       if (!opened) alert("WHATSAPP MESSAGE (COPY & SEND):\n\n" + message);
     });
 
-    // ===== MODAL (ADMIN EDIT POPUP + IMAGES) =====
+    // ===== MODAL IMAGES (ADMIN) =====
     function renderModalImages() {
       if (!modalImagesList) return;
       if (!modalImages.length) {
@@ -1893,11 +1881,11 @@
 
       const wrap = document.createElement("div");
       wrap.className = "image-thumbs";
-      modalImages.forEach((img) => {
+      modalImages.forEach((img, index) => {
         const div = document.createElement("div");
         div.className = "image-thumb";
         div.innerHTML = `
-          <img src="${img.dataUrl}" alt="">
+          <img src="${img.dataUrl}" alt="" data-view-source="modal" data-view-index="${index}">
           <button type="button" class="danger small" data-modal-img-id="${img.id}">X</button>
         `;
         wrap.appendChild(div);
@@ -2059,7 +2047,7 @@
       }
     }
 
-    // FORM SUBMIT (staff + admin batch form)
+    // ===== FORM SUBMIT (STAFF + ADMIN ADD ITEMS TAB) =====
     itemForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -2096,7 +2084,6 @@
       };
 
       if (currentRole === "admin" && adminEditId && batchEditIndex === null) {
-        // editing uploaded item from top form (not usual, but allowed)
         try {
           setStatus("UPDATING ITEM…");
           await loadInventory();
@@ -2241,9 +2228,229 @@
       playBellSound();
     });
 
-    // INIT
+    // ===== IMAGE VIEWER (SIMPLE) =====
+    let viewerScale = 1;
+    let viewerTranslateX = 0;
+    let viewerTranslateY = 0;
+    let viewerPointers = new Map();
+    let viewerInitialDistance = 0;
+    let viewerInitialScale = 1;
+    let viewerLastX = 0;
+    let viewerLastY = 0;
+
+    function applyViewerTransform() {
+      viewerImage.style.transform =
+        `translate(${viewerTranslateX}px, ${viewerTranslateY}px) scale(${viewerScale})`;
+    }
+
+    function resetViewerTransform() {
+      viewerScale = 1;
+      viewerTranslateX = 0;
+      viewerTranslateY = 0;
+      applyViewerTransform();
+    }
+
+    function openImageViewer(imagesArray, startIndex, options) {
+      if (!imagesArray || !imagesArray.length) return;
+      viewerState.source = options.source || null;
+      viewerState.images = imagesArray;
+      viewerState.index = startIndex || 0;
+      viewerState.deletable = !!options.deletable;
+      viewerState.onChange = options.onChange || null;
+
+      viewerDeleteBtn.style.display = viewerState.deletable ? "inline-flex" : "none";
+
+      showViewerImage(viewerState.index);
+      resetViewerTransform();
+      imageViewer.style.display = "flex";
+    }
+
+    function closeImageViewer() {
+      imageViewer.style.display = "none";
+      viewerState.source = null;
+      viewerState.images = [];
+      viewerState.index = 0;
+      viewerState.deletable = false;
+      viewerState.onChange = null;
+      resetViewerTransform();
+    }
+
+    function showViewerImage(i) {
+      if (!viewerState.images.length) return;
+      if (i < 0) i = 0;
+      if (i >= viewerState.images.length) i = viewerState.images.length - 1;
+      viewerState.index = i;
+      const img = viewerState.images[i];
+      viewerImage.src = img.dataUrl;
+      viewerCounter.textContent = `${i + 1} / ${viewerState.images.length}`;
+      resetViewerTransform();
+    }
+
+    function nextViewerImage() {
+      if (!viewerState.images.length) return;
+      const i = (viewerState.index + 1) % viewerState.images.length;
+      showViewerImage(i);
+    }
+
+    function prevViewerImage() {
+      if (!viewerState.images.length) return;
+      const i =
+        (viewerState.index - 1 + viewerState.images.length) %
+        viewerState.images.length;
+      showViewerImage(i);
+    }
+
+    viewerCloseBtn.addEventListener("click", closeImageViewer);
+    viewerPrevBtn.addEventListener("click", prevViewerImage);
+    viewerNextBtn.addEventListener("click", nextViewerImage);
+
+    viewerDeleteBtn.addEventListener("click", () => {
+      if (!viewerState.deletable || !viewerState.images.length) return;
+      const idx = viewerState.index;
+      const img = viewerState.images[idx];
+      const newArr = viewerState.images.filter((_, i) => i !== idx);
+      viewerState.images = newArr;
+      if (viewerState.onChange) viewerState.onChange(newArr);
+      if (!newArr.length) {
+        closeImageViewer();
+        return;
+      }
+      const newIndex = Math.min(idx, newArr.length - 1);
+      showViewerImage(newIndex);
+    });
+
+    // click outside image to close
+    imageViewer.addEventListener("click", (e) => {
+      if (e.target === imageViewer) {
+        closeImageViewer();
+      }
+    });
+
+    // keyboard: ESC close, X delete
+    document.addEventListener("keydown", (e) => {
+      if (imageViewer.style.display !== "flex") return;
+      if (e.key === "Escape") {
+        closeImageViewer();
+      } else if ((e.key === "x" || e.key === "X") && viewerState.deletable) {
+        viewerDeleteBtn.click();
+      } else if (e.key === "ArrowRight") {
+        nextViewerImage();
+      } else if (e.key === "ArrowLeft") {
+        prevViewerImage();
+      }
+    });
+
+    // pinch + pan using pointer events
+    viewerWrapper.addEventListener("pointerdown", (e) => {
+      viewerWrapper.setPointerCapture(e.pointerId);
+      viewerPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      if (viewerPointers.size === 1) {
+        viewerLastX = e.clientX;
+        viewerLastY = e.clientY;
+      } else if (viewerPointers.size === 2) {
+        const arr = Array.from(viewerPointers.values());
+        const dx = arr[1].x - arr[0].x;
+        const dy = arr[1].y - arr[0].y;
+        viewerInitialDistance = Math.hypot(dx, dy);
+        viewerInitialScale = viewerScale;
+      }
+    });
+
+    viewerWrapper.addEventListener("pointermove", (e) => {
+      if (!viewerPointers.has(e.pointerId)) return;
+      viewerPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      if (viewerPointers.size === 1) {
+        // pan
+        const dx = e.clientX - viewerLastX;
+        const dy = e.clientY - viewerLastY;
+        viewerLastX = e.clientX;
+        viewerLastY = e.clientY;
+        viewerTranslateX += dx;
+        viewerTranslateY += dy;
+        applyViewerTransform();
+      } else if (viewerPointers.size === 2) {
+        // pinch
+        const arr = Array.from(viewerPointers.values());
+        const dx = arr[1].x - arr[0].x;
+        const dy = arr[1].y - arr[0].y;
+        const dist = Math.hypot(dx, dy);
+        if (viewerInitialDistance > 0) {
+          let newScale = viewerInitialScale * (dist / viewerInitialDistance);
+          newScale = Math.max(1, Math.min(4, newScale));
+          viewerScale = newScale;
+          applyViewerTransform();
+        }
+      }
+    });
+
+    viewerWrapper.addEventListener("pointerup", (e) => {
+      viewerWrapper.releasePointerCapture(e.pointerId);
+      viewerPointers.delete(e.pointerId);
+      if (viewerPointers.size === 1) {
+        const remaining = Array.from(viewerPointers.values())[0];
+        viewerLastX = remaining.x;
+        viewerLastY = remaining.y;
+      }
+    });
+
+    viewerWrapper.addEventListener("pointercancel", (e) => {
+      viewerWrapper.releasePointerCapture(e.pointerId);
+      viewerPointers.delete(e.pointerId);
+    });
+
+    // swipe with touch (horizontal)
+    let touchStartX = 0;
+    let touchStartY = 0;
+    imageViewer.addEventListener("touchstart", (e) => {
+      if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }
+    });
+
+    imageViewer.addEventListener("touchend", (e) => {
+      if (e.changedTouches.length === 0) return;
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      if (Math.abs(dx) > 50 && Math.abs(dy) < 40 && viewerScale === 1) {
+        if (dx < 0) nextViewerImage();
+        else prevViewerImage();
+      }
+    });
+
+    // open viewer from any thumb image (staff form + admin modal)
+    document.addEventListener("click", (e) => {
+      const imgEl = e.target.closest("img[data-view-source]");
+      if (!imgEl) return;
+
+      const source = imgEl.dataset.viewSource;
+      const index = Number(imgEl.dataset.viewIndex || 0);
+
+      if (source === "form") {
+        openImageViewer(formImages, index, {
+          source: "form",
+          deletable: true,
+          onChange: (newArr) => {
+            formImages = newArr;
+            renderFormImages();
+          }
+        });
+      } else if (source === "modal") {
+        openImageViewer(modalImages, index, {
+          source: "modal",
+          deletable: true,
+          onChange: (newArr) => {
+            modalImages = newArr;
+            renderModalImages();
+          }
+        });
+      }
+    });
+
+    // ===== INIT =====
     (async function init() {
-      registerPWA();
       updateRoleUI();
       renderBatch();
       await loadInventory();
