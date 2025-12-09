@@ -421,7 +421,6 @@
               id="item-images-input"
               type="file"
               accept="image/*"
-              capture="environment"
               multiple
               style="display:none;"
             />
@@ -616,7 +615,7 @@
     const REPO_OWNER = "unique205";
     const REPO_NAME = "inventory-data";
     const FILE_PATH = "data/inventory.json";
-    const IMAGES_FILE_PATH = "data/images.json";
+    const IMAGES_FILE_PATH = "images.json"; // <-- images.json at repo root
     const BRANCH = "main";
     const ADMIN_PASSWORD = "admin123";
     const ADMIN_PHONE = "917588756668";
@@ -1160,10 +1159,8 @@
           batchName: item.batchName || ""
         }));
 
-        // merge inventory
         inventory = inventory.concat(enriched);
 
-        // merge images
         enriched.forEach((item) => {
           const imgs = item.images || [];
           setImagesForItem(item.id, imgs);
@@ -1216,6 +1213,65 @@
       imageInput.click();
     });
 
+    // Compress image to <= maxSizeBytes using canvas (JPEG)
+    async function compressImageFile(file, maxSizeBytes) {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+
+            const maxDim = 1280;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height && width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else if (height >= width && height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+
+            let quality = 0.9;
+            let out = canvas.toDataURL("image/jpeg", quality);
+
+            const calcSize = (d) => Math.round((d.length * 3) / 4);
+
+            while (calcSize(out) > maxSizeBytes && quality > 0.3) {
+              quality -= 0.1;
+              out = canvas.toDataURL("image/jpeg", quality);
+            }
+
+            if (calcSize(out) > maxSizeBytes) {
+              resolve(null);
+            } else {
+              resolve(out);
+            }
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      }).catch(() => null);
+
+      if (!dataUrl) return null;
+
+      return {
+        id: generateImageId(),
+        name: file.name,
+        size: Math.round((dataUrl.length * 3) / 4),
+        dataUrl
+      };
+    }
+
     imageInput.addEventListener("change", (e) => {
       const files = Array.from(e.target.files || []);
       if (!files.length) return;
@@ -1225,35 +1281,34 @@
       let rejectedTooMany = false;
       let rejectedSize = false;
 
-      files.forEach((file) => {
-        if (formImages.length >= maxImages) {
-          rejectedTooMany = true;
-          return;
-        }
-        if (file.size > maxSize) {
-          rejectedSize = true;
-          return;
+      (async () => {
+        for (const file of files) {
+          if (formImages.length >= maxImages) {
+            rejectedTooMany = true;
+            break;
+          }
+
+          const compressed = await compressImageFile(file, maxSize);
+          if (!compressed) {
+            rejectedSize = true;
+            continue;
+          }
+
+          formImages.push(compressed);
         }
 
-        const reader = new FileReader();
-        reader.onload = () => {
-          formImages.push({
-            id: generateImageId(),
-            name: file.name,
-            size: file.size,
-            dataUrl: reader.result
-          });
-          renderFormImages();
-        };
-        reader.readAsDataURL(file);
-      });
+        renderFormImages();
 
-      if (rejectedTooMany) {
-        imageStatusText.textContent = "MAX 10 IMAGES REACHED.";
-      } else if (rejectedSize) {
-        imageStatusText.textContent = "SOME IMAGES > 2MB REJECTED.";
-      }
-      imageInput.value = "";
+        if (rejectedTooMany) {
+          imageStatusText.textContent = "MAX 10 IMAGES REACHED.";
+        } else if (rejectedSize) {
+          imageStatusText.textContent = "SOME IMAGES COULD NOT BE COMPRESSED <= 2MB.";
+        } else {
+          imageStatusText.textContent = `${formImages.length} IMAGE(S)`;
+        }
+
+        imageInput.value = "";
+      })();
     });
 
     imageList.addEventListener("click", (e) => {
@@ -1788,7 +1843,7 @@
       };
 
       if (currentRole === "admin" && adminEditId && batchEditIndex === null) {
-        // Editing an already uploaded item (admin)
+        // Editing uploaded item
         try {
           setStatus("UPDATING ITEM…");
           await loadInventory();
@@ -1823,7 +1878,7 @@
         return;
       }
 
-      // BATCH ITEM (staff or admin)
+      // BATCH ITEM
       const copyImages = formImages.map((img) => ({ ...img }));
 
       if (batchEditIndex === null) {
