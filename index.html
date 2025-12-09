@@ -1,3 +1,6 @@
+Here’s the **updated full single HTML file** with the image viewer fixed so the image shows properly in large view (staff + admin):
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -420,6 +423,7 @@
       flex: 1;
       max-width: 90vw;
       max-height: 75vh;
+      min-height: 40vh;             /* ensure visible height */
       overflow: hidden;
       touch-action: none;
       display: flex;
@@ -433,9 +437,13 @@
     #viewer-image {
       max-width: 100%;
       max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;          /* show full image */
       transform-origin: center center;
       user-select: none;
       -webkit-user-drag: none;
+      display: block;
     }
 
     .viewer-footer {
@@ -2281,6 +2289,7 @@
       if (i >= viewerState.images.length) i = viewerState.images.length - 1;
       viewerState.index = i;
       const img = viewerState.images[i];
+      viewerImage.style.display = "block";        // ensure visible
       viewerImage.src = img.dataUrl;
       viewerCounter.textContent = `${i + 1} / ${viewerState.images.length}`;
       resetViewerTransform();
@@ -2459,3 +2468,4 @@
   </script>
 </body>
 </html>
+```
