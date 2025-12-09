@@ -244,7 +244,7 @@
       border-bottom-color: var(--accent-soft);
     }
 
-    /* Item name suggestions (staff/admin add form) */
+    /* Item name suggestions */
     .name-input-wrapper {
       position: relative;
     }
@@ -275,6 +275,40 @@
 
     .suggestion-item:hover {
       background: #111827;
+    }
+
+    /* Image thumbnails */
+    .image-thumbs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.25rem;
+    }
+
+    .image-thumb {
+      position: relative;
+      width: 70px;
+      height: 70px;
+      border-radius: 0.4rem;
+      overflow: hidden;
+      border: 1px solid #374151;
+      background: #020617;
+    }
+
+    .image-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .image-thumb button {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      padding: 0 4px;
+      font-size: 0.6rem;
+      border-radius: 999px;
     }
 
     /* Bell animation */
@@ -324,7 +358,6 @@
         display: none;
       }
 
-      /* Actions column vertically stacked */
       td.actions-cell {
         display: flex;
         flex-direction: column;
@@ -332,7 +365,6 @@
       }
     }
 
-    /* Wider screens: 2-column row for name/qty/group */
     @media (min-width: 641px) {
       .field-row {
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -370,11 +402,35 @@
               <input id="item-group" class="upper" placeholder="E.G. RAW MATERIAL" />
             </div>
           </div>
+
           <div>
             <label for="item-details">DETAILS</label>
             <textarea id="item-details" class="upper" placeholder="GRADE, BRAND, ETC."></textarea>
           </div>
-          <div class="actions-row">
+
+          <!-- IMAGES -->
+          <div style="margin-top:0.5rem;">
+            <label>IMAGES (REQUIRED, MAX 10, ≤ 2MB EACH)</label>
+            <div class="actions-row" style="margin-top:0.25rem;">
+              <button type="button" id="add-image-btn" class="secondary small">
+                UPLOAD / CAPTURE
+              </button>
+              <span class="muted" id="image-status-text"></span>
+            </div>
+            <input
+              id="item-images-input"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              multiple
+              style="display:none;"
+            />
+            <div id="item-images-list">
+              <p class="muted">NO IMAGES ADDED.</p>
+            </div>
+          </div>
+
+          <div class="actions-row" style="margin-top:0.6rem;">
             <button type="submit" id="submit-btn">ADD TO BATCH</button>
             <button type="button" id="cancel-edit-btn" class="secondary" style="display:none;">CANCEL</button>
             <div class="status">STATUS: <span id="status-text">IDLE</span></div>
@@ -437,7 +493,7 @@
           <button type="button" class="tab-btn small batch-filter-tab" data-batch-view="approved">APPROVED</button>
         </div>
 
-        <!-- Selected batch details (opens above list) -->
+        <!-- Selected batch details -->
         <div id="batch-items-wrapper" style="margin-top:0.3rem; display:none;">
           <div class="actions-row" style="margin-bottom:0.3rem;">
             <span class="muted" id="selected-batch-label">NO BATCH SELECTED.</span>
@@ -488,11 +544,10 @@
         <div id="batch-list" style="margin-top:0.4rem;"></div>
       </div>
 
-      <!-- ADMIN ALL ITEMS TAB -->
+      <!-- ADMIN ALL ITEMS TAB (reports) -->
       <div id="admin-items-tab" style="display:none;">
         <div class="muted" id="count-info">LOADING…</div>
 
-        <!-- Report filters -->
         <div class="field-row" style="margin-top:0.4rem;">
           <div>
             <label for="item-search-input">ITEM NAME</label>
@@ -561,10 +616,11 @@
     const REPO_OWNER = "unique205";
     const REPO_NAME = "inventory-data";
     const FILE_PATH = "data/inventory.json";
+    const IMAGES_FILE_PATH = "data/images.json";
     const BRANCH = "main";
     const ADMIN_PASSWORD = "admin123";
-    const ADMIN_PHONE = "917588756668"; // +91 7588756668
-    const WHATSAPP_PHONE = ADMIN_PHONE; // used for wa.me
+    const ADMIN_PHONE = "917588756668";
+    const WHATSAPP_PHONE = ADMIN_PHONE;
 
     // ===== STATE =====
     let currentRole = "staff";
@@ -575,11 +631,16 @@
     let adminEditId = null;
     let selectedBatchKey = null;
 
-    // Search/filter state
+    // images
+    let imagesStore = []; // [{itemId, images:[{id,name,size,dataUrl}]}]
+    let imagesSha = null;
+    let formImages = []; // current item images (for add/edit)
+
+    // Search/filter
     let batchSearchName = "";
     let batchSearchDate = "";
     let itemSearchTerm = "";
-    let currentBatchFilter = "pending"; // "pending" or "approved"
+    let currentBatchFilter = "pending";
     let reportDateFrom = "";
     let reportDateTo = "";
     let reportGroupFilter = "";
@@ -593,7 +654,7 @@
     const mainEl = document.querySelector("main");
     const staffBatchWrapper = document.getElementById("staff-batch-wrapper");
 
-    // Shared add form
+    // form
     const itemForm = document.getElementById("item-form");
     const itemNameInput = document.getElementById("item-name");
     const itemQtyInput = document.getElementById("item-qty");
@@ -607,12 +668,17 @@
     const nameInputWrapper = document.querySelector(".name-input-wrapper");
     const itemSuggestions = document.getElementById("item-suggestions");
 
-    // Shared batch view
+    const addImageBtn = document.getElementById("add-image-btn");
+    const imageInput = document.getElementById("item-images-input");
+    const imageList = document.getElementById("item-images-list");
+    const imageStatusText = document.getElementById("image-status-text");
+
+    // batch
     const batchBody = document.getElementById("batch-body");
     const uploadBatchBtn = document.getElementById("upload-batch-btn");
     const batchStatus = document.getElementById("batch-status");
 
-    // Admin general
+    // admin
     const adminCard = document.getElementById("admin-card");
     const pendingBadge = document.getElementById("pending-badge");
     const adminAddTab = document.getElementById("admin-add-tab");
@@ -621,7 +687,6 @@
     const adminItemsTab = document.getElementById("admin-items-tab");
     const tabButtons = document.querySelectorAll(".admin-main-tab");
 
-    // Admin batches
     const batchListInfo = document.getElementById("batch-list-info");
     const batchList = document.getElementById("batch-list");
     const batchItemsWrapper = document.getElementById("batch-items-wrapper");
@@ -635,7 +700,6 @@
     const batchClearSearchBtn = document.getElementById("batch-clear-search-btn");
     const batchFilterButtons = document.querySelectorAll(".batch-filter-tab");
 
-    // Admin items
     const countInfo = document.getElementById("count-info");
     const inventoryBody = document.getElementById("inventory-body");
     const itemSearchInput = document.getElementById("item-search-input");
@@ -665,40 +729,17 @@
       return `BATCH_${ts}_${rand}`;
     }
 
+    function generateImageId() {
+      const ts = Date.now();
+      const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+      return `IMG_${ts}_${rand}`;
+    }
+
     function formatDate(iso) {
       if (!iso) return "-";
       const d = new Date(iso);
       if (Number.isNaN(d.getTime())) return String(iso).toUpperCase();
       return d.toLocaleString().toUpperCase();
-    }
-
-    // WhatsApp message: pure "NAME, QTY, GROUP" per line, no caption
-    function buildBatchWhatsAppMessage(batchTimeIso, items) {
-      const itemLines = items.map((it) => {
-        const parts = [
-          (it.name || "").toString().toUpperCase(),
-          String(it.quantity ?? ""),
-          (it.group || "").toString().toUpperCase()
-        ];
-        return parts.join(", ");
-      });
-      return itemLines.join("\n");
-    }
-
-    function openWhatsAppForBatch(message) {
-      const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`;
-
-      try {
-        const win = window.open(url, "_blank");
-        if (!win) {
-          console.warn("WHATSAPP WINDOW BLOCKED OR NOT OPENED");
-          return false;
-        }
-        return true;
-      } catch (err) {
-        console.error("FAILED TO OPEN WHATSAPP:", err);
-        return false;
-      }
     }
 
     function getBatchKeyForItem(item) {
@@ -715,39 +756,20 @@
       return "🟡 PENDING";
     }
 
-    function getBatchDisplayNameFromItems(batchKey, items) {
-      if (!items || !items.length) return formatDate(batchKey);
-      const first = items[0];
-      const batchName = (first.batchName || "").trim();
-      const batchTime = getBatchTimeForItem(first) || batchKey;
-      if (batchName) return batchName;
-      return formatDate(batchTime);
-    }
-
     async function getBackendToken() {
       try {
         const res = await fetch(BACKEND_URL, { method: "POST" });
-        if (!res.ok) {
-          console.warn("BACKEND /get-token HTTP ERROR:", res.status);
-          return null;
-        }
+        if (!res.ok) return null;
         const data = await res.json().catch(() => ({}));
-        if (!data.token) {
-          console.warn("BACKEND /get-token RETURNED NO TOKEN");
-          return null;
-        }
-        return data.token;
-      } catch (err) {
-        console.error("BACKEND /get-token FAILED:", err);
+        return data.token || null;
+      } catch {
         return null;
       }
     }
 
     async function githubRequest(path, options = {}) {
       const token = await getBackendToken();
-      if (!token) {
-        throw new Error("BACKEND TOKEN REQUEST FAILED");
-      }
+      if (!token) throw new Error("BACKEND TOKEN REQUEST FAILED");
 
       const res = await fetch(`https://api.github.com${path}`, {
         ...options,
@@ -773,14 +795,11 @@
       itemDetailsInput.value = "";
       batchEditIndex = null;
       adminEditId = null;
+      formImages = [];
+      renderFormImages();
 
-      if (currentRole === "admin") {
-        submitBtn.textContent = "ADD TO BATCH";
-        formTitle.textContent = "ADD ITEM (ADMIN)";
-      } else {
-        submitBtn.textContent = "ADD TO BATCH";
-        formTitle.textContent = "ADD ITEM";
-      }
+      submitBtn.textContent = "ADD TO BATCH";
+      formTitle.textContent = currentRole === "admin" ? "ADD ITEM (ADMIN)" : "ADD ITEM";
       cancelEditBtn.style.display = "none";
     }
 
@@ -823,7 +842,6 @@
       renderAdminViews();
     }
 
-    // Simple "ding" sound for bell
     function playBellSound() {
       try {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -839,16 +857,13 @@
         gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
         osc.start(now);
         osc.stop(now + 0.6);
-      } catch (e) {
-        console.warn("Audio not available:", e);
-      }
+      } catch {}
     }
 
     // ===== PWA REGISTER =====
     function registerPWA() {
       if (!("serviceWorker" in navigator)) return;
 
-      // Inline manifest
       try {
         const manifest = {
           name: "Inventory System",
@@ -865,11 +880,8 @@
         link.rel = "manifest";
         link.href = manifestURL;
         document.head.appendChild(link);
-      } catch (e) {
-        console.warn("Manifest setup failed:", e);
-      }
+      } catch {}
 
-      // Service worker (offline cache)
       const swCode = `
         const CACHE_NAME = 'inventory-app-v1';
         const OFFLINE_URLS = ['.', self.location.href];
@@ -905,13 +917,11 @@
       try {
         const blob = new Blob([swCode], { type: "text/javascript" });
         const swUrl = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(swUrl).catch((err) => console.warn("SW register failed", err));
-      } catch (e) {
-        console.warn("SW setup failed", e);
-      }
+        navigator.serviceWorker.register(swUrl).catch(() => {});
+      } catch {}
     }
 
-    // ===== LOAD / SAVE INVENTORY WITH CACHE & BACKUP =====
+    // ===== INVENTORY LOAD/SAVE + BACKUP =====
     async function loadInventory() {
       try {
         setStatus("LOADING FROM GITHUB…");
@@ -926,9 +936,7 @@
         try {
           localStorage.setItem("inventory_cache", JSON.stringify(inventory));
           localStorage.removeItem("inventory_pending_save");
-        } catch (e) {
-          console.warn("LOCAL CACHE SAVE FAILED:", e);
-        }
+        } catch {}
 
         renderAdminViews();
         setStatus("LOADED");
@@ -943,9 +951,7 @@
             setStatus("OFFLINE – USING CACHED INVENTORY");
             return;
           }
-        } catch (e) {
-          console.warn("FAILED TO USE LOCAL CACHE:", e);
-        }
+        } catch {}
         inventory = [];
         renderAdminViews();
         setStatus("WORKING OFFLINE (NO CACHE)");
@@ -984,15 +990,11 @@
         );
         currentSha = data.content.sha;
 
-        // update cache & clear pending
         try {
           localStorage.setItem("inventory_cache", snapshot);
           localStorage.removeItem("inventory_pending_save");
-        } catch (e) {
-          console.warn("LOCAL CACHE SAVE FAILED:", e);
-        }
+        } catch {}
 
-        // auto-backup version
         try {
           await createBackup(snapshot);
         } catch (e) {
@@ -1003,14 +1005,11 @@
         try {
           localStorage.setItem("inventory_cache", snapshot);
           localStorage.setItem("inventory_pending_save", JSON.stringify({ snapshot, ts: Date.now() }));
-        } catch (e) {
-          console.warn("FAILED TO STORE PENDING SAVE:", e);
-        }
+        } catch {}
         throw err;
       }
     }
 
-    // Auto-sync pending saves when coming online
     window.addEventListener("online", () => {
       try {
         const pendingStr = localStorage.getItem("inventory_pending_save");
@@ -1029,7 +1028,65 @@
       }
     });
 
-    // ===== STAFF/ADMIN BATCH UI =====
+    // ===== IMAGES LOAD/SAVE (SEPARATE FILE) =====
+    async function loadImages() {
+      try {
+        const data = await githubRequest(
+          `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(IMAGES_FILE_PATH)}?ref=${BRANCH}`
+        );
+        imagesSha = data.sha;
+        const decoded = atob(data.content.replace(/\n/g, ""));
+        imagesStore = decoded.trim() ? JSON.parse(decoded) : [];
+        try {
+          localStorage.setItem("images_cache", JSON.stringify(imagesStore));
+        } catch {}
+      } catch (err) {
+        console.warn("LOAD IMAGES FAILED:", err);
+        imagesSha = null;
+        try {
+          const cached = localStorage.getItem("images_cache");
+          if (cached) {
+            imagesStore = JSON.parse(cached);
+            return;
+          }
+        } catch {}
+        imagesStore = [];
+      }
+    }
+
+    async function saveImages() {
+      const snapshot = JSON.stringify(imagesStore, null, 2);
+      const content = btoa(snapshot);
+      const body = {
+        message: "UPDATE IMAGES.JSON FROM INVENTORY-APP",
+        content,
+        branch: BRANCH
+      };
+      if (imagesSha) body.sha = imagesSha;
+
+      const data = await githubRequest(
+        `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(IMAGES_FILE_PATH)}`,
+        { method: "PUT", body: JSON.stringify(body) }
+      );
+      imagesSha = data.content.sha;
+      try {
+        localStorage.setItem("images_cache", snapshot);
+      } catch {}
+    }
+
+    function getImagesForItem(itemId) {
+      const entry = imagesStore.find((e) => e.itemId === itemId);
+      return entry ? entry.images || [] : [];
+    }
+
+    function setImagesForItem(itemId, images) {
+      const idx = imagesStore.findIndex((e) => e.itemId === itemId);
+      const payload = { itemId, images };
+      if (idx === -1) imagesStore.push(payload);
+      else imagesStore[idx] = payload;
+    }
+
+    // ===== BATCH UI =====
     function renderBatch() {
       batchBody.innerHTML = "";
 
@@ -1066,6 +1123,9 @@
         itemQtyInput.value = item.quantity;
         itemGroupInput.value = item.group || "";
         itemDetailsInput.value = item.details || "";
+        formImages = (item.images || []).map((img) => ({ ...img }));
+        renderFormImages();
+
         submitBtn.textContent = "UPDATE BATCH ITEM";
         cancelEditBtn.style.display = "inline-block";
         formTitle.textContent = currentRole === "admin" ? "EDIT ITEM (ADMIN)" : "EDIT BATCH ITEM";
@@ -1090,6 +1150,7 @@
         const batchId = generateBatchId();
 
         await loadInventory();
+        await loadImages();
 
         const enriched = batchItems.map((item) => ({
           ...item,
@@ -1099,9 +1160,19 @@
           batchName: item.batchName || ""
         }));
 
+        // merge inventory
         inventory = inventory.concat(enriched);
+
+        // merge images
+        enriched.forEach((item) => {
+          const imgs = item.images || [];
+          setImagesForItem(item.id, imgs);
+        });
+
         await saveInventory();
+        await saveImages();
         await loadInventory();
+        await loadImages();
 
         batchItems = [];
         renderBatch();
@@ -1115,7 +1186,85 @@
       }
     });
 
-    // ===== ITEM NAME SUGGESTIONS =====
+    // ===== IMAGE UI (FORM) =====
+    function renderFormImages() {
+      if (!imageList) return;
+      if (!formImages.length) {
+        imageList.innerHTML = '<p class="muted">NO IMAGES ADDED.</p>';
+        imageStatusText.textContent = "";
+        return;
+      }
+
+      const wrap = document.createElement("div");
+      wrap.className = "image-thumbs";
+      formImages.forEach((img) => {
+        const div = document.createElement("div");
+        div.className = "image-thumb";
+        div.innerHTML = `
+          <img src="${img.dataUrl}" alt="">
+          <button type="button" class="danger small" data-img-id="${img.id}">X</button>
+        `;
+        wrap.appendChild(div);
+      });
+      imageList.innerHTML = "";
+      imageList.appendChild(wrap);
+      imageStatusText.textContent = `${formImages.length} IMAGE(S)`;
+    }
+
+    addImageBtn.addEventListener("click", () => {
+      if (!imageInput) return;
+      imageInput.click();
+    });
+
+    imageInput.addEventListener("change", (e) => {
+      const files = Array.from(e.target.files || []);
+      if (!files.length) return;
+
+      const maxImages = 10;
+      const maxSize = 2 * 1024 * 1024; // 2MB
+      let rejectedTooMany = false;
+      let rejectedSize = false;
+
+      files.forEach((file) => {
+        if (formImages.length >= maxImages) {
+          rejectedTooMany = true;
+          return;
+        }
+        if (file.size > maxSize) {
+          rejectedSize = true;
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          formImages.push({
+            id: generateImageId(),
+            name: file.name,
+            size: file.size,
+            dataUrl: reader.result
+          });
+          renderFormImages();
+        };
+        reader.readAsDataURL(file);
+      });
+
+      if (rejectedTooMany) {
+        imageStatusText.textContent = "MAX 10 IMAGES REACHED.";
+      } else if (rejectedSize) {
+        imageStatusText.textContent = "SOME IMAGES > 2MB REJECTED.";
+      }
+      imageInput.value = "";
+    });
+
+    imageList.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-img-id]");
+      if (!btn) return;
+      const id = btn.dataset.imgId;
+      formImages = formImages.filter((img) => img.id !== id);
+      renderFormImages();
+    });
+
+    // ===== NAME SUGGESTIONS =====
     function clearSuggestions() {
       if (!itemSuggestions) return;
       itemSuggestions.innerHTML = "";
@@ -1182,6 +1331,8 @@
       if (match.quantity != null) itemQtyInput.value = match.quantity;
       itemGroupInput.value = (match.group || "").toString().toUpperCase();
       itemDetailsInput.value = (match.details || "").toString().toUpperCase();
+      formImages = getImagesForItem(match.id).map((img) => ({ ...img }));
+      renderFormImages();
       clearSuggestions();
     });
 
@@ -1191,7 +1342,7 @@
       }
     });
 
-    // ===== ADMIN: GROUPING =====
+    // ===== GROUPING =====
     function groupByBatch() {
       const groups = {};
       inventory.forEach((item) => {
@@ -1202,7 +1353,7 @@
       return groups;
     }
 
-    // ===== ADMIN: RENDER VIEWS =====
+    // ===== ADMIN RENDER =====
     function renderAdminViews() {
       if (currentRole !== "admin") return;
 
@@ -1218,7 +1369,7 @@
         return db - da;
       });
 
-      // Count pending / approved batches
+      // counts
       let pendingCount = 0;
       let approvedCount = 0;
       keys.forEach((k) => {
@@ -1230,14 +1381,11 @@
 
       if (pendingBadge) {
         pendingBadge.textContent = `🔔 ${pendingCount}`;
-        if (pendingCount > 0) {
-          pendingBadge.classList.add("bell-alert");
-        } else {
-          pendingBadge.classList.remove("bell-alert");
-        }
+        if (pendingCount > 0) pendingBadge.classList.add("bell-alert");
+        else pendingBadge.classList.remove("bell-alert");
       }
 
-      // BATCH LIST TAB
+      // BATCH LIST
       batchList.innerHTML = "";
       let shownCount = 0;
 
@@ -1250,11 +1398,9 @@
         const statusRaw = (first.batchStatus || "PENDING").toUpperCase();
         const statusDisplay = getStatusDisplay(statusRaw);
 
-        // Filter by pending/approved tab
         if (currentBatchFilter === "pending" && statusRaw === "APPROVED") return;
         if (currentBatchFilter === "approved" && statusRaw !== "APPROVED") return;
 
-        // Filter by search
         const nameFilter = batchSearchName;
         const dateFilter = batchSearchDate;
         const dateStr = (() => {
@@ -1263,12 +1409,8 @@
           return d.toISOString().slice(0, 10);
         })();
 
-        if (nameFilter && !displayName.toUpperCase().includes(nameFilter)) {
-          return;
-        }
-        if (dateFilter && dateStr !== dateFilter) {
-          return;
-        }
+        if (nameFilter && !displayName.toUpperCase().includes(nameFilter)) return;
+        if (dateFilter && dateStr !== dateFilter) return;
 
         const div = document.createElement("div");
         div.className = "batch-header";
@@ -1291,7 +1433,7 @@
         batchListInfo.textContent = `${pendingCount} PENDING • ${approvedCount} APPROVED (VIEW: ${currentBatchFilter.toUpperCase()}, SHOWING ${shownCount})`;
       }
 
-      // ALL ITEMS TAB – custom report filters
+      // ALL ITEMS (REPORTS)
       inventoryBody.innerHTML = "";
       if (!inventory.length) {
         countInfo.textContent = "NO ITEMS IN INVENTORY.";
@@ -1316,7 +1458,6 @@
             return d.toISOString().slice(0, 10);
           })();
 
-          // Filters
           if (itemSearchTerm && !nameUpper.includes(itemSearchTerm)) return;
           if (reportGroupFilter && !groupUpper.includes(reportGroupFilter)) return;
           if (reportStatusFilter !== "ALL" && statusRaw !== reportStatusFilter) return;
@@ -1343,9 +1484,7 @@
           }
 
           const tr = document.createElement("tr");
-          if (matchesName) {
-            tr.classList.add("highlight-row");
-          }
+          if (matchesName) tr.classList.add("highlight-row");
           tr.innerHTML = `
             <td>${item.id || "-"}</td>
             <td>${item.name || ""}</td>
@@ -1378,7 +1517,6 @@
         }
       }
 
-      // Selected batch details
       if (selectedBatchKey && groups[selectedBatchKey]) {
         renderSelectedBatchItems(selectedBatchKey, groups[selectedBatchKey]);
       } else {
@@ -1387,7 +1525,6 @@
       }
     }
 
-    // BATCH LIST CLICK (VIEW / RENAME)
     batchList.addEventListener("click", async (e) => {
       const btn = e.target;
       const action = btn.dataset.action;
@@ -1457,7 +1594,7 @@
       });
     }
 
-    // APPROVE (ADMIN ONLY)
+    // APPROVE
     approveBatchBtn.addEventListener("click", async () => {
       if (!selectedBatchKey) {
         alert("NO BATCH SELECTED.");
@@ -1506,7 +1643,29 @@
       }
     });
 
-    // SEND WHATSAPP (ADMIN ONLY, AFTER APPROVAL)
+    // SEND WHATSAPP
+    function buildBatchWhatsAppMessage(_batchTimeIso, items) {
+      const lines = items.map((it) => {
+        const parts = [
+          (it.name || "").toString().toUpperCase(),
+          String(it.quantity ?? ""),
+          (it.group || "").toString().toUpperCase()
+        ];
+        return parts.join(", ");
+      });
+      return lines.join("\n");
+    }
+
+    function openWhatsAppForBatch(message) {
+      const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`;
+      try {
+        const win = window.open(url, "_blank");
+        return !!win;
+      } catch {
+        return false;
+      }
+    }
+
     sendWhatsAppBtn.addEventListener("click", () => {
       if (!selectedBatchKey) {
         alert("NO BATCH SELECTED.");
@@ -1527,15 +1686,12 @@
         return;
       }
 
-      const batchTime = getBatchTimeForItem(first) || selectedBatchKey;
-      const message = buildBatchWhatsAppMessage(batchTime, items);
+      const message = buildBatchWhatsAppMessage(null, items);
       const opened = openWhatsAppForBatch(message);
-      if (!opened) {
-        alert("WHATSAPP MESSAGE (COPY & SEND):\n\n" + message);
-      }
+      if (!opened) alert("WHATSAPP MESSAGE (COPY & SEND):\n\n" + message);
     });
 
-    // ADMIN TABLE ACTIONS (EDIT / DELETE)
+    // ADMIN TABLE ACTIONS
     adminBatchBody.addEventListener("click", handleAdminTableClick);
     inventoryBody.addEventListener("click", handleAdminTableClick);
 
@@ -1559,6 +1715,9 @@
         itemQtyInput.value = item.quantity ?? "";
         itemGroupInput.value = (item.group || "").toString().toUpperCase();
         itemDetailsInput.value = (item.details || "").toString().toUpperCase();
+        formImages = getImagesForItem(id).map((img) => ({ ...img }));
+        renderFormImages();
+
         submitBtn.textContent = "UPDATE BATCH ITEM";
         cancelEditBtn.style.display = "inline-block";
         formTitle.textContent = "EDIT ITEM (ADMIN)";
@@ -1569,6 +1728,7 @@
         try {
           setStatus("DELETING ITEM…");
           await loadInventory();
+          await loadImages();
 
           const idx = inventory.findIndex((it) => it.id === id);
           if (idx === -1) {
@@ -1577,8 +1737,12 @@
           }
 
           inventory.splice(idx, 1);
+          imagesStore = imagesStore.filter((e) => e.itemId !== id);
+
           await saveInventory();
+          await saveImages();
           await loadInventory();
+          await loadImages();
           setStatus("ITEM DELETED");
         } catch (err) {
           console.error("DELETE FAILED:", err);
@@ -1587,7 +1751,7 @@
       }
     }
 
-    // STAFF/ADMIN FORM SUBMIT
+    // FORM SUBMIT (staff + admin)
     itemForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -1600,13 +1764,17 @@
         alert("NAME AND QUANTITY ARE REQUIRED.");
         return;
       }
+      if (!formImages.length) {
+        alert("AT LEAST 1 IMAGE IS REQUIRED.");
+        return;
+      }
 
       const now = new Date().toISOString();
 
       const baseItem = {
         id:
           batchEditIndex === null
-            ? generateId()
+            ? adminEditId || generateId()
             : batchItems[batchEditIndex].id,
         name,
         quantity: qty,
@@ -1619,11 +1787,50 @@
         updatedAt: now
       };
 
+      if (currentRole === "admin" && adminEditId && batchEditIndex === null) {
+        // Editing an already uploaded item (admin)
+        try {
+          setStatus("UPDATING ITEM…");
+          await loadInventory();
+          await loadImages();
+
+          const idx = inventory.findIndex((it) => it.id === adminEditId);
+          if (idx === -1) {
+            setStatus("ITEM NOT FOUND");
+            return;
+          }
+
+          inventory[idx] = {
+            ...inventory[idx],
+            name,
+            quantity: qty,
+            group,
+            details,
+            updatedAt: now
+          };
+          setImagesForItem(adminEditId, formImages.map((img) => ({ ...img })));
+
+          await saveInventory();
+          await saveImages();
+          await loadInventory();
+          await loadImages();
+          resetForm();
+          setStatus("ITEM UPDATED");
+        } catch (err) {
+          console.error("SAVE FAILED:", err);
+          setStatus("ERROR SAVING");
+        }
+        return;
+      }
+
+      // BATCH ITEM (staff or admin)
+      const copyImages = formImages.map((img) => ({ ...img }));
+
       if (batchEditIndex === null) {
-        batchItems.push(baseItem);
+        batchItems.push({ ...baseItem, images: copyImages });
         setStatus("ITEM ADDED TO BATCH");
       } else {
-        batchItems[batchEditIndex] = baseItem;
+        batchItems[batchEditIndex] = { ...baseItem, images: copyImages };
         setStatus("BATCH ITEM UPDATED");
       }
 
@@ -1633,7 +1840,7 @@
 
     cancelEditBtn.addEventListener("click", () => resetForm());
 
-    // ADMIN LOGIN VIA TITLE
+    // ADMIN LOGIN
     appTitle.addEventListener("click", () => {
       if (currentRole === "admin") {
         currentRole = "staff";
@@ -1651,17 +1858,17 @@
 
       currentRole = "admin";
       updateRoleUI();
-      loadInventory();
+      Promise.all([loadInventory(), loadImages()]);
     });
 
-    // ADMIN MAIN TABS (ADD / BATCHES / ITEMS)
+    // ADMIN MAIN TABS
     tabButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
         setAdminMainTab(btn.dataset.tab);
       });
     });
 
-    // BATCH PENDING / APPROVED FILTER TABS
+    // BATCH FILTER TABS
     batchFilterButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
         currentBatchFilter = btn.dataset.batchView || "pending";
@@ -1671,7 +1878,7 @@
       });
     });
 
-    // BATCH SEARCH EVENTS
+    // BATCH SEARCH
     batchSearchBtn.addEventListener("click", () => {
       batchSearchName = (batchSearchNameInput.value || "").trim().toUpperCase();
       batchSearchDate = batchSearchDateInput.value || "";
@@ -1686,7 +1893,7 @@
       renderAdminViews();
     });
 
-    // ITEM REPORT FILTERS
+    // REPORT FILTERS
     itemSearchBtn.addEventListener("click", () => {
       itemSearchTerm = (itemSearchInput.value || "").trim().toUpperCase();
       reportDateFrom = reportDateFromInput.value || "";
@@ -1714,7 +1921,7 @@
       renderAdminViews();
     });
 
-    // BELL CLICK: go to batches → pending + ding + scroll
+    // BELL CLICK
     pendingBadge.addEventListener("click", () => {
       if (currentRole !== "admin") return;
       setAdminMainTab("batches");
@@ -1733,6 +1940,7 @@
       updateRoleUI();
       renderBatch();
       await loadInventory();
+      await loadImages();
     })();
   </script>
 </body>
