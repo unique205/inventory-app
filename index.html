@@ -3,16 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📦 Inventory System with Batches</title>
+    <title>📦 Inventory System</title>
     <style>
         /* RESET */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f5f5f5; }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        
-        /* HEADER */
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { color: #2c3e50; margin-bottom: 10px; }
         
         /* SETUP SCREEN */
         .setup-screen { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
@@ -23,14 +19,13 @@
         .token-box input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 5px; font-size: 16px; }
         
         /* BUTTONS */
-        .btn { padding: 10px 20px; border: none; border-radius: 5px; font-size: 14px; cursor: pointer; margin: 5px; }
-        .btn-primary { background: #25D366; color: white; } /* WhatsApp green */
-        .btn-primary:hover { background: #128C7E; }
-        .btn-secondary { background: #3498db; color: white; }
-        .btn-secondary:hover { background: #2980b9; }
-        .btn-danger { background: #e74c3c; color: white; }
+        .btn { padding: 12px 24px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin: 5px; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-primary:hover { background: #2980b9; }
+        .btn-secondary { background: #95a5a6; color: white; }
+        .btn-success { background: #27ae60; color: white; }
         .btn-warning { background: #f39c12; color: white; }
-        .btn-small { padding: 5px 10px; font-size: 12px; }
+        .btn-danger { background: #e74c3c; color: white; }
         
         /* LOGIN SCREEN */
         .login-screen { text-align: center; padding: 40px; }
@@ -43,14 +38,9 @@
         .staff-form { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #2c3e50; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
         .form-row { display: flex; gap: 15px; }
         .form-row .form-group { flex: 1; }
-        
-        /* WHATSAPP MESSAGE BOX */
-        .whatsapp-box { background: #dcf8c6; border: 2px solid #25D366; padding: 15px; border-radius: 10px; margin: 15px 0; }
-        .whatsapp-box h3 { color: #075E54; margin-bottom: 10px; }
-        .whatsapp-message { background: white; padding: 10px; border-radius: 5px; font-family: monospace; white-space: pre-wrap; margin: 10px 0; }
         
         /* SUGGESTIONS */
         .suggestions { border: 1px solid #ddd; background: white; max-height: 200px; overflow-y: auto; margin-top: 5px; display: none; position: absolute; width: 100%; z-index: 100; }
@@ -60,42 +50,50 @@
         /* MESSAGES */
         .success { background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-top: 15px; text-align: center; }
         .error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin: 10px 0; }
-        .info { background: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 5px; margin: 10px 0; }
         
-        /* INVENTORY TABLE */
-        .inventory-table { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 20px; }
-        .table-header { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr 1fr 1fr; background: #34495e; color: white; padding: 12px 15px; font-weight: bold; font-size: 14px; }
-        .table-row { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr 1fr 1fr; padding: 10px 15px; border-bottom: 1px solid #eee; align-items: center; font-size: 14px; }
-        .table-row:hover { background: #f9f9f9; }
-        .batch-badge { background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; }
-        .highlight { background: #fff3cd !important; border-left: 3px solid #ffc107; }
+        /* ADMIN DASHBOARD LAYOUT */
+        .admin-dashboard { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
         
         /* BATCH MANAGEMENT */
-        .batch-section { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .batch-list { display: flex; flex-wrap: wrap; gap: 10px; margin: 15px 0; }
-        .batch-item { background: #f8f9fa; border: 1px solid #dee2e6; padding: 10px 15px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; min-width: 200px; }
-        .batch-name { font-weight: bold; color: #2c3e50; }
-        .batch-date { font-size: 12px; color: #6c757d; }
+        .batch-section { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .batch-list { max-height: 500px; overflow-y: auto; margin-top: 15px; }
+        .batch-item { padding: 15px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .batch-item.approved { border-left: 4px solid #27ae60; }
+        .batch-item.pending { border-left: 4px solid #f39c12; }
+        .batch-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .batch-actions { display: flex; gap: 5px; }
+        .batch-badge { padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .batch-approved { background: #27ae60; color: white; }
+        .batch-pending { background: #f39c12; color: white; }
         
-        /* SEARCH & FILTER */
-        .search-box { display: flex; gap: 10px; margin: 15px 0; }
-        .search-box input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        /* INVENTORY TABLE */
+        .inventory-section { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .inventory-table { margin-top: 20px; }
+        .table-header { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr 1fr; background: #34495e; color: white; padding: 15px; font-weight: bold; }
+        .table-row { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr 1fr; padding: 12px 15px; border-bottom: 1px solid #eee; align-items: center; }
+        .table-row:hover { background: #f9f9f9; }
+        .table-row.highlighted { background: #fffacd; }
+        .batch-info { font-size: 12px; color: #666; margin-top: 5px; }
+        
+        /* SEARCH & FILTERS */
+        .search-section { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .search-section input, .search-section select { flex: 1; min-width: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
         
         /* CONTROLS */
         .admin-controls { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
         
         /* MODAL */
         .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-content { background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        
+        /* WHATSAPP MESSAGE */
+        .whatsapp-message { background: #25D366; color: white; padding: 15px; border-radius: 5px; margin-top: 20px; }
+        .whatsapp-text { background: white; color: #333; padding: 10px; border-radius: 3px; font-family: monospace; margin: 10px 0; white-space: pre-wrap; }
         
         /* UTILITY */
         .hidden { display: none !important; }
         .visible { display: block !important; }
         .text-center { text-align: center; }
-        .flex { display: flex; }
-        .gap-10 { gap: 10px; }
-        .mb-10 { margin-bottom: 10px; }
-        .mt-20 { margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -134,12 +132,12 @@
             <div class="login-buttons">
                 <button class="login-btn staff-btn" onclick="loginAsStaff()">
                     <h3>👷 STAFF USER</h3>
-                    <p>• Add new items to batches<br>• WhatsApp message generated<br>• Cannot view/edit inventory</p>
+                    <p>• Add new items only<br>• Cannot view or delete<br>• Simple interface</p>
                 </button>
                 
                 <button class="login-btn admin-btn" onclick="loginAsAdmin()">
                     <h3>👑 ADMIN USER</h3>
-                    <p>• Manage batches & inventory<br>• View WhatsApp messages<br>• Search items & batches<br>• Password: admin123</p>
+                    <p>• View ALL inventory with batches<br>• Add/Edit/Delete items<br>• Manage batches<br>• WhatsApp notifications</p>
                 </button>
             </div>
             
@@ -151,23 +149,17 @@
         <!-- STAFF INTERFACE -->
         <div id="staffInterface" class="hidden">
             <div class="header">
-                <h1>➕ Add Items to Batch</h1>
-                <p>Staff Mode: Add items to current batch. WhatsApp message will be generated.</p>
+                <h1>➕ Add Inventory Item</h1>
+                <p>Staff Mode: Add items only. Admin reviews inventory.</p>
             </div>
             
             <div id="staffError" class="error hidden"></div>
-            
-            <!-- CURRENT BATCH INFO -->
-            <div class="info" id="currentBatchInfo">
-                <strong>Current Batch:</strong> <span id="batchName">BATCH-001</span>
-                <button class="btn btn-small btn-secondary" onclick="changeBatch()" style="float: right;">Change Batch</button>
-            </div>
             
             <div class="staff-form">
                 <div class="form-row">
                     <div class="form-group" style="position: relative;">
                         <label>ITEM NAME *</label>
-                        <input type="text" id="itemName" placeholder="Type item name..." autocapitalize="characters" oninput="showSuggestions()">
+                        <input type="text" id="itemName" placeholder="Type item name..." autocapitalize="characters">
                         <div id="suggestionsBox" class="suggestions"></div>
                     </div>
                     <div class="form-group">
@@ -195,133 +187,124 @@
                     </div>
                 </div>
                 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>SPECIAL NOTES (For WhatsApp)</label>
-                        <textarea id="itemNotes" placeholder="Any special notes for this item..." rows="2"></textarea>
-                    </div>
-                </div>
-                
-                <button class="btn btn-primary" onclick="addItem()">➕ ADD ITEM TO BATCH</button>
+                <button class="btn btn-primary" onclick="addItem()">➕ ADD ITEM</button>
                 
                 <div id="successMessage" class="success hidden">
-                    ✅ Item added to batch!
+                    ✅ Item added successfully!
                 </div>
-            </div>
-            
-            <!-- WHATSAPP MESSAGE PREVIEW -->
-            <div id="whatsappPreview" class="whatsapp-box hidden">
-                <h3>📱 WhatsApp Message (Click to send)</h3>
-                <div class="whatsapp-message" id="whatsappMessage" onclick="sendWhatsApp()">
-                    Loading message...
-                </div>
-                <p style="font-size: 12px; color: #666; margin-top: 10px;">
-                    Click the message above to open WhatsApp with this text. Or copy and send manually.
-                </p>
             </div>
             
             <div style="text-align: center; margin-top: 30px;">
                 <button class="btn btn-secondary" onclick="logout()">← Back to Login</button>
-                <button class="btn btn-warning" onclick="clearBatchItems()">🗑️ Clear Current Batch</button>
             </div>
         </div>
 
         <!-- ADMIN INTERFACE -->
         <div id="adminInterface" class="hidden">
-            <div class="header">
-                <h1>📋 Inventory & Batch Management</h1>
-                <p>Admin Mode: Manage all batches, inventory, and WhatsApp messages.</p>
-            </div>
-            
-            <div id="adminError" class="error hidden"></div>
-            
-            <!-- BATCH MANAGEMENT -->
-            <div class="batch-section">
-                <h3>📦 Batch Management</h3>
-                <div class="search-box">
-                    <input type="text" id="searchBatch" placeholder="Search batches by name or date..." oninput="filterBatches()">
-                    <button class="btn btn-primary" onclick="createNewBatch()">➕ Create New Batch</button>
+            <div class="admin-dashboard">
+                <!-- BATCH MANAGEMENT SECTION -->
+                <div class="batch-section">
+                    <h2>📋 Batch Management</h2>
+                    
+                    <div class="search-section">
+                        <input type="text" id="batchSearch" placeholder="🔍 Search batches..." oninput="filterBatches()">
+                        <input type="date" id="batchDate" onchange="filterBatchesByDate()">
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="showNewBatchModal()" style="width: 100%; margin-bottom: 15px;">
+                        ➕ Create New Batch
+                    </button>
+                    
+                    <div class="batch-list" id="batchList">
+                        <!-- Batches will be loaded here -->
+                    </div>
+                    
+                    <div id="whatsappSection" class="hidden">
+                        <div class="whatsapp-message">
+                            <h3>📱 WhatsApp Notification</h3>
+                            <p>Copy this message and send to: <strong>7588756658</strong></p>
+                            <div class="whatsapp-text" id="whatsappMessage"></div>
+                            <button class="btn btn-success" onclick="copyWhatsAppMessage()" style="width: 100%; margin-top: 10px;">
+                                📋 Copy Message
+                            </button>
+                            <a id="whatsappLink" target="_blank" style="display: block; margin-top: 10px; color: white; text-decoration: underline;">
+                                📱 Open WhatsApp
+                            </a>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="batch-list" id="batchList">
-                    <!-- Batches will be loaded here -->
-                </div>
-            </div>
-            
-            <!-- INVENTORY SEARCH -->
-            <div class="search-box">
-                <input type="text" id="searchInventory" placeholder="Search items by name, group, or details..." oninput="filterInventory()">
-                <input type="date" id="filterDate" onchange="filterByDate()">
-                <select id="filterBatch" onchange="filterByBatch()">
-                    <option value="">All Batches</option>
-                </select>
-            </div>
-            
-            <div class="admin-controls">
-                <button class="btn btn-secondary" onclick="loadInventory()">🔄 Refresh All</button>
-                <button class="btn btn-primary" onclick="generateWhatsAppForSelected()">📱 WhatsApp for Selected</button>
-                <button class="btn btn-danger" onclick="showDeleteModal()">🗑️ Delete Selected</button>
-                <button class="btn btn-secondary" onclick="logout()">← Logout</button>
-            </div>
-            
-            <div class="inventory-table">
-                <div class="table-header">
-                    <div>ITEM NAME</div>
-                    <div>QUANTITY</div>
-                    <div>GROUP</div>
-                    <div>DETAILS</div>
-                    <div>BATCH</div>
-                    <div>ACTION</div>
-                </div>
-                <div id="inventoryList">
-                    <div style="text-align: center; padding: 40px; color: #7f8c8d;">
-                        <p>Click "Refresh All" to load inventory...</p>
+                <!-- INVENTORY SECTION -->
+                <div class="inventory-section">
+                    <h2>📦 Inventory Items</h2>
+                    
+                    <div class="search-section">
+                        <input type="text" id="itemSearch" placeholder="🔍 Search items..." oninput="searchItems()">
+                        <select id="batchFilter" onchange="filterByBatch()">
+                            <option value="">All Batches</option>
+                        </select>
+                        <select id="groupFilter" onchange="filterByGroup()">
+                            <option value="">All Groups</option>
+                        </select>
+                    </div>
+                    
+                    <div class="admin-controls">
+                        <button class="btn btn-primary" onclick="loadInventory()">🔄 Refresh</button>
+                        <button class="btn btn-secondary" onclick="exportData()">📥 Export</button>
+                        <button class="btn btn-danger" onclick="showDeleteModal()">🗑️ Delete All</button>
+                        <button class="btn btn-secondary" onclick="logout()">← Logout</button>
+                    </div>
+                    
+                    <div id="adminError" class="error hidden"></div>
+                    
+                    <div class="inventory-table">
+                        <div class="table-header">
+                            <div>ITEM NAME</div>
+                            <div>QUANTITY</div>
+                            <div>GROUP</div>
+                            <div>DETAILS</div>
+                            <div>ACTION</div>
+                        </div>
+                        <div id="inventoryList">
+                            <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+                                <p>Click "Refresh" to load inventory...</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- SELECTED ITEMS WHATSAPP -->
-            <div id="adminWhatsappBox" class="whatsapp-box hidden mt-20">
-                <h3>📱 WhatsApp Message for Selected Items</h3>
-                <div class="whatsapp-message" id="adminWhatsappMessage" onclick="sendAdminWhatsApp()">
-                    Select items first...
-                </div>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button class="btn btn-small btn-primary" onclick="copyToClipboard('adminWhatsappMessage')">📋 Copy</button>
-                    <button class="btn btn-small btn-secondary" onclick="clearSelectedItems()">🗑️ Clear Selection</button>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- MODALS -->
-    <div id="batchModal" class="modal">
+    <!-- NEW BATCH MODAL -->
+    <div id="newBatchModal" class="modal">
         <div class="modal-content">
-            <h3>📦 Create New Batch</h3>
-            <div class="form-group mb-10">
-                <label>Batch Name</label>
-                <input type="text" id="newBatchName" placeholder="e.g., BATCH-001, JANUARY-2024" style="width: 100%;">
+            <h3 style="color: #2c3e50; margin-bottom: 15px;">📦 Create New Batch</h3>
+            <div class="form-group">
+                <label>Batch Name *</label>
+                <input type="text" id="batchName" placeholder="e.g., JANUARY_2024_DELIVERY" style="width: 100%; padding: 10px; margin: 5px 0;">
             </div>
-            <div class="form-group mb-10">
+            <div class="form-group">
                 <label>Description (Optional)</label>
-                <textarea id="newBatchDesc" placeholder="Batch purpose, location, etc..." rows="3" style="width: 100%;"></textarea>
+                <textarea id="batchDescription" placeholder="Batch details..." style="width: 100%; padding: 10px; margin: 5px 0; height: 100px;"></textarea>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn btn-primary" onclick="saveNewBatch()">✅ Create Batch</button>
-                <button class="btn btn-secondary" onclick="closeBatchModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="createBatch()">Create Batch</button>
+                <button class="btn btn-secondary" onclick="hideModal('newBatchModal')">Cancel</button>
             </div>
         </div>
     </div>
 
+    <!-- DELETE MODAL -->
     <div id="deleteModal" class="modal">
         <div class="modal-content">
-            <h3 style="color: #c0392b;">⚠️ Delete Items?</h3>
-            <p id="deleteMessage">This will delete selected items permanently.</p>
-            <p>Type <strong>DELETE</strong> to confirm:</p>
-            <input type="text" id="confirmDelete" placeholder="Type DELETE" style="width: 100%; padding: 10px; margin: 10px 0; border: 2px solid #ddd; border-radius: 5px;">
+            <h3 style="color: #c0392b; margin-bottom: 15px;">⚠️ Delete All Items?</h3>
+            <p>This will delete ALL inventory items permanently.</p>
+            <p>Type <strong>DELETE ALL</strong> to confirm:</p>
+            <input type="text" id="confirmDelete" placeholder="Type DELETE ALL" style="width: 100%; padding: 10px; margin: 10px 0; border: 2px solid #ddd; border-radius: 5px;">
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button id="confirmDeleteBtn" class="btn btn-danger" disabled onclick="confirmDelete()">Delete Selected</button>
-                <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button id="confirmDeleteBtn" class="btn btn-danger" disabled onclick="deleteAllItems()">Delete Everything</button>
+                <button class="btn btn-secondary" onclick="hideModal('deleteModal')">Cancel</button>
             </div>
         </div>
     </div>
@@ -336,7 +319,7 @@
             DATA_FILE: 'data/inventory.json',
             BATCH_FILE: 'data/batches.json',
             ADMIN_PASSWORD: 'admin123',
-            WHATSAPP_NUMBER: '917588756658' // Indian format
+            WHATSAPP_NUMBER: '7588756658'
         };
 
         // Application state
@@ -345,14 +328,13 @@
         let allItems = [];
         let allBatches = [];
         let currentBatch = null;
-        let currentBatchItems = [];
-        let selectedItems = new Set();
+        let searchTerm = '';
 
         // ============================================
         // INITIALIZATION
         // ============================================
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Starting inventory system with batches...');
+            console.log('Starting inventory system...');
             
             // Load token from localStorage
             githubToken = localStorage.getItem('inventory_token');
@@ -363,23 +345,25 @@
                 showScreen('setupScreen');
             }
             
-            // Setup current batch
-            loadCurrentBatch();
-            
             // Setup event listeners
             setupEventListeners();
         });
 
         function setupEventListeners() {
-            // Delete confirmation
+            // Suggestions typing
+            document.getElementById('itemName')?.addEventListener('input', showSuggestions);
+            
+            // Delete confirmation input
             document.getElementById('confirmDelete')?.addEventListener('input', function() {
                 const deleteBtn = document.getElementById('confirmDeleteBtn');
-                deleteBtn.disabled = this.value !== 'DELETE';
+                deleteBtn.disabled = this.value !== 'DELETE ALL';
             });
             
-            // Enter key in batch name
-            document.getElementById('newBatchName')?.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') saveNewBatch();
+            // Click outside suggestions
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.form-group')) {
+                    document.getElementById('suggestionsBox').style.display = 'none';
+                }
             });
         }
 
@@ -387,26 +371,20 @@
         // SCREEN MANAGEMENT
         // ============================================
         function showScreen(screenId) {
-            ['setupScreen', 'loginScreen', 'staffInterface', 'adminInterface'].forEach(id => {
+            const screens = ['setupScreen', 'loginScreen', 'staffInterface', 'adminInterface'];
+            screens.forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
             document.getElementById(screenId).classList.remove('hidden');
             
             // Clear messages
             clearMessages();
-            
-            // Update UI based on screen
-            if (screenId === 'staffInterface') {
-                updateStaffInterface();
-            } else if (screenId === 'adminInterface') {
-                loadAdminData();
-            }
         }
 
         function clearMessages() {
-            document.getElementById('staffError')?.classList.add('hidden');
-            document.getElementById('adminError')?.classList.add('hidden');
-            document.getElementById('successMessage')?.classList.add('hidden');
+            document.getElementById('staffError').classList.add('hidden');
+            document.getElementById('adminError').classList.add('hidden');
+            document.getElementById('successMessage').classList.add('hidden');
         }
 
         // ============================================
@@ -438,7 +416,9 @@
         function resetApp() {
             if (confirm('Reset token? You will need to enter it again.')) {
                 localStorage.removeItem('inventory_token');
+                localStorage.removeItem('current_batch');
                 githubToken = null;
+                currentBatch = null;
                 showScreen('setupScreen');
             }
         }
@@ -457,10 +437,10 @@
                     showScreen('loginScreen');
                     showMessage('info', '✅ Connected to GitHub!');
                 } else {
-                    alert('Error: ' + response.status);
+                    alert('Error: ' + response.status + '\n\n1. Check token is valid\n2. Repository exists: unique205/inventory-data');
                 }
             } catch (error) {
-                alert('Connection failed.');
+                alert('Connection failed. Check internet.');
             }
         }
 
@@ -470,6 +450,7 @@
         function loginAsStaff() {
             currentUser = 'staff';
             showScreen('staffInterface');
+            loadItemsForSuggestions();
         }
 
         function loginAsAdmin() {
@@ -477,6 +458,8 @@
             if (password === CONFIG.ADMIN_PASSWORD) {
                 currentUser = 'admin';
                 showScreen('adminInterface');
+                loadInventory();
+                loadBatches();
             } else {
                 alert('Incorrect password');
             }
@@ -488,168 +471,6 @@
         }
 
         // ============================================
-        // BATCH MANAGEMENT
-        // ============================================
-        function loadCurrentBatch() {
-            const saved = localStorage.getItem('current_batch');
-            if (saved) {
-                currentBatch = JSON.parse(saved);
-            } else {
-                // Default batch
-                currentBatch = {
-                    id: 'batch_' + Date.now(),
-                    name: 'BATCH-' + new Date().toISOString().slice(0, 10).replace(/-/g, ''),
-                    date: new Date().toISOString(),
-                    description: 'Default batch'
-                };
-                localStorage.setItem('current_batch', JSON.stringify(currentBatch));
-            }
-        }
-
-        function saveCurrentBatch() {
-            localStorage.setItem('current_batch', JSON.stringify(currentBatch));
-        }
-
-        function updateStaffInterface() {
-            if (currentBatch) {
-                document.getElementById('batchName').textContent = currentBatch.name;
-                document.getElementById('currentBatchInfo').classList.remove('hidden');
-                loadCurrentBatchItems();
-                updateWhatsAppMessage();
-            }
-        }
-
-        async function loadAdminData() {
-            await Promise.all([
-                loadBatches(),
-                loadInventory()
-            ]);
-        }
-
-        async function loadBatches() {
-            try {
-                const data = await readFromGitHub(CONFIG.BATCH_FILE);
-                allBatches = data || [];
-                renderBatchList();
-                updateBatchFilter();
-            } catch (error) {
-                allBatches = [];
-                console.log('No batches found, starting fresh');
-            }
-        }
-
-        function renderBatchList() {
-            const container = document.getElementById('batchList');
-            if (allBatches.length === 0) {
-                container.innerHTML = '<p style="color: #666; width: 100%; text-align: center;">No batches yet. Create one!</p>';
-                return;
-            }
-            
-            // Sort by date (newest first)
-            const sorted = [...allBatches].sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            container.innerHTML = sorted.map(batch => `
-                <div class="batch-item">
-                    <div>
-                        <div class="batch-name">${batch.name}</div>
-                        <div class="batch-date">${formatDate(batch.date)}</div>
-                        ${batch.description ? `<div style="font-size: 12px; color: #666; margin-top: 5px;">${batch.description}</div>` : ''}
-                    </div>
-                    <div>
-                        <button class="btn btn-small btn-secondary" onclick="viewBatchItems('${batch.id}')">View</button>
-                        <button class="btn btn-small btn-primary" onclick="setAsCurrentBatch('${batch.id}')">Use</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function filterBatches() {
-            const search = document.getElementById('searchBatch').value.toLowerCase();
-            const items = document.querySelectorAll('.batch-item');
-            
-            items.forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(search) ? 'flex' : 'none';
-            });
-        }
-
-        function createNewBatch() {
-            document.getElementById('newBatchName').value = '';
-            document.getElementById('newBatchDesc').value = '';
-            document.getElementById('batchModal').style.display = 'flex';
-            document.getElementById('newBatchName').focus();
-        }
-
-        function closeBatchModal() {
-            document.getElementById('batchModal').style.display = 'none';
-        }
-
-        async function saveNewBatch() {
-            const name = document.getElementById('newBatchName').value.trim();
-            const desc = document.getElementById('newBatchDesc').value.trim();
-            
-            if (!name) {
-                alert('Please enter batch name');
-                return;
-            }
-            
-            // Create new batch
-            const newBatch = {
-                id: 'batch_' + Date.now(),
-                name: name,
-                description: desc,
-                date: new Date().toISOString(),
-                createdBy: 'admin'
-            };
-            
-            // Add to batches
-            allBatches.push(newBatch);
-            
-            // Save to GitHub
-            try {
-                await writeToGitHub(allBatches, CONFIG.BATCH_FILE);
-                
-                // Update UI
-                renderBatchList();
-                updateBatchFilter();
-                closeBatchModal();
-                
-                // Set as current batch
-                currentBatch = newBatch;
-                saveCurrentBatch();
-                
-                showAdminMessage(`✅ Batch "${name}" created`);
-            } catch (error) {
-                showAdminError('Failed to save batch');
-            }
-        }
-
-        function setAsCurrentBatch(batchId) {
-            const batch = allBatches.find(b => b.id === batchId);
-            if (batch) {
-                currentBatch = batch;
-                saveCurrentBatch();
-                if (currentUser === 'staff') {
-                    updateStaffInterface();
-                }
-                alert(`✅ Now using batch: ${batch.name}`);
-            }
-        }
-
-        function viewBatchItems(batchId) {
-            // Filter items by batch
-            const batchItems = allItems.filter(item => item.batchId === batchId);
-            displayInventory(batchItems);
-            showAdminMessage(`Showing ${batchItems.length} items from batch`);
-        }
-
-        function updateBatchFilter() {
-            const select = document.getElementById('filterBatch');
-            select.innerHTML = '<option value="">All Batches</option>' +
-                allBatches.map(batch => `<option value="${batch.id}">${batch.name}</option>`).join('');
-        }
-
-        // ============================================
         // STAFF FUNCTIONS
         // ============================================
         async function addItem() {
@@ -657,7 +478,6 @@
             const quantity = parseInt(document.getElementById('itemQuantity').value) || 0;
             const group = document.getElementById('itemGroup').value;
             const details = document.getElementById('itemDetails').value.trim().toUpperCase();
-            const notes = document.getElementById('itemNotes').value.trim();
             
             // Validation
             if (!name) {
@@ -672,10 +492,6 @@
                 showStaffError('Please select a group');
                 return;
             }
-            if (!currentBatch) {
-                showStaffError('No batch selected. Please select a batch first.');
-                return;
-            }
             
             // Create item
             const newItem = {
@@ -684,155 +500,332 @@
                 quantity: quantity,
                 group: group,
                 details: details,
-                notes: notes,
-                batchId: currentBatch.id,
-                batchName: currentBatch.name,
                 addedBy: 'staff',
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                batchId: currentBatch
             };
             
-            // Add to current batch items
-            currentBatchItems.push(newItem);
-            localStorage.setItem('current_batch_items', JSON.stringify(currentBatchItems));
-            
-            // Success
-            showSuccess(`✅ ${name} added to ${currentBatch.name}!`);
-            
-            // Clear form
-            document.getElementById('itemName').value = '';
-            document.getElementById('itemQuantity').value = '';
-            document.getElementById('itemDetails').value = '';
-            document.getElementById('itemNotes').value = '';
-            document.getElementById('itemGroup').value = '';
-            document.getElementById('itemName').focus();
-            document.getElementById('suggestionsBox').style.display = 'none';
-            
-            // Update WhatsApp message
-            updateWhatsAppMessage();
-        }
-
-        function loadCurrentBatchItems() {
-            const saved = localStorage.getItem('current_batch_items');
-            currentBatchItems = saved ? JSON.parse(saved) : [];
-        }
-
-        function clearBatchItems() {
-            if (confirm('Clear all items from current batch?')) {
-                currentBatchItems = [];
-                localStorage.setItem('current_batch_items', JSON.stringify(currentBatchItems));
-                updateWhatsAppMessage();
-                showSuccess('✅ Batch cleared');
-            }
-        }
-
-        function changeBatch() {
-            if (confirm('Change batch? Current batch items will be cleared.')) {
-                localStorage.removeItem('current_batch');
-                localStorage.removeItem('current_batch_items');
-                loadCurrentBatch();
-                updateStaffInterface();
-            }
-        }
-
-        // ============================================
-        // WHATSAPP FUNCTIONS
-        // ============================================
-        function updateWhatsAppMessage() {
-            if (!currentBatch || currentBatchItems.length === 0) {
-                document.getElementById('whatsappPreview').classList.add('hidden');
-                return;
-            }
-            
-            let message = `*INVENTORY BATCH: ${currentBatch.name}*\n`;
-            message += `Date: ${formatDate(new Date().toISOString())}\n`;
-            message += `Items: ${currentBatchItems.length}\n\n`;
-            
-            // Group items by group
-            const grouped = {};
-            currentBatchItems.forEach(item => {
-                if (!grouped[item.group]) grouped[item.group] = [];
-                grouped[item.group].push(item);
-            });
-            
-            // Add items by group
-            Object.keys(grouped).forEach(group => {
-                message += `*${group}:*\n`;
-                grouped[group].forEach(item => {
-                    message += `• ${item.name}: ${item.quantity}`;
-                    if (item.details) message += ` (${item.details})`;
-                    if (item.notes) message += ` - ${item.notes}`;
-                    message += '\n';
-                });
-                message += '\n';
-            });
-            
-            message += `\nTotal Items: ${currentBatchItems.length}`;
-            message += `\n\n---\nSent via Inventory System`;
-            
-            document.getElementById('whatsappMessage').textContent = message;
-            document.getElementById('whatsappPreview').classList.remove('hidden');
-        }
-
-        function sendWhatsApp() {
-            const message = document.getElementById('whatsappMessage').textContent;
-            const encoded = encodeURIComponent(message);
-            const url = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encoded}`;
-            window.open(url, '_blank');
-            
-            // Save batch to main inventory
-            saveBatchToInventory();
-        }
-
-        async function saveBatchToInventory() {
-            if (currentBatchItems.length === 0) return;
-            
             try {
-                // Read existing inventory
-                let existing = [];
-                try {
-                    existing = await readFromGitHub(CONFIG.DATA_FILE);
-                } catch (e) {
-                    existing = [];
-                }
+                await saveItemToGitHub(newItem);
                 
-                // Add batch items
-                currentBatchItems.forEach(item => {
-                    existing.unshift(item);
-                });
+                // Success
+                showSuccess(`✅ ${name} added to inventory!`);
                 
-                // Save to GitHub
-                await writeToGitHub(existing, CONFIG.DATA_FILE);
-                
-                // Clear local batch
-                currentBatchItems = [];
-                localStorage.setItem('current_batch_items', JSON.stringify(currentBatchItems));
-                
-                // Update UI
-                updateWhatsAppMessage();
-                showSuccess('✅ Batch saved to inventory! WhatsApp message sent.');
+                // Clear form
+                document.getElementById('itemName').value = '';
+                document.getElementById('itemQuantity').value = '';
+                document.getElementById('itemDetails').value = '';
+                document.getElementById('itemGroup').value = '';
+                document.getElementById('itemName').focus();
+                document.getElementById('suggestionsBox').style.display = 'none';
                 
             } catch (error) {
-                console.error('Error saving batch:', error);
-                showStaffError('Failed to save batch, but WhatsApp message is ready.');
+                console.error('Error:', error);
+                showStaffError('Failed to save. Please try again.');
             }
         }
 
-        function generateWhatsAppForSelected() {
-            const selected = Array.from(selectedItems);
-            if (selected.length === 0) {
-                alert('Please select items first');
+        // ============================================
+        // SUGGESTIONS
+        // ============================================
+        async function loadItemsForSuggestions() {
+            try {
+                const data = await readFromGitHub(CONFIG.DATA_FILE);
+                allItems = data;
+            } catch (error) {
+                allItems = [];
+            }
+        }
+
+        function showSuggestions() {
+            const search = document.getElementById('itemName').value.toUpperCase();
+            const box = document.getElementById('suggestionsBox');
+            
+            if (search.length < 2) {
+                box.style.display = 'none';
                 return;
             }
             
-            const selectedItemsData = allItems.filter(item => selected.has(item.id));
+            const matches = allItems.filter(item => 
+                item.name.includes(search)
+            ).slice(0, 5);
             
-            let message = `*SELECTED INVENTORY ITEMS*\n`;
-            message += `Date: ${formatDate(new Date().toISOString())}\n`;
-            message += `Selected Items: ${selected.length}\n\n`;
+            if (matches.length === 0) {
+                box.style.display = 'none';
+                return;
+            }
             
-            // Group by batch
-            const byBatch = {};
-            selectedItemsData.forEach(item => {
-                const batchName = item.batchName || 'No Batch';
-                if (!byBatch[batchName]) byBatch[batchName] = [];
-                byBatch[batchName].push(item
+            box.innerHTML = matches.map(item => `
+                <div class="suggestion" onclick="selectSuggestion('${escapeString(item.name)}', '${item.group}', '${escapeString(item.details || '')}')">
+                    <strong>${item.name}</strong><br>
+                    <small>Group: ${item.group} | Last: ${item.quantity}</small>
+                </div>
+            `).join('');
+            
+            box.style.display = 'block';
+        }
+
+        function escapeString(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+        }
+
+        function selectSuggestion(name, group, details) {
+            document.getElementById('itemName').value = name;
+            document.getElementById('itemGroup').value = group;
+            document.getElementById('itemDetails').value = details || '';
+            document.getElementById('suggestionsBox').style.display = 'none';
+            document.getElementById('itemQuantity').focus();
+        }
+
+        // ============================================
+        // BATCH MANAGEMENT
+        // ============================================
+        async function loadBatches() {
+            try {
+                const data = await readFromGitHub(CONFIG.BATCH_FILE);
+                allBatches = data;
+                displayBatches();
+                updateBatchFilter();
+            } catch (error) {
+                allBatches = [];
+                // Create default batch if none exists
+                if (allBatches.length === 0) {
+                    const defaultBatch = {
+                        id: 'batch_default',
+                        name: 'DEFAULT BATCH',
+                        description: 'Default batch for items without specific batch',
+                        status: 'approved',
+                        createdAt: new Date().toISOString(),
+                        itemCount: 0
+                    };
+                    allBatches.push(defaultBatch);
+                    await writeToGitHub(CONFIG.BATCH_FILE, allBatches);
+                }
+            }
+        }
+
+        function displayBatches() {
+            const container = document.getElementById('batchList');
+            
+            if (allBatches.length === 0) {
+                container.innerHTML = '<p style="color: #7f8c8d; text-align: center;">No batches created yet.</p>';
+                return;
+            }
+            
+            // Sort by newest first
+            const sorted = [...allBatches].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            container.innerHTML = sorted.map(batch => `
+                <div class="batch-item ${batch.status}">
+                    <div class="batch-header">
+                        <div>
+                            <strong>${batch.name}</strong>
+                            <span class="batch-badge batch-${batch.status}">
+                                ${batch.status === 'approved' ? '✅ Approved' : '⏳ Pending'}
+                            </span>
+                        </div>
+                        <div class="batch-actions">
+                            ${batch.status === 'pending' ? 
+                                `<button class="btn btn-success btn-small" onclick="approveBatch('${batch.id}')">✅</button>` : ''}
+                            <button class="btn btn-warning btn-small" onclick="editBatch('${batch.id}')">✏️</button>
+                            <button class="btn btn-danger btn-small" onclick="deleteBatch('${batch.id}')">🗑️</button>
+                        </div>
+                    </div>
+                    <p style="margin: 5px 0; color: #666;">${batch.description || 'No description'}</p>
+                    <div style="font-size: 12px; color: #999;">
+                        Created: ${formatDate(batch.createdAt)} | 
+                        Items: ${batch.itemCount || 0}
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <button class="btn btn-primary btn-small" onclick="selectBatch('${batch.id}')" style="width: 100%;">
+                            ${currentBatch === batch.id ? '✓ Selected' : 'Select for Items'}
+                        </button>
+                        ${batch.status === 'approved' ? 
+                            `<button class="btn btn-success btn-small" onclick="generateWhatsAppMessage('${batch.id}')" style="width: 100%; margin-top: 5px;">
+                                📱 Generate WhatsApp
+                            </button>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterBatches() {
+            const search = document.getElementById('batchSearch').value.toLowerCase();
+            const batches = document.querySelectorAll('.batch-item');
+            
+            batches.forEach(batch => {
+                const name = batch.querySelector('strong').textContent.toLowerCase();
+                batch.style.display = name.includes(search) ? 'block' : 'none';
+            });
+        }
+
+        function filterBatchesByDate() {
+            const date = document.getElementById('batchDate').value;
+            if (!date) {
+                filterBatches();
+                return;
+            }
+            
+            const batches = document.querySelectorAll('.batch-item');
+            const selectedDate = new Date(date).toDateString();
+            
+            batches.forEach(batch => {
+                const dateText = batch.querySelector('div[style*="font-size: 12px"]').textContent;
+                const batchDate = new Date(dateText.split('Created: ')[1].split(' |')[0]).toDateString();
+                batch.style.display = batchDate === selectedDate ? 'block' : 'none';
+            });
+        }
+
+        function showNewBatchModal() {
+            document.getElementById('batchName').value = '';
+            document.getElementById('batchDescription').value = '';
+            showModal('newBatchModal');
+        }
+
+        async function createBatch() {
+            const name = document.getElementById('batchName').value.trim().toUpperCase();
+            const description = document.getElementById('batchDescription').value.trim();
+            
+            if (!name) {
+                alert('Please enter batch name');
+                return;
+            }
+            
+            const newBatch = {
+                id: 'batch_' + Date.now(),
+                name: name,
+                description: description,
+                status: 'pending',
+                createdAt: new Date().toISOString(),
+                itemCount: 0
+            };
+            
+            allBatches.push(newBatch);
+            await writeToGitHub(CONFIG.BATCH_FILE, allBatches);
+            displayBatches();
+            updateBatchFilter();
+            hideModal('newBatchModal');
+            showAdminMessage(`✅ Batch "${name}" created!`);
+        }
+
+        async function approveBatch(batchId) {
+            const batch = allBatches.find(b => b.id === batchId);
+            if (!batch) return;
+            
+            batch.status = 'approved';
+            batch.approvedAt = new Date().toISOString();
+            
+            await writeToGitHub(CONFIG.BATCH_FILE, allBatches);
+            displayBatches();
+            showAdminMessage(`✅ Batch "${batch.name}" approved!`);
+            
+            // Generate WhatsApp message automatically
+            generateWhatsAppMessage(batchId);
+        }
+
+        function selectBatch(batchId) {
+            currentBatch = batchId;
+            localStorage.setItem('current_batch', batchId);
+            displayBatches();
+            showAdminMessage(`✅ Batch selected for new items`);
+        }
+
+        function generateWhatsAppMessage(batchId) {
+            const batch = allBatches.find(b => b.id === batchId);
+            if (!batch) return;
+            
+            // Get items for this batch
+            const batchItems = allItems.filter(item => item.batchId === batchId);
+            
+            let message = `*INVENTORY BATCH: ${batch.name}*\n`;
+            message += `Date: ${formatDate(batch.createdAt)}\n`;
+            message += `Status: ${batch.status === 'approved' ? '✅ APPROVED' : '⏳ PENDING'}\n`;
+            message += `Items Count: ${batchItems.length}\n\n`;
+            message += `*ITEMS LIST:*\n`;
+            
+            if (batchItems.length === 0) {
+                message += `No items in this batch.\n`;
+            } else {
+                batchItems.forEach((item, index) => {
+                    message += `${index + 1}. ${item.name} - ${item.quantity} units\n`;
+                    if (item.details) {
+                        message += `   📝 ${item.details}\n`;
+                    }
+                });
+            }
+            
+            message += `\n*TOTAL ITEMS:* ${batchItems.length}\n`;
+            message += `*APPROVED BY:* Admin\n`;
+            message += `\nPlease review and confirm.`;
+            
+            // Display message
+            document.getElementById('whatsappMessage').textContent = message;
+            document.getElementById('whatsappSection').classList.remove('hidden');
+            
+            // Create WhatsApp link
+            const whatsappLink = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+            document.getElementById('whatsappLink').href = whatsappLink;
+        }
+
+        function copyWhatsAppMessage() {
+            const message = document.getElementById('whatsappMessage').textContent;
+            navigator.clipboard.writeText(message).then(() => {
+                alert('✅ Message copied to clipboard! Ready to paste in WhatsApp.');
+            });
+        }
+
+        // ============================================
+        // INVENTORY MANAGEMENT
+        // ============================================
+        async function loadInventory() {
+            try {
+                const data = await readFromGitHub(CONFIG.DATA_FILE);
+                allItems = data;
+                displayInventory(allItems);
+                updateBatchFilter();
+                updateGroupFilter();
+                showAdminMessage(`✅ Loaded ${data.length} items`);
+            } catch (error) {
+                console.error('Error:', error);
+                showAdminError('Failed to load inventory.');
+            }
+        }
+
+        function displayInventory(items) {
+            const container = document.getElementById('inventoryList');
+            
+            if (items.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+                        <p>No inventory items yet.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Filter by search term if any
+            let filtered = items;
+            if (searchTerm) {
+                filtered = items.filter(item => 
+                    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (item.details && item.details.toLowerCase().includes(searchTerm.toLowerCase()))
+                );
+            }
+            
+            // Apply batch filter
+            const batchFilter = document.getElementById('batchFilter').value;
+            if (batchFilter) {
+                filtered = filtered.filter(item => item.batchId === batchFilter);
+            }
+            
+            // Apply group filter
+            const groupFilter = document.getElementById('groupFilter').value;
+            if (groupFilter) {
+                filtered = filtered.filter(item => item.group === groupFilter);
+            }
+            
+            // Newest first
+            const sorted = [...filtered].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            container.innerHTML = sorted.map(item => {
+                const batch = allBatches.find(b => b.id === item.batch
