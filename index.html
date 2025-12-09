@@ -243,6 +243,39 @@
       border-bottom-color: var(--accent-soft);
     }
 
+    /* Item name suggestions (staff add form) */
+    .name-input-wrapper {
+      position: relative;
+    }
+
+    .suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #020617;
+      border: 1px solid #374151;
+      border-radius: 0.4rem;
+      margin-top: 0.15rem;
+      max-height: 160px;
+      overflow-y: auto;
+      font-size: 0.75rem;
+      display: none;
+      z-index: 20;
+    }
+
+    .suggestion-item {
+      padding: 0.25rem 0.45rem;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .suggestion-item:hover {
+      background: #111827;
+    }
+
     /* ===== SMALL SCREENS ===== */
     @media (max-width: 640px) {
       header {
@@ -296,15 +329,17 @@
   </header>
 
   <main>
-    <!-- ADD / EDIT FORM -->
+    <!-- STAFF ADD / EDIT FORM -->
     <section class="card">
       <h2 id="form-title">ADD ITEM</h2>
       <form id="item-form">
         <div class="field-row">
           <div>
             <label for="item-name">ITEM NAME *</label>
-            <input id="item-name" class="upper" list="name-list" autocomplete="off" required />
-            <datalist id="name-list"></datalist>
+            <div class="name-input-wrapper">
+              <input id="item-name" class="upper" autocomplete="off" required />
+              <div id="item-suggestions" class="suggestions"></div>
+            </div>
           </div>
           <div>
             <label for="item-qty">QUANTITY *</label>
@@ -327,7 +362,7 @@
       </form>
     </section>
 
-    <!-- CURRENT BATCH -->
+    <!-- CURRENT BATCH (STAFF) -->
     <section class="card">
       <h2>CURRENT BATCH (NOT UPLOADED)</h2>
       <p class="muted" id="batch-info">
@@ -356,35 +391,59 @@
 
     <!-- ADMIN PANEL -->
     <section class="card" id="admin-card" style="display:none;">
-      <h2>ADMIN PANEL</h2>
+      <h2>
+        ADMIN PANEL
+        <span id="pending-badge" class="badge">🔔 0</span>
+      </h2>
+
+      <!-- MAIN ADMIN TABS -->
       <div class="tab-row">
-        <button type="button" class="tab-btn active" data-tab="batches">BATCHES</button>
-        <button type="button" class="tab-btn" data-tab="items">ALL ITEMS</button>
+        <button type="button" class="tab-btn admin-main-tab active" data-tab="add">ADD ITEMS</button>
+        <button type="button" class="tab-btn admin-main-tab" data-tab="batches">BATCHES</button>
+        <button type="button" class="tab-btn admin-main-tab" data-tab="items">ALL ITEMS</button>
       </div>
 
-      <!-- BATCH TAB -->
-      <div id="admin-batches-tab">
-        <div class="muted" id="batch-list-info">LOADING…</div>
-
-        <!-- Batch search controls -->
-        <div class="field-row" style="margin:0.4rem 0;">
-          <div>
-            <label for="batch-search-name">SEARCH BATCH BY NAME</label>
-            <input id="batch-search-name" placeholder="TYPE BATCH NAME…" />
-          </div>
-          <div>
-            <label for="batch-search-date">SEARCH BATCH BY DATE</label>
-            <input id="batch-search-date" type="date" />
-          </div>
+      <!-- ADMIN ADD ITEMS TAB -->
+      <div id="admin-add-tab">
+        <div class="card" style="background:#020617; border-color:#1f2937; margin:0.3rem -0.1rem 0.7rem;">
+          <h3 style="margin:0 0 0.5rem; font-size:0.9rem;">ADD ITEM (ADMIN)</h3>
+          <form id="admin-add-form">
+            <div class="field-row">
+              <div>
+                <label for="admin-item-name">ITEM NAME *</label>
+                <input id="admin-item-name" class="upper" autocomplete="off" required />
+              </div>
+              <div>
+                <label for="admin-item-qty">QUANTITY *</label>
+                <input id="admin-item-qty" type="number" min="0" step="1" required />
+              </div>
+              <div>
+                <label for="admin-item-group">GROUP</label>
+                <input id="admin-item-group" class="upper" placeholder="E.G. RAW MATERIAL" />
+              </div>
+            </div>
+            <div>
+              <label for="admin-item-details">DETAILS</label>
+              <textarea id="admin-item-details" class="upper" placeholder="GRADE, BRAND, ETC."></textarea>
+            </div>
+            <div class="actions-row">
+              <button type="submit" class="secondary">ADD DIRECTLY</button>
+              <span class="muted" id="admin-add-status"></span>
+            </div>
+          </form>
         </div>
-        <div class="actions-row" style="margin-top:0.2rem;">
-          <button type="button" id="batch-search-btn" class="secondary small">SEARCH</button>
-          <button type="button" id="batch-clear-search-btn" class="secondary small">CLEAR</button>
+      </div>
+
+      <!-- ADMIN BATCHES TAB -->
+      <div id="admin-batches-tab" style="display:none;">
+        <!-- Pending / Approved mini-tabs -->
+        <div class="tab-row" id="batch-status-tabs" style="margin-bottom:0.4rem;">
+          <button type="button" class="tab-btn small batch-filter-tab active" data-batch-view="pending">PENDING</button>
+          <button type="button" class="tab-btn small batch-filter-tab" data-batch-view="approved">APPROVED</button>
         </div>
 
-        <div id="batch-list" style="margin-top:0.5rem;"></div>
-
-        <div id="batch-items-wrapper" style="margin-top:0.7rem; display:none;">
+        <!-- Selected batch details (opens above list) -->
+        <div id="batch-items-wrapper" style="margin-top:0.3rem; display:none;">
           <div class="actions-row" style="margin-bottom:0.3rem;">
             <span class="muted" id="selected-batch-label">NO BATCH SELECTED.</span>
             <button type="button" id="approve-batch-btn" class="secondary">
@@ -411,9 +470,30 @@
             </table>
           </div>
         </div>
+
+        <!-- Batch list -->
+        <div class="muted" id="batch-list-info" style="margin-top:0.6rem;">LOADING…</div>
+
+        <!-- Batch search controls -->
+        <div class="field-row" style="margin:0.4rem 0;">
+          <div>
+            <label for="batch-search-name">SEARCH BATCH BY NAME</label>
+            <input id="batch-search-name" placeholder="TYPE BATCH NAME…" />
+          </div>
+          <div>
+            <label for="batch-search-date">SEARCH BATCH BY DATE</label>
+            <input id="batch-search-date" type="date" />
+          </div>
+        </div>
+        <div class="actions-row" style="margin-top:0.2rem;">
+          <button type="button" id="batch-search-btn" class="secondary small">SEARCH</button>
+          <button type="button" id="batch-clear-search-btn" class="secondary small">CLEAR</button>
+        </div>
+
+        <div id="batch-list" style="margin-top:0.4rem;"></div>
       </div>
 
-      <!-- ITEMS TAB -->
+      <!-- ADMIN ALL ITEMS TAB -->
       <div id="admin-items-tab" style="display:none;">
         <div class="muted" id="count-info">LOADING…</div>
 
@@ -476,11 +556,13 @@
     let batchSearchName = "";
     let batchSearchDate = "";
     let itemSearchTerm = "";
+    let currentBatchFilter = "pending"; // "pending" or "approved"
 
     // ===== DOM =====
     const appTitle = document.getElementById("app-title");
     const roleBadge = document.getElementById("role-badge");
 
+    // Staff form
     const itemForm = document.getElementById("item-form");
     const itemNameInput = document.getElementById("item-name");
     const itemQtyInput = document.getElementById("item-qty");
@@ -491,16 +573,31 @@
     const formTitle = document.getElementById("form-title");
     const statusText = document.getElementById("status-text");
 
+    const nameInputWrapper = document.querySelector(".name-input-wrapper");
+    const itemSuggestions = document.getElementById("item-suggestions");
+
+    // Staff batch
     const batchBody = document.getElementById("batch-body");
     const uploadBatchBtn = document.getElementById("upload-batch-btn");
     const batchStatus = document.getElementById("batch-status");
-    const nameList = document.getElementById("name-list");
 
+    // Admin general
     const adminCard = document.getElementById("admin-card");
-    const tabButtons = document.querySelectorAll(".tab-btn");
+    const pendingBadge = document.getElementById("pending-badge");
+    const tabButtons = document.querySelectorAll(".admin-main-tab");
+    const adminAddTab = document.getElementById("admin-add-tab");
     const adminBatchesTab = document.getElementById("admin-batches-tab");
     const adminItemsTab = document.getElementById("admin-items-tab");
 
+    // Admin add form
+    const adminAddForm = document.getElementById("admin-add-form");
+    const adminItemNameInput = document.getElementById("admin-item-name");
+    const adminItemQtyInput = document.getElementById("admin-item-qty");
+    const adminItemGroupInput = document.getElementById("admin-item-group");
+    const adminItemDetailsInput = document.getElementById("admin-item-details");
+    const adminAddStatus = document.getElementById("admin-add-status");
+
+    // Admin batches
     const batchListInfo = document.getElementById("batch-list-info");
     const batchList = document.getElementById("batch-list");
     const batchItemsWrapper = document.getElementById("batch-items-wrapper");
@@ -508,17 +605,15 @@
     const approveBatchBtn = document.getElementById("approve-batch-btn");
     const sendWhatsAppBtn = document.getElementById("send-whatsapp-btn");
     const adminBatchBody = document.getElementById("admin-batch-body");
-
-    const countInfo = document.getElementById("count-info");
-    const inventoryBody = document.getElementById("inventory-body");
-
-    // Batch search DOM
     const batchSearchNameInput = document.getElementById("batch-search-name");
     const batchSearchDateInput = document.getElementById("batch-search-date");
     const batchSearchBtn = document.getElementById("batch-search-btn");
     const batchClearSearchBtn = document.getElementById("batch-clear-search-btn");
+    const batchFilterButtons = document.querySelectorAll(".batch-filter-tab");
 
-    // Item search DOM
+    // Admin items
+    const countInfo = document.getElementById("count-info");
+    const inventoryBody = document.getElementById("inventory-body");
     const itemSearchInput = document.getElementById("item-search-input");
     const itemSearchBtn = document.getElementById("item-search-btn");
     const itemClearSearchBtn = document.getElementById("item-clear-search-btn");
@@ -548,26 +643,17 @@
       return d.toLocaleString().toUpperCase();
     }
 
+    // WhatsApp message: pure "NAME, QTY, GROUP" per line, no caption
     function buildBatchWhatsAppMessage(batchTimeIso, items) {
-      const headerLines = [
-        "NEW INVENTORY BATCH",
-        "TIME: " + formatDate(batchTimeIso),
-        "",
-      ];
-
-      const itemLines = items.map((it, idx) => {
+      const itemLines = items.map((it) => {
         const parts = [
-          `${idx + 1}. ${it.name || ""}`,
-          `QTY: ${it.quantity ?? ""}`,
+          (it.name || "").toString().toUpperCase(),
+          String(it.quantity ?? ""),
+          (it.group || "").toString().toUpperCase()
         ];
-
-        if (it.group) parts.push(`GROUP: ${it.group}`);
-        if (it.details) parts.push(`DETAILS: ${it.details}`);
-
-        return parts.join(" | ");
+        return parts.join(", ");
       });
-
-      return [...headerLines, ...itemLines].join("\n");
+      return itemLines.join("\n");
     }
 
     function openWhatsAppForBatch(message) {
@@ -695,14 +781,12 @@
         const decoded = atob(data.content.replace(/\n/g, ""));
         inventory = decoded.trim() ? JSON.parse(decoded) : [];
 
-        populateNameList();
         renderAdminViews();
         setStatus("LOADED");
       } catch (err) {
         console.error("ERROR LOADING INVENTORY:", err);
         inventory = [];
         currentSha = null;
-        populateNameList();
         renderAdminViews();
         setStatus("WORKING OFFLINE (INVENTORY NOT LOADED)");
       }
@@ -725,20 +809,7 @@
       currentSha = data.content.sha;
     }
 
-    function populateNameList() {
-      const names = new Set();
-      inventory.forEach((it) => {
-        if (it.name) names.add(String(it.name).toUpperCase());
-      });
-      nameList.innerHTML = "";
-      names.forEach((name) => {
-        const opt = document.createElement("option");
-        opt.value = name;
-        nameList.appendChild(opt);
-      });
-    }
-
-    // ===== BATCH (STAFF) =====
+    // ===== STAFF BATCH =====
     function renderBatch() {
       batchBody.innerHTML = "";
 
@@ -761,7 +832,7 @@
           batchBody.appendChild(tr);
         });
       }
-      // keep status text as is (set by upload / others)
+      // batchStatus text handled by upload / others
     }
 
     batchBody.addEventListener("click", (e) => {
@@ -827,7 +898,83 @@
       }
     });
 
-    // ===== ADMIN VIEWS =====
+    // ===== ITEM NAME SUGGESTIONS (STAFF FORM) =====
+    function clearSuggestions() {
+      if (!itemSuggestions) return;
+      itemSuggestions.innerHTML = "";
+      itemSuggestions.style.display = "none";
+    }
+
+    function showItemSuggestions(term) {
+      if (!itemSuggestions) return;
+      const query = term.trim().toUpperCase();
+      if (!query) {
+        clearSuggestions();
+        return;
+      }
+
+      const byName = new Map();
+      inventory.forEach((it) => {
+        const n = (it.name || "").toString().toUpperCase();
+        if (!n) return;
+        if (!byName.has(n)) byName.set(n, it);
+      });
+
+      const matches = [];
+      byName.forEach((it, n) => {
+        if (n.includes(query)) matches.push(it);
+      });
+
+      matches.sort((a, b) => {
+        const na = (a.name || "").toString();
+        const nb = (b.name || "").toString();
+        return na.localeCompare(nb);
+      });
+
+      if (!matches.length) {
+        clearSuggestions();
+        return;
+      }
+
+      const limited = matches.slice(0, 8);
+      itemSuggestions.innerHTML = "";
+      limited.forEach((it) => {
+        const div = document.createElement("div");
+        div.className = "suggestion-item";
+        div.dataset.name = (it.name || "").toString().toUpperCase();
+        div.textContent = it.name || "";
+        itemSuggestions.appendChild(div);
+      });
+      itemSuggestions.style.display = "block";
+    }
+
+    itemNameInput.addEventListener("input", () => {
+      showItemSuggestions(itemNameInput.value);
+    });
+
+    itemSuggestions.addEventListener("click", (e) => {
+      const target = e.target.closest(".suggestion-item");
+      if (!target) return;
+      const nameUpper = target.dataset.name || "";
+      const match = inventory.find(
+        (it) => (it.name || "").toString().toUpperCase() === nameUpper
+      );
+      if (!match) return;
+
+      itemNameInput.value = (match.name || "").toString().toUpperCase();
+      if (match.quantity != null) itemQtyInput.value = match.quantity;
+      itemGroupInput.value = (match.group || "").toString().toUpperCase();
+      itemDetailsInput.value = (match.details || "").toString().toUpperCase();
+      clearSuggestions();
+    });
+
+    document.addEventListener("click", (e) => {
+      if (nameInputWrapper && !nameInputWrapper.contains(e.target)) {
+        clearSuggestions();
+      }
+    });
+
+    // ===== ADMIN: GROUPING =====
     function groupByBatch() {
       const groups = {};
       inventory.forEach((item) => {
@@ -838,6 +985,7 @@
       return groups;
     }
 
+    // ===== ADMIN: RENDER VIEWS =====
     function renderAdminViews() {
       if (currentRole !== "admin") return;
 
@@ -853,27 +1001,23 @@
         return db - da;
       });
 
-      // BATCH LIST TAB – split into PENDING / APPROVED
-      batchList.innerHTML = "";
-
-      const pendingContainer = document.createElement("div");
-      const approvedContainer = document.createElement("div");
-
-      const pendingHeader = document.createElement("div");
-      pendingHeader.className = "muted";
-      pendingHeader.style.marginBottom = "0.25rem";
-      pendingHeader.textContent = "PENDING BATCHES";
-
-      const approvedHeader = document.createElement("div");
-      approvedHeader.className = "muted";
-      approvedHeader.style.margin = "0.75rem 0 0.25rem";
-      approvedHeader.textContent = "APPROVED BATCHES";
-
-      pendingContainer.appendChild(pendingHeader);
-      approvedContainer.appendChild(approvedHeader);
-
+      // Count pending / approved batches (unique)
       let pendingCount = 0;
       let approvedCount = 0;
+      keys.forEach((k) => {
+        const first = groups[k][0];
+        const statusRaw = (first.batchStatus || "PENDING").toUpperCase();
+        if (statusRaw === "APPROVED") approvedCount++;
+        else pendingCount++;
+      });
+
+      if (pendingBadge) {
+        pendingBadge.textContent = `🔔 ${pendingCount}`;
+      }
+
+      // BATCH LIST TAB (filtered by currentBatchFilter + search)
+      batchList.innerHTML = "";
+      let shownCount = 0;
 
       keys.forEach((k) => {
         const items = groups[k];
@@ -883,6 +1027,10 @@
         const displayName = batchName || formatDate(batchTime);
         const statusRaw = (first.batchStatus || "PENDING").toUpperCase();
         const statusDisplay = getStatusDisplay(statusRaw);
+
+        // Filter by pending/approved tab
+        if (currentBatchFilter === "pending" && statusRaw === "APPROVED") return;
+        if (currentBatchFilter === "approved" && statusRaw !== "APPROVED") return;
 
         // Filter by search
         const nameFilter = batchSearchName;
@@ -911,37 +1059,14 @@
             <button class="small secondary" data-action="view-batch" data-key="${k}">VIEW</button>
             <button class="small secondary" data-action="rename-batch" data-key="${k}">RENAME</button>
           </span>`;
-
-        if (statusRaw === "APPROVED") {
-          approvedContainer.appendChild(div);
-          approvedCount++;
-        } else {
-          pendingContainer.appendChild(div);
-          pendingCount++;
-        }
+        batchList.appendChild(div);
+        shownCount++;
       });
-
-      if (pendingCount === 0) {
-        const msg = document.createElement("div");
-        msg.className = "muted";
-        msg.textContent = "NO PENDING BATCHES.";
-        pendingContainer.appendChild(msg);
-      }
-
-      if (approvedCount === 0) {
-        const msg = document.createElement("div");
-        msg.className = "muted";
-        msg.textContent = "NO APPROVED BATCHES.";
-        approvedContainer.appendChild(msg);
-      }
-
-      batchList.appendChild(pendingContainer);
-      batchList.appendChild(approvedContainer);
 
       if (!keys.length) {
         batchListInfo.textContent = "NO BATCHES FOUND.";
       } else {
-        batchListInfo.textContent = `${pendingCount} PENDING • ${approvedCount} APPROVED (FILTERED)`;
+        batchListInfo.textContent = `${pendingCount} PENDING • ${approvedCount} APPROVED (FILTERED VIEW: ${currentBatchFilter.toUpperCase()}, SHOWING ${shownCount})`;
       }
 
       // ALL ITEMS TAB
@@ -1008,6 +1133,7 @@
         }
       }
 
+      // Selected batch details (if any)
       if (selectedBatchKey && groups[selectedBatchKey]) {
         renderSelectedBatchItems(selectedBatchKey, groups[selectedBatchKey]);
       } else {
@@ -1016,6 +1142,7 @@
       }
     }
 
+    // BATCH LIST CLICK (VIEW / RENAME)
     batchList.addEventListener("click", async (e) => {
       const btn = e.target;
       const action = btn.dataset.action;
@@ -1108,7 +1235,6 @@
         await saveInventory();
         await loadInventory();
 
-        // Also call backend stub (if needed)
         const freshGroups = groupByBatch();
         const freshItems = freshGroups[selectedBatchKey] || [];
         const payload = {
@@ -1164,7 +1290,7 @@
       }
     });
 
-    // ADMIN TABLE ACTIONS
+    // ADMIN TABLE ACTIONS (EDIT / DELETE)
     adminBatchBody.addEventListener("click", handleAdminTableClick);
     inventoryBody.addEventListener("click", handleAdminTableClick);
 
@@ -1184,10 +1310,10 @@
         updateRoleUI();
 
         adminEditId = id;
-        itemNameInput.value = (item.name || "").toUpperCase();
+        itemNameInput.value = (item.name || "").toString().toUpperCase();
         itemQtyInput.value = item.quantity ?? "";
-        itemGroupInput.value = (item.group || "").toUpperCase();
-        itemDetailsInput.value = (item.details || "").toUpperCase();
+        itemGroupInput.value = (item.group || "").toString().toUpperCase();
+        itemDetailsInput.value = (item.details || "").toString().toUpperCase();
         submitBtn.textContent = "UPDATE ITEM";
         cancelEditBtn.style.display = "inline-block";
         formTitle.textContent = "EDIT ITEM (ADMIN)";
@@ -1216,7 +1342,7 @@
       }
     }
 
-    // FORM SUBMIT
+    // STAFF FORM SUBMIT
     itemForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -1262,6 +1388,7 @@
         return;
       }
 
+      // ADMIN EDITING EXISTING ITEM USING TOP FORM
       if (currentRole === "admin") {
         if (!adminEditId) {
           setStatus("SELECT AN ITEM FROM ADMIN TABLE");
@@ -1300,6 +1427,54 @@
 
     cancelEditBtn.addEventListener("click", () => resetForm());
 
+    // ADMIN ADD FORM SUBMIT (DIRECT ADD)
+    adminAddForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = adminItemNameInput.value.trim().toUpperCase();
+      const qty = Number(adminItemQtyInput.value || 0);
+      const group = adminItemGroupInput.value.trim().toUpperCase();
+      const details = adminItemDetailsInput.value.trim().toUpperCase();
+
+      if (!name || Number.isNaN(qty)) {
+        alert("NAME AND QUANTITY ARE REQUIRED.");
+        return;
+      }
+
+      const now = new Date().toISOString();
+      const batchId = generateBatchId();
+
+      const newItem = {
+        id: generateId(),
+        name,
+        quantity: qty,
+        group,
+        details,
+        timestamp: now,
+        updatedAt: now,
+        batchTime: now,
+        batchId,
+        batchStatus: "APPROVED", // admin direct add is approved
+        batchName: "ADMIN-ADD"
+      };
+
+      try {
+        adminAddStatus.textContent = "SAVING…";
+        await loadInventory();
+        inventory.push(newItem);
+        await saveInventory();
+        await loadInventory();
+        adminAddStatus.textContent = "ITEM ADDED.";
+        adminItemNameInput.value = "";
+        adminItemQtyInput.value = "";
+        adminItemGroupInput.value = "";
+        adminItemDetailsInput.value = "";
+      } catch (err) {
+        console.error("ADMIN ADD FAILED:", err);
+        adminAddStatus.textContent = "ERROR SAVING ITEM.";
+      }
+    });
+
     // ADMIN LOGIN VIA TITLE
     appTitle.addEventListener("click", () => {
       if (currentRole === "admin") {
@@ -1321,19 +1496,35 @@
       loadInventory();
     });
 
-    // TABS
+    // ADMIN MAIN TABS (ADD / BATCHES / ITEMS)
     tabButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
         tabButtons.forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
         const tab = btn.dataset.tab;
-        if (tab === "batches") {
+        if (tab === "add") {
+          adminAddTab.style.display = "block";
+          adminBatchesTab.style.display = "none";
+          adminItemsTab.style.display = "none";
+        } else if (tab === "batches") {
+          adminAddTab.style.display = "none";
           adminBatchesTab.style.display = "block";
           adminItemsTab.style.display = "none";
-        } else {
+        } else if (tab === "items") {
+          adminAddTab.style.display = "none";
           adminBatchesTab.style.display = "none";
           adminItemsTab.style.display = "block";
         }
+      });
+    });
+
+    // BATCH PENDING / APPROVED FILTER TABS
+    batchFilterButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        currentBatchFilter = btn.dataset.batchView || "pending";
+        batchFilterButtons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderAdminViews();
       });
     });
 
