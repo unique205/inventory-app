@@ -100,7 +100,8 @@
 
     input,
     textarea,
-    button {
+    button,
+    select {
       font: inherit;
       border-radius: 0.4rem;
       border: 1px solid #374151;
@@ -346,7 +347,7 @@
   </header>
 
   <main>
-    <!-- STAFF ADD + BATCH (this will move into admin panel when admin logs in) -->
+    <!-- STAFF ADD + BATCH (moves into admin panel when admin logs in) -->
     <div id="staff-batch-wrapper">
       <!-- ADD / EDIT FORM -->
       <section class="card">
@@ -491,16 +492,44 @@
       <div id="admin-items-tab" style="display:none;">
         <div class="muted" id="count-info">LOADING…</div>
 
-        <!-- Item search controls -->
+        <!-- Report filters -->
         <div class="field-row" style="margin-top:0.4rem;">
           <div>
-            <label for="item-search-input">SEARCH ITEM (NAME)</label>
+            <label for="item-search-input">ITEM NAME</label>
             <input id="item-search-input" placeholder="TYPE ITEM NAME…" class="upper" />
           </div>
+          <div>
+            <label for="report-date-from">DATE FROM (BATCH)</label>
+            <input id="report-date-from" type="date" />
+          </div>
+          <div>
+            <label for="report-date-to">DATE TO (BATCH)</label>
+            <input id="report-date-to" type="date" />
+          </div>
         </div>
+
+        <div class="field-row" style="margin-top:0.4rem;">
+          <div>
+            <label for="report-group">GROUP</label>
+            <input id="report-group" class="upper" placeholder="E.G. RAW MATERIAL" />
+          </div>
+          <div>
+            <label for="report-status">STATUS</label>
+            <select id="report-status">
+              <option value="ALL">ALL</option>
+              <option value="PENDING">PENDING</option>
+              <option value="APPROVED">APPROVED</option>
+            </select>
+          </div>
+          <div>
+            <label for="report-batch">BATCH NAME</label>
+            <input id="report-batch" class="upper" placeholder="TYPE BATCH NAME…" />
+          </div>
+        </div>
+
         <div class="actions-row" style="margin-top:0.2rem;">
-          <button type="button" id="item-search-btn" class="secondary small">SEARCH</button>
-          <button type="button" id="item-clear-search-btn" class="secondary small">CLEAR</button>
+          <button type="button" id="item-search-btn" class="secondary small">APPLY FILTERS</button>
+          <button type="button" id="item-clear-search-btn" class="secondary small">CLEAR FILTERS</button>
           <span class="muted" id="item-search-result"></span>
         </div>
 
@@ -551,6 +580,11 @@
     let batchSearchDate = "";
     let itemSearchTerm = "";
     let currentBatchFilter = "pending"; // "pending" or "approved"
+    let reportDateFrom = "";
+    let reportDateTo = "";
+    let reportGroupFilter = "";
+    let reportStatusFilter = "ALL";
+    let reportBatchNameFilter = "";
 
     // ===== DOM =====
     const appTitle = document.getElementById("app-title");
@@ -559,7 +593,7 @@
     const mainEl = document.querySelector("main");
     const staffBatchWrapper = document.getElementById("staff-batch-wrapper");
 
-    // Staff/admin shared add form
+    // Shared add form
     const itemForm = document.getElementById("item-form");
     const itemNameInput = document.getElementById("item-name");
     const itemQtyInput = document.getElementById("item-qty");
@@ -573,7 +607,7 @@
     const nameInputWrapper = document.querySelector(".name-input-wrapper");
     const itemSuggestions = document.getElementById("item-suggestions");
 
-    // Shared batch view (used by staff & admin ADD tab)
+    // Shared batch view
     const batchBody = document.getElementById("batch-body");
     const uploadBatchBtn = document.getElementById("upload-batch-btn");
     const batchStatus = document.getElementById("batch-status");
@@ -608,6 +642,11 @@
     const itemSearchBtn = document.getElementById("item-search-btn");
     const itemClearSearchBtn = document.getElementById("item-clear-search-btn");
     const itemSearchResult = document.getElementById("item-search-result");
+    const reportDateFromInput = document.getElementById("report-date-from");
+    const reportDateToInput = document.getElementById("report-date-to");
+    const reportGroupInput = document.getElementById("report-group");
+    const reportStatusSelect = document.getElementById("report-status");
+    const reportBatchInput = document.getElementById("report-batch");
 
     // ===== UTILS =====
     function setStatus(msg) {
@@ -736,8 +775,8 @@
       adminEditId = null;
 
       if (currentRole === "admin") {
-        submitBtn.textContent = "UPDATE ITEM";
-        formTitle.textContent = "EDIT ITEM (ADMIN)";
+        submitBtn.textContent = "ADD TO BATCH";
+        formTitle.textContent = "ADD ITEM (ADMIN)";
       } else {
         submitBtn.textContent = "ADD TO BATCH";
         formTitle.textContent = "ADD ITEM";
@@ -748,12 +787,10 @@
     function moveStaffUIForRole() {
       if (!staffBatchWrapper || !adminCard || !mainEl || !adminAddContainer) return;
       if (currentRole === "admin") {
-        // Move staff UI into admin ADD tab
         if (staffBatchWrapper.parentNode !== adminAddContainer) {
           adminAddContainer.appendChild(staffBatchWrapper);
         }
       } else {
-        // Move staff UI back above admin panel
         if (staffBatchWrapper.parentNode !== mainEl) {
           mainEl.insertBefore(staffBatchWrapper, adminCard);
         }
@@ -786,7 +823,7 @@
       renderAdminViews();
     }
 
-    // Simple "ding" sound when clicking bell (needs user interaction)
+    // Simple "ding" sound for bell
     function playBellSound() {
       try {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -807,7 +844,74 @@
       }
     }
 
-    // ===== LOAD / SAVE INVENTORY =====
+    // ===== PWA REGISTER =====
+    function registerPWA() {
+      if (!("serviceWorker" in navigator)) return;
+
+      // Inline manifest
+      try {
+        const manifest = {
+          name: "Inventory System",
+          short_name: "Inventory",
+          start_url: ".",
+          display: "standalone",
+          background_color: "#020617",
+          theme_color: "#020617",
+          icons: []
+        };
+        const blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
+        const manifestURL = URL.createObjectURL(blob);
+        const link = document.createElement("link");
+        link.rel = "manifest";
+        link.href = manifestURL;
+        document.head.appendChild(link);
+      } catch (e) {
+        console.warn("Manifest setup failed:", e);
+      }
+
+      // Service worker (offline cache)
+      const swCode = `
+        const CACHE_NAME = 'inventory-app-v1';
+        const OFFLINE_URLS = ['.', self.location.href];
+        self.addEventListener('install', (event) => {
+          event.waitUntil(
+            caches.open(CACHE_NAME)
+              .then((cache) => cache.addAll(OFFLINE_URLS))
+              .then(() => self.skipWaiting())
+          );
+        });
+        self.addEventListener('activate', (event) => {
+          event.waitUntil(
+            caches.keys().then((keys) =>
+              Promise.all(keys.map((key) => (key === CACHE_NAME ? null : caches.delete(key))))
+            ).then(() => self.clients.claim())
+          );
+        });
+        self.addEventListener('fetch', (event) => {
+          const req = event.request;
+          if (req.method !== 'GET') return;
+          event.respondWith(
+            caches.match(req).then((cached) => {
+              if (cached) return cached;
+              return fetch(req).then((res) => {
+                const resClone = res.clone();
+                caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
+                return res;
+              }).catch(() => caches.match('.'));
+            })
+          );
+        });
+      `;
+      try {
+        const blob = new Blob([swCode], { type: "text/javascript" });
+        const swUrl = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(swUrl).catch((err) => console.warn("SW register failed", err));
+      } catch (e) {
+        console.warn("SW setup failed", e);
+      }
+    }
+
+    // ===== LOAD / SAVE INVENTORY WITH CACHE & BACKUP =====
     async function loadInventory() {
       try {
         setStatus("LOADING FROM GITHUB…");
@@ -819,19 +923,53 @@
         const decoded = atob(data.content.replace(/\n/g, ""));
         inventory = decoded.trim() ? JSON.parse(decoded) : [];
 
+        try {
+          localStorage.setItem("inventory_cache", JSON.stringify(inventory));
+          localStorage.removeItem("inventory_pending_save");
+        } catch (e) {
+          console.warn("LOCAL CACHE SAVE FAILED:", e);
+        }
+
         renderAdminViews();
         setStatus("LOADED");
       } catch (err) {
         console.error("ERROR LOADING INVENTORY:", err);
-        inventory = [];
         currentSha = null;
+        try {
+          const cached = localStorage.getItem("inventory_cache");
+          if (cached) {
+            inventory = JSON.parse(cached);
+            renderAdminViews();
+            setStatus("OFFLINE – USING CACHED INVENTORY");
+            return;
+          }
+        } catch (e) {
+          console.warn("FAILED TO USE LOCAL CACHE:", e);
+        }
+        inventory = [];
         renderAdminViews();
-        setStatus("WORKING OFFLINE (INVENTORY NOT LOADED)");
+        setStatus("WORKING OFFLINE (NO CACHE)");
       }
     }
 
+    async function createBackup(snapshot) {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+      const backupPath = `backups/inventory-${timestamp}.json`;
+      const content = btoa(snapshot);
+      const body = {
+        message: `BACKUP INVENTORY ${timestamp}`,
+        content,
+        branch: BRANCH
+      };
+      await githubRequest(
+        `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(backupPath)}`,
+        { method: "PUT", body: JSON.stringify(body) }
+      );
+    }
+
     async function saveInventory() {
-      const content = btoa(JSON.stringify(inventory, null, 2));
+      const snapshot = JSON.stringify(inventory, null, 2);
+      const content = btoa(snapshot);
       const body = {
         message: "UPDATE INVENTORY.JSON FROM INVENTORY-APP",
         content,
@@ -839,13 +977,57 @@
       };
       if (currentSha) body.sha = currentSha;
 
-      const data = await githubRequest(
-        `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(FILE_PATH)}`,
-        { method: "PUT", body: JSON.stringify(body) }
-      );
+      try {
+        const data = await githubRequest(
+          `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(FILE_PATH)}`,
+          { method: "PUT", body: JSON.stringify(body) }
+        );
+        currentSha = data.content.sha;
 
-      currentSha = data.content.sha;
+        // update cache & clear pending
+        try {
+          localStorage.setItem("inventory_cache", snapshot);
+          localStorage.removeItem("inventory_pending_save");
+        } catch (e) {
+          console.warn("LOCAL CACHE SAVE FAILED:", e);
+        }
+
+        // auto-backup version
+        try {
+          await createBackup(snapshot);
+        } catch (e) {
+          console.warn("BACKUP FAILED:", e);
+        }
+      } catch (err) {
+        console.error("SAVE INVENTORY FAILED:", err);
+        try {
+          localStorage.setItem("inventory_cache", snapshot);
+          localStorage.setItem("inventory_pending_save", JSON.stringify({ snapshot, ts: Date.now() }));
+        } catch (e) {
+          console.warn("FAILED TO STORE PENDING SAVE:", e);
+        }
+        throw err;
+      }
     }
+
+    // Auto-sync pending saves when coming online
+    window.addEventListener("online", () => {
+      try {
+        const pendingStr = localStorage.getItem("inventory_pending_save");
+        if (!pendingStr) return;
+        const data = JSON.parse(pendingStr);
+        if (!data || !data.snapshot) return;
+        inventory = JSON.parse(data.snapshot);
+        saveInventory()
+          .then(() => {
+            localStorage.removeItem("inventory_pending_save");
+            loadInventory();
+          })
+          .catch((err) => console.error("RESYNC FAILED:", err));
+      } catch (e) {
+        console.error("RESYNC ERROR:", e);
+      }
+    });
 
     // ===== STAFF/ADMIN BATCH UI =====
     function renderBatch() {
@@ -884,7 +1066,7 @@
         itemQtyInput.value = item.quantity;
         itemGroupInput.value = item.group || "";
         itemDetailsInput.value = item.details || "";
-        submitBtn.textContent = currentRole === "admin" ? "UPDATE ITEM" : "UPDATE BATCH ITEM";
+        submitBtn.textContent = "UPDATE BATCH ITEM";
         cancelEditBtn.style.display = "inline-block";
         formTitle.textContent = currentRole === "admin" ? "EDIT ITEM (ADMIN)" : "EDIT BATCH ITEM";
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1109,7 +1291,7 @@
         batchListInfo.textContent = `${pendingCount} PENDING • ${approvedCount} APPROVED (VIEW: ${currentBatchFilter.toUpperCase()}, SHOWING ${shownCount})`;
       }
 
-      // ALL ITEMS TAB
+      // ALL ITEMS TAB – custom report filters
       inventoryBody.innerHTML = "";
       if (!inventory.length) {
         countInfo.textContent = "NO ITEMS IN INVENTORY.";
@@ -1117,24 +1299,40 @@
           '<tr><td colspan="8" class="muted">NO ITEMS.</td></tr>';
         itemSearchResult.textContent = "";
       } else {
-        countInfo.textContent = `${inventory.length} ITEMS`;
-
+        let filteredCount = 0;
         let matchCount = 0;
         let firstMatchInfo = null;
 
         inventory.forEach((item) => {
-          const nameStr = (item.name || "").toString().toUpperCase();
-          const matches = itemSearchTerm && nameStr.includes(itemSearchTerm);
+          const nameUpper = (item.name || "").toString().toUpperCase();
+          const groupUpper = (item.group || "").toString().toUpperCase();
+          const statusRaw = (item.batchStatus || "PENDING").toUpperCase();
+          const batchNameUpper = (item.batchName || "").toString().toUpperCase();
+          const batchKey = getBatchKeyForItem(item);
+          const batchTime = getBatchTimeForItem(item) || batchKey;
+          const batchDateStr = (() => {
+            const d = new Date(batchTime);
+            if (isNaN(d)) return "";
+            return d.toISOString().slice(0, 10);
+          })();
 
-          if (matches) {
+          // Filters
+          if (itemSearchTerm && !nameUpper.includes(itemSearchTerm)) return;
+          if (reportGroupFilter && !groupUpper.includes(reportGroupFilter)) return;
+          if (reportStatusFilter !== "ALL" && statusRaw !== reportStatusFilter) return;
+          if (reportBatchNameFilter && !batchNameUpper.includes(reportBatchNameFilter)) return;
+          if (reportDateFrom && batchDateStr && batchDateStr < reportDateFrom) return;
+          if (reportDateTo && batchDateStr && batchDateStr > reportDateTo) return;
+
+          filteredCount++;
+
+          const matchesName = itemSearchTerm && nameUpper.includes(itemSearchTerm);
+          if (matchesName) {
             matchCount++;
             if (!firstMatchInfo) {
-              const batchKey = getBatchKeyForItem(item);
-              const batchTime = getBatchTimeForItem(item) || batchKey;
-              const batchLabel = (item.batchName && item.batchName.trim())
+              const batchLabel = batchNameUpper
                 ? item.batchName
                 : formatDate(batchTime);
-              const statusRaw = item.batchStatus || "PENDING";
               const statusDisplay = getStatusDisplay(statusRaw);
               firstMatchInfo = {
                 name: item.name,
@@ -1145,7 +1343,7 @@
           }
 
           const tr = document.createElement("tr");
-          if (matches) {
+          if (matchesName) {
             tr.classList.add("highlight-row");
           }
           tr.innerHTML = `
@@ -1163,17 +1361,24 @@
           inventoryBody.appendChild(tr);
         });
 
+        if (!filteredCount) {
+          inventoryBody.innerHTML =
+            '<tr><td colspan="8" class="muted">NO ITEMS MATCH FILTERS.</td></tr>';
+        }
+
+        countInfo.textContent = `${filteredCount} ITEMS (FILTERED FROM ${inventory.length})`;
+
         if (itemSearchTerm && matchCount > 0 && firstMatchInfo) {
           itemSearchResult.textContent =
             `'${firstMatchInfo.name}' FOUND IN BATCH: ${firstMatchInfo.batchLabel} • STATUS: ${firstMatchInfo.statusDisplay}`;
-        } else if (itemSearchTerm) {
+        } else if (itemSearchTerm && filteredCount === 0) {
           itemSearchResult.textContent = "NO ITEMS FOUND FOR SEARCH.";
         } else {
           itemSearchResult.textContent = "";
         }
       }
 
-      // Selected batch details (if any)
+      // Selected batch details
       if (selectedBatchKey && groups[selectedBatchKey]) {
         renderSelectedBatchItems(selectedBatchKey, groups[selectedBatchKey]);
       } else {
@@ -1354,7 +1559,7 @@
         itemQtyInput.value = item.quantity ?? "";
         itemGroupInput.value = (item.group || "").toString().toUpperCase();
         itemDetailsInput.value = (item.details || "").toString().toUpperCase();
-        submitBtn.textContent = "UPDATE ITEM";
+        submitBtn.textContent = "UPDATE BATCH ITEM";
         cancelEditBtn.style.display = "inline-block";
         formTitle.textContent = "EDIT ITEM (ADMIN)";
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1398,7 +1603,6 @@
 
       const now = new Date().toISOString();
 
-      // Both staff and admin use same batch mechanism here
       const baseItem = {
         id:
           batchEditIndex === null
@@ -1482,15 +1686,30 @@
       renderAdminViews();
     });
 
-    // ITEM SEARCH EVENTS
+    // ITEM REPORT FILTERS
     itemSearchBtn.addEventListener("click", () => {
       itemSearchTerm = (itemSearchInput.value || "").trim().toUpperCase();
+      reportDateFrom = reportDateFromInput.value || "";
+      reportDateTo = reportDateToInput.value || "";
+      reportGroupFilter = (reportGroupInput.value || "").trim().toUpperCase();
+      reportStatusFilter = (reportStatusSelect.value || "ALL").toUpperCase();
+      reportBatchNameFilter = (reportBatchInput.value || "").trim().toUpperCase();
       renderAdminViews();
     });
 
     itemClearSearchBtn.addEventListener("click", () => {
       itemSearchInput.value = "";
+      reportDateFromInput.value = "";
+      reportDateToInput.value = "";
+      reportGroupInput.value = "";
+      reportStatusSelect.value = "ALL";
+      reportBatchInput.value = "";
       itemSearchTerm = "";
+      reportDateFrom = "";
+      reportDateTo = "";
+      reportGroupFilter = "";
+      reportStatusFilter = "ALL";
+      reportBatchNameFilter = "";
       itemSearchResult.textContent = "";
       renderAdminViews();
     });
@@ -1510,6 +1729,7 @@
 
     // INIT
     (async function init() {
+      registerPWA();
       updateRoleUI();
       renderBatch();
       await loadInventory();
