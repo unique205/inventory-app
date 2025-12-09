@@ -383,11 +383,15 @@
         </div>
 
         <div id="batch-list" style="margin-top:0.5rem;"></div>
+
         <div id="batch-items-wrapper" style="margin-top:0.7rem; display:none;">
           <div class="actions-row" style="margin-bottom:0.3rem;">
             <span class="muted" id="selected-batch-label">NO BATCH SELECTED.</span>
             <button type="button" id="approve-batch-btn" class="secondary">
-              APPROVE &amp; NOTIFY
+              APPROVE
+            </button>
+            <button type="button" id="send-whatsapp-btn" class="secondary">
+              SEND WHATSAPP
             </button>
           </div>
           <div class="table-wrapper">
@@ -502,6 +506,7 @@
     const batchItemsWrapper = document.getElementById("batch-items-wrapper");
     const selectedBatchLabel = document.getElementById("selected-batch-label");
     const approveBatchBtn = document.getElementById("approve-batch-btn");
+    const sendWhatsAppBtn = document.getElementById("send-whatsapp-btn");
     const adminBatchBody = document.getElementById("admin-batch-body");
 
     const countInfo = document.getElementById("count-info");
@@ -740,24 +745,23 @@
       if (!batchItems.length) {
         batchBody.innerHTML =
           '<tr><td colspan="6" class="muted">NO ITEMS IN BATCH.</td></tr>';
-        batchStatus.textContent = "";
-        return;
+      } else {
+        batchItems.forEach((item, index) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${item.id}</td>
+            <td>${item.name}</td>
+            <td>${item.quantity}</td>
+            <td>${item.group || ""}</td>
+            <td>${item.details || ""}</td>
+            <td class="actions-cell">
+              <button class="small secondary" data-action="edit-batch" data-index="${index}">EDIT</button>
+              <button class="small danger" data-action="remove-batch" data-index="${index}">REMOVE</button>
+            </td>`;
+          batchBody.appendChild(tr);
+        });
       }
-
-      batchItems.forEach((item, index) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${item.id}</td>
-          <td>${item.name}</td>
-          <td>${item.quantity}</td>
-          <td>${item.group || ""}</td>
-          <td>${item.details || ""}</td>
-          <td class="actions-cell">
-            <button class="small secondary" data-action="edit-batch" data-index="${index}">EDIT</button>
-            <button class="small danger" data-action="remove-batch" data-index="${index}">REMOVE</button>
-          </td>`;
-        batchBody.appendChild(tr);
-      });
+      // keep status text as is (set by upload / others)
     }
 
     batchBody.addEventListener("click", (e) => {
@@ -809,12 +813,7 @@
         await saveInventory();
         await loadInventory();
 
-        // WhatsApp message for this batch
-        const message = buildBatchWhatsAppMessage(batchTime, enriched);
-        const opened = openWhatsAppForBatch(message);
-        if (!opened) {
-          alert("WHATSAPP MESSAGE (COPY & SEND):\n\n" + message);
-        }
+        // STAFF DOES NOT SEND WHATSAPP – ONLY ADMIN AFTER APPROVAL
 
         batchItems = [];
         renderBatch();
@@ -854,9 +853,27 @@
         return db - da;
       });
 
-      // BATCH LIST TAB
+      // BATCH LIST TAB – split into PENDING / APPROVED
       batchList.innerHTML = "";
-      let shownCount = 0;
+
+      const pendingContainer = document.createElement("div");
+      const approvedContainer = document.createElement("div");
+
+      const pendingHeader = document.createElement("div");
+      pendingHeader.className = "muted";
+      pendingHeader.style.marginBottom = "0.25rem";
+      pendingHeader.textContent = "PENDING BATCHES";
+
+      const approvedHeader = document.createElement("div");
+      approvedHeader.className = "muted";
+      approvedHeader.style.margin = "0.75rem 0 0.25rem";
+      approvedHeader.textContent = "APPROVED BATCHES";
+
+      pendingContainer.appendChild(pendingHeader);
+      approvedContainer.appendChild(approvedHeader);
+
+      let pendingCount = 0;
+      let approvedCount = 0;
 
       keys.forEach((k) => {
         const items = groups[k];
@@ -864,7 +881,7 @@
         const batchTime = getBatchTimeForItem(first) || k;
         const batchName = (first.batchName || "").trim();
         const displayName = batchName || formatDate(batchTime);
-        const statusRaw = first.batchStatus || "PENDING";
+        const statusRaw = (first.batchStatus || "PENDING").toUpperCase();
         const statusDisplay = getStatusDisplay(statusRaw);
 
         // Filter by search
@@ -894,16 +911,37 @@
             <button class="small secondary" data-action="view-batch" data-key="${k}">VIEW</button>
             <button class="small secondary" data-action="rename-batch" data-key="${k}">RENAME</button>
           </span>`;
-        batchList.appendChild(div);
-        shownCount++;
+
+        if (statusRaw === "APPROVED") {
+          approvedContainer.appendChild(div);
+          approvedCount++;
+        } else {
+          pendingContainer.appendChild(div);
+          pendingCount++;
+        }
       });
+
+      if (pendingCount === 0) {
+        const msg = document.createElement("div");
+        msg.className = "muted";
+        msg.textContent = "NO PENDING BATCHES.";
+        pendingContainer.appendChild(msg);
+      }
+
+      if (approvedCount === 0) {
+        const msg = document.createElement("div");
+        msg.className = "muted";
+        msg.textContent = "NO APPROVED BATCHES.";
+        approvedContainer.appendChild(msg);
+      }
+
+      batchList.appendChild(pendingContainer);
+      batchList.appendChild(approvedContainer);
 
       if (!keys.length) {
         batchListInfo.textContent = "NO BATCHES FOUND.";
-      } else if (shownCount === keys.length && !batchSearchName && !batchSearchDate) {
-        batchListInfo.textContent = `${keys.length} BATCH(ES)`;
       } else {
-        batchListInfo.textContent = `${shownCount} BATCH(ES) SHOWN (FILTERED)`;
+        batchListInfo.textContent = `${pendingCount} PENDING • ${approvedCount} APPROVED (FILTERED)`;
       }
 
       // ALL ITEMS TAB
@@ -1047,7 +1085,7 @@
       });
     }
 
-    // APPROVE & NOTIFY
+    // APPROVE (ADMIN ONLY)
     approveBatchBtn.addEventListener("click", async () => {
       if (!selectedBatchKey) {
         alert("NO BATCH SELECTED.");
@@ -1070,6 +1108,7 @@
         await saveInventory();
         await loadInventory();
 
+        // Also call backend stub (if needed)
         const freshGroups = groupByBatch();
         const freshItems = freshGroups[selectedBatchKey] || [];
         const payload = {
@@ -1083,17 +1122,45 @@
           }))
         };
 
-        // Backend stub – no popup if it fails
         fetch(NOTIFY_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         }).catch((err) => console.error("NOTIFY FAILED:", err));
 
-        setStatus("BATCH APPROVED (NOTIFICATION STUB)");
+        setStatus("BATCH APPROVED");
       } catch (err) {
-        console.error("APPROVE/NOTIFY FAILED:", err);
+        console.error("APPROVE FAILED:", err);
         setStatus("ERROR APPROVING BATCH");
+      }
+    });
+
+    // SEND WHATSAPP (ADMIN ONLY, AFTER APPROVAL)
+    sendWhatsAppBtn.addEventListener("click", () => {
+      if (!selectedBatchKey) {
+        alert("NO BATCH SELECTED.");
+        return;
+      }
+
+      const groups = groupByBatch();
+      const items = groups[selectedBatchKey];
+      if (!items || !items.length) {
+        alert("BATCH HAS NO ITEMS.");
+        return;
+      }
+
+      const first = items[0];
+      const statusRaw = (first.batchStatus || "PENDING").toUpperCase();
+      if (statusRaw !== "APPROVED") {
+        alert("BATCH IS NOT APPROVED YET.");
+        return;
+      }
+
+      const batchTime = getBatchTimeForItem(first) || selectedBatchKey;
+      const message = buildBatchWhatsAppMessage(batchTime, items);
+      const opened = openWhatsAppForBatch(message);
+      if (!opened) {
+        alert("WHATSAPP MESSAGE (COPY & SEND):\n\n" + message);
       }
     });
 
