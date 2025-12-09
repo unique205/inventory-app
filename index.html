@@ -243,7 +243,7 @@
       border-bottom-color: var(--accent-soft);
     }
 
-    /* Item name suggestions (staff add form) */
+    /* Item name suggestions (staff/admin add form) */
     .name-input-wrapper {
       position: relative;
     }
@@ -274,6 +274,23 @@
 
     .suggestion-item:hover {
       background: #111827;
+    }
+
+    /* Bell animation */
+    #pending-badge.bell-alert {
+      border-color: #f97316;
+      color: #fecaca;
+      box-shadow: 0 0 10px #f97316;
+      animation: bellRing 0.9s infinite;
+    }
+
+    @keyframes bellRing {
+      0% { transform: translateX(0) rotate(0); }
+      20% { transform: translateX(-1px) rotate(-5deg); }
+      40% { transform: translateX(1px) rotate(5deg); }
+      60% { transform: translateX(-1px) rotate(-5deg); }
+      80% { transform: translateX(1px) rotate(5deg); }
+      100% { transform: translateX(0) rotate(0); }
     }
 
     /* ===== SMALL SCREENS ===== */
@@ -329,65 +346,68 @@
   </header>
 
   <main>
-    <!-- STAFF ADD / EDIT FORM -->
-    <section class="card">
-      <h2 id="form-title">ADD ITEM</h2>
-      <form id="item-form">
-        <div class="field-row">
-          <div>
-            <label for="item-name">ITEM NAME *</label>
-            <div class="name-input-wrapper">
-              <input id="item-name" class="upper" autocomplete="off" required />
-              <div id="item-suggestions" class="suggestions"></div>
+    <!-- STAFF ADD + BATCH (this will move into admin panel when admin logs in) -->
+    <div id="staff-batch-wrapper">
+      <!-- ADD / EDIT FORM -->
+      <section class="card">
+        <h2 id="form-title">ADD ITEM</h2>
+        <form id="item-form">
+          <div class="field-row">
+            <div>
+              <label for="item-name">ITEM NAME *</label>
+              <div class="name-input-wrapper">
+                <input id="item-name" class="upper" autocomplete="off" required />
+                <div id="item-suggestions" class="suggestions"></div>
+              </div>
+            </div>
+            <div>
+              <label for="item-qty">QUANTITY *</label>
+              <input id="item-qty" type="number" min="0" step="1" required />
+            </div>
+            <div>
+              <label for="item-group">GROUP</label>
+              <input id="item-group" class="upper" placeholder="E.G. RAW MATERIAL" />
             </div>
           </div>
           <div>
-            <label for="item-qty">QUANTITY *</label>
-            <input id="item-qty" type="number" min="0" step="1" required />
+            <label for="item-details">DETAILS</label>
+            <textarea id="item-details" class="upper" placeholder="GRADE, BRAND, ETC."></textarea>
           </div>
-          <div>
-            <label for="item-group">GROUP</label>
-            <input id="item-group" class="upper" placeholder="E.G. RAW MATERIAL" />
+          <div class="actions-row">
+            <button type="submit" id="submit-btn">ADD TO BATCH</button>
+            <button type="button" id="cancel-edit-btn" class="secondary" style="display:none;">CANCEL</button>
+            <div class="status">STATUS: <span id="status-text">IDLE</span></div>
           </div>
-        </div>
-        <div>
-          <label for="item-details">DETAILS</label>
-          <textarea id="item-details" class="upper" placeholder="GRADE, BRAND, ETC."></textarea>
-        </div>
-        <div class="actions-row">
-          <button type="submit" id="submit-btn">ADD TO BATCH</button>
-          <button type="button" id="cancel-edit-btn" class="secondary" style="display:none;">CANCEL</button>
-          <div class="status">STATUS: <span id="status-text">IDLE</span></div>
-        </div>
-      </form>
-    </section>
+        </form>
+      </section>
 
-    <!-- CURRENT BATCH (STAFF) -->
-    <section class="card">
-      <h2>CURRENT BATCH (NOT UPLOADED)</h2>
-      <p class="muted" id="batch-info">
-        ADD ITEMS ABOVE. THEY WILL APPEAR HERE UNTIL YOU UPLOAD THE BATCH.
-      </p>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>NAME</th>
-              <th>QTY</th>
-              <th>GROUP</th>
-              <th>DETAILS</th>
-              <th>ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody id="batch-body"></tbody>
-        </table>
-      </div>
-      <div class="actions-row" style="margin-top:0.6rem;">
-        <button type="button" id="upload-batch-btn" class="secondary">UPLOAD BATCH</button>
-        <span class="muted" id="batch-status"></span>
-      </div>
-    </section>
+      <!-- CURRENT BATCH -->
+      <section class="card">
+        <h2>CURRENT BATCH (NOT UPLOADED)</h2>
+        <p class="muted" id="batch-info">
+          ADD ITEMS ABOVE. THEY WILL APPEAR HERE UNTIL YOU UPLOAD THE BATCH.
+        </p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>NAME</th>
+                <th>QTY</th>
+                <th>GROUP</th>
+                <th>DETAILS</th>
+                <th>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody id="batch-body"></tbody>
+          </table>
+        </div>
+        <div class="actions-row" style="margin-top:0.6rem;">
+          <button type="button" id="upload-batch-btn" class="secondary">UPLOAD BATCH</button>
+          <span class="muted" id="batch-status"></span>
+        </div>
+      </section>
+    </div>
 
     <!-- ADMIN PANEL -->
     <section class="card" id="admin-card" style="display:none;">
@@ -398,44 +418,18 @@
 
       <!-- MAIN ADMIN TABS -->
       <div class="tab-row">
-        <button type="button" class="tab-btn admin-main-tab active" data-tab="add">ADD ITEMS</button>
-        <button type="button" class="tab-btn admin-main-tab" data-tab="batches">BATCHES</button>
+        <button type="button" class="tab-btn admin-main-tab" data-tab="add">ADD ITEMS</button>
+        <button type="button" class="tab-btn admin-main-tab active" data-tab="batches">BATCHES</button>
         <button type="button" class="tab-btn admin-main-tab" data-tab="items">ALL ITEMS</button>
       </div>
 
-      <!-- ADMIN ADD ITEMS TAB -->
-      <div id="admin-add-tab">
-        <div class="card" style="background:#020617; border-color:#1f2937; margin:0.3rem -0.1rem 0.7rem;">
-          <h3 style="margin:0 0 0.5rem; font-size:0.9rem;">ADD ITEM (ADMIN)</h3>
-          <form id="admin-add-form">
-            <div class="field-row">
-              <div>
-                <label for="admin-item-name">ITEM NAME *</label>
-                <input id="admin-item-name" class="upper" autocomplete="off" required />
-              </div>
-              <div>
-                <label for="admin-item-qty">QUANTITY *</label>
-                <input id="admin-item-qty" type="number" min="0" step="1" required />
-              </div>
-              <div>
-                <label for="admin-item-group">GROUP</label>
-                <input id="admin-item-group" class="upper" placeholder="E.G. RAW MATERIAL" />
-              </div>
-            </div>
-            <div>
-              <label for="admin-item-details">DETAILS</label>
-              <textarea id="admin-item-details" class="upper" placeholder="GRADE, BRAND, ETC."></textarea>
-            </div>
-            <div class="actions-row">
-              <button type="submit" class="secondary">ADD DIRECTLY</button>
-              <span class="muted" id="admin-add-status"></span>
-            </div>
-          </form>
-        </div>
+      <!-- ADMIN ADD ITEMS TAB (reuses staff add+batch UI) -->
+      <div id="admin-add-tab" style="display:none;">
+        <div id="admin-add-container"></div>
       </div>
 
       <!-- ADMIN BATCHES TAB -->
-      <div id="admin-batches-tab" style="display:none;">
+      <div id="admin-batches-tab">
         <!-- Pending / Approved mini-tabs -->
         <div class="tab-row" id="batch-status-tabs" style="margin-bottom:0.4rem;">
           <button type="button" class="tab-btn small batch-filter-tab active" data-batch-view="pending">PENDING</button>
@@ -562,7 +556,10 @@
     const appTitle = document.getElementById("app-title");
     const roleBadge = document.getElementById("role-badge");
 
-    // Staff form
+    const mainEl = document.querySelector("main");
+    const staffBatchWrapper = document.getElementById("staff-batch-wrapper");
+
+    // Staff/admin shared add form
     const itemForm = document.getElementById("item-form");
     const itemNameInput = document.getElementById("item-name");
     const itemQtyInput = document.getElementById("item-qty");
@@ -576,7 +573,7 @@
     const nameInputWrapper = document.querySelector(".name-input-wrapper");
     const itemSuggestions = document.getElementById("item-suggestions");
 
-    // Staff batch
+    // Shared batch view (used by staff & admin ADD tab)
     const batchBody = document.getElementById("batch-body");
     const uploadBatchBtn = document.getElementById("upload-batch-btn");
     const batchStatus = document.getElementById("batch-status");
@@ -584,18 +581,11 @@
     // Admin general
     const adminCard = document.getElementById("admin-card");
     const pendingBadge = document.getElementById("pending-badge");
-    const tabButtons = document.querySelectorAll(".admin-main-tab");
     const adminAddTab = document.getElementById("admin-add-tab");
+    const adminAddContainer = document.getElementById("admin-add-container");
     const adminBatchesTab = document.getElementById("admin-batches-tab");
     const adminItemsTab = document.getElementById("admin-items-tab");
-
-    // Admin add form
-    const adminAddForm = document.getElementById("admin-add-form");
-    const adminItemNameInput = document.getElementById("admin-item-name");
-    const adminItemQtyInput = document.getElementById("admin-item-qty");
-    const adminItemGroupInput = document.getElementById("admin-item-group");
-    const adminItemDetailsInput = document.getElementById("admin-item-details");
-    const adminAddStatus = document.getElementById("admin-add-status");
+    const tabButtons = document.querySelectorAll(".admin-main-tab");
 
     // Admin batches
     const batchListInfo = document.getElementById("batch-list-info");
@@ -755,11 +745,38 @@
       cancelEditBtn.style.display = "none";
     }
 
+    function moveStaffUIForRole() {
+      if (!staffBatchWrapper || !adminCard || !mainEl || !adminAddContainer) return;
+      if (currentRole === "admin") {
+        // Move staff UI into admin ADD tab
+        if (staffBatchWrapper.parentNode !== adminAddContainer) {
+          adminAddContainer.appendChild(staffBatchWrapper);
+        }
+      } else {
+        // Move staff UI back above admin panel
+        if (staffBatchWrapper.parentNode !== mainEl) {
+          mainEl.insertBefore(staffBatchWrapper, adminCard);
+        }
+      }
+    }
+
+    function setAdminMainTab(tab) {
+      tabButtons.forEach((b) => {
+        b.classList.toggle("active", b.dataset.tab === tab);
+      });
+      adminAddTab.style.display = tab === "add" ? "block" : "none";
+      adminBatchesTab.style.display = tab === "batches" ? "block" : "none";
+      adminItemsTab.style.display = tab === "items" ? "block" : "none";
+    }
+
     function updateRoleUI() {
+      moveStaffUIForRole();
+
       if (currentRole === "admin") {
         roleBadge.textContent = "ADMIN";
         roleBadge.className = "badge badge-admin";
         adminCard.style.display = "block";
+        setAdminMainTab("batches");
       } else {
         roleBadge.textContent = "STAFF";
         roleBadge.className = "badge badge-staff";
@@ -767,6 +784,27 @@
       }
       renderBatch();
       renderAdminViews();
+    }
+
+    // Simple "ding" sound when clicking bell (needs user interaction)
+    function playBellSound() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = 880;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        gain.gain.value = 0.1;
+        const now = ctx.currentTime;
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+        osc.start(now);
+        osc.stop(now + 0.6);
+      } catch (e) {
+        console.warn("Audio not available:", e);
+      }
     }
 
     // ===== LOAD / SAVE INVENTORY =====
@@ -809,7 +847,7 @@
       currentSha = data.content.sha;
     }
 
-    // ===== STAFF BATCH =====
+    // ===== STAFF/ADMIN BATCH UI =====
     function renderBatch() {
       batchBody.innerHTML = "";
 
@@ -832,7 +870,6 @@
           batchBody.appendChild(tr);
         });
       }
-      // batchStatus text handled by upload / others
     }
 
     batchBody.addEventListener("click", (e) => {
@@ -847,9 +884,9 @@
         itemQtyInput.value = item.quantity;
         itemGroupInput.value = item.group || "";
         itemDetailsInput.value = item.details || "";
-        submitBtn.textContent = "UPDATE BATCH ITEM";
+        submitBtn.textContent = currentRole === "admin" ? "UPDATE ITEM" : "UPDATE BATCH ITEM";
         cancelEditBtn.style.display = "inline-block";
-        formTitle.textContent = "EDIT BATCH ITEM";
+        formTitle.textContent = currentRole === "admin" ? "EDIT ITEM (ADMIN)" : "EDIT BATCH ITEM";
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else if (btn.dataset.action === "remove-batch") {
         batchItems.splice(idx, 1);
@@ -884,8 +921,6 @@
         await saveInventory();
         await loadInventory();
 
-        // STAFF DOES NOT SEND WHATSAPP – ONLY ADMIN AFTER APPROVAL
-
         batchItems = [];
         renderBatch();
         batchStatus.textContent =
@@ -898,7 +933,7 @@
       }
     });
 
-    // ===== ITEM NAME SUGGESTIONS (STAFF FORM) =====
+    // ===== ITEM NAME SUGGESTIONS =====
     function clearSuggestions() {
       if (!itemSuggestions) return;
       itemSuggestions.innerHTML = "";
@@ -1001,7 +1036,7 @@
         return db - da;
       });
 
-      // Count pending / approved batches (unique)
+      // Count pending / approved batches
       let pendingCount = 0;
       let approvedCount = 0;
       keys.forEach((k) => {
@@ -1013,9 +1048,14 @@
 
       if (pendingBadge) {
         pendingBadge.textContent = `🔔 ${pendingCount}`;
+        if (pendingCount > 0) {
+          pendingBadge.classList.add("bell-alert");
+        } else {
+          pendingBadge.classList.remove("bell-alert");
+        }
       }
 
-      // BATCH LIST TAB (filtered by currentBatchFilter + search)
+      // BATCH LIST TAB
       batchList.innerHTML = "";
       let shownCount = 0;
 
@@ -1066,7 +1106,7 @@
       if (!keys.length) {
         batchListInfo.textContent = "NO BATCHES FOUND.";
       } else {
-        batchListInfo.textContent = `${pendingCount} PENDING • ${approvedCount} APPROVED (FILTERED VIEW: ${currentBatchFilter.toUpperCase()}, SHOWING ${shownCount})`;
+        batchListInfo.textContent = `${pendingCount} PENDING • ${approvedCount} APPROVED (VIEW: ${currentBatchFilter.toUpperCase()}, SHOWING ${shownCount})`;
       }
 
       // ALL ITEMS TAB
@@ -1342,7 +1382,7 @@
       }
     }
 
-    // STAFF FORM SUBMIT
+    // STAFF/ADMIN FORM SUBMIT
     itemForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -1358,122 +1398,36 @@
 
       const now = new Date().toISOString();
 
-      if (currentRole === "staff") {
-        const baseItem = {
-          id:
-            batchEditIndex === null
-              ? generateId()
-              : batchItems[batchEditIndex].id,
-          name,
-          quantity: qty,
-          group,
-          details,
-          timestamp:
-            batchEditIndex === null
-              ? now
-              : batchItems[batchEditIndex].timestamp || now,
-          updatedAt: now
-        };
-
-        if (batchEditIndex === null) {
-          batchItems.push(baseItem);
-          setStatus("ITEM ADDED TO BATCH");
-        } else {
-          batchItems[batchEditIndex] = baseItem;
-          setStatus("BATCH ITEM UPDATED");
-        }
-
-        renderBatch();
-        resetForm();
-        return;
-      }
-
-      // ADMIN EDITING EXISTING ITEM USING TOP FORM
-      if (currentRole === "admin") {
-        if (!adminEditId) {
-          setStatus("SELECT AN ITEM FROM ADMIN TABLE");
-          return;
-        }
-
-        try {
-          setStatus("UPDATING ITEM…");
-          await loadInventory();
-
-          const idx = inventory.findIndex((it) => it.id === adminEditId);
-          if (idx === -1) {
-            setStatus("ITEM NOT FOUND");
-            return;
-          }
-
-          inventory[idx] = {
-            ...inventory[idx],
-            name,
-            quantity: qty,
-            group,
-            details,
-            updatedAt: now
-          };
-
-          await saveInventory();
-          await loadInventory();
-          resetForm();
-          setStatus("ITEM UPDATED");
-        } catch (err) {
-          console.error("SAVE FAILED:", err);
-          setStatus("ERROR SAVING");
-        }
-      }
-    });
-
-    cancelEditBtn.addEventListener("click", () => resetForm());
-
-    // ADMIN ADD FORM SUBMIT (DIRECT ADD)
-    adminAddForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const name = adminItemNameInput.value.trim().toUpperCase();
-      const qty = Number(adminItemQtyInput.value || 0);
-      const group = adminItemGroupInput.value.trim().toUpperCase();
-      const details = adminItemDetailsInput.value.trim().toUpperCase();
-
-      if (!name || Number.isNaN(qty)) {
-        alert("NAME AND QUANTITY ARE REQUIRED.");
-        return;
-      }
-
-      const now = new Date().toISOString();
-      const batchId = generateBatchId();
-
-      const newItem = {
-        id: generateId(),
+      // Both staff and admin use same batch mechanism here
+      const baseItem = {
+        id:
+          batchEditIndex === null
+            ? generateId()
+            : batchItems[batchEditIndex].id,
         name,
         quantity: qty,
         group,
         details,
-        timestamp: now,
-        updatedAt: now,
-        batchTime: now,
-        batchId,
-        batchStatus: "APPROVED", // admin direct add is approved
-        batchName: "ADMIN-ADD"
+        timestamp:
+          batchEditIndex === null
+            ? now
+            : batchItems[batchEditIndex].timestamp || now,
+        updatedAt: now
       };
 
-      try {
-        adminAddStatus.textContent = "SAVING…";
-        await loadInventory();
-        inventory.push(newItem);
-        await saveInventory();
-        await loadInventory();
-        adminAddStatus.textContent = "ITEM ADDED.";
-        adminItemNameInput.value = "";
-        adminItemQtyInput.value = "";
-        adminItemGroupInput.value = "";
-        adminItemDetailsInput.value = "";
-      } catch (err) {
-        console.error("ADMIN ADD FAILED:", err);
-        adminAddStatus.textContent = "ERROR SAVING ITEM.";
+      if (batchEditIndex === null) {
+        batchItems.push(baseItem);
+        setStatus("ITEM ADDED TO BATCH");
+      } else {
+        batchItems[batchEditIndex] = baseItem;
+        setStatus("BATCH ITEM UPDATED");
       }
+
+      renderBatch();
+      resetForm();
     });
+
+    cancelEditBtn.addEventListener("click", () => resetForm());
 
     // ADMIN LOGIN VIA TITLE
     appTitle.addEventListener("click", () => {
@@ -1499,22 +1453,7 @@
     // ADMIN MAIN TABS (ADD / BATCHES / ITEMS)
     tabButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
-        tabButtons.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        const tab = btn.dataset.tab;
-        if (tab === "add") {
-          adminAddTab.style.display = "block";
-          adminBatchesTab.style.display = "none";
-          adminItemsTab.style.display = "none";
-        } else if (tab === "batches") {
-          adminAddTab.style.display = "none";
-          adminBatchesTab.style.display = "block";
-          adminItemsTab.style.display = "none";
-        } else if (tab === "items") {
-          adminAddTab.style.display = "none";
-          adminBatchesTab.style.display = "none";
-          adminItemsTab.style.display = "block";
-        }
+        setAdminMainTab(btn.dataset.tab);
       });
     });
 
@@ -1554,6 +1493,19 @@
       itemSearchTerm = "";
       itemSearchResult.textContent = "";
       renderAdminViews();
+    });
+
+    // BELL CLICK: go to batches → pending + ding + scroll
+    pendingBadge.addEventListener("click", () => {
+      if (currentRole !== "admin") return;
+      setAdminMainTab("batches");
+      currentBatchFilter = "pending";
+      batchFilterButtons.forEach((b) => {
+        b.classList.toggle("active", b.dataset.batchView === "pending");
+      });
+      renderAdminViews();
+      adminCard.scrollIntoView({ behavior: "smooth" });
+      playBellSound();
     });
 
     // INIT
