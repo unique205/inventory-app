@@ -328,6 +328,39 @@
       100% { transform: translateX(0) rotate(0); }
     }
 
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .modal {
+      background: var(--card);
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      padding: 0.9rem 1rem 1rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .modal h3 {
+      margin: 0 0 0.6rem;
+      font-size: 0.95rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.4rem;
+      margin-top: 0.6rem;
+    }
+
     /* ===== SMALL SCREENS ===== */
     @media (max-width: 640px) {
       header {
@@ -352,7 +385,6 @@
         margin-right: 0;
       }
 
-      /* Hide ID column on narrow screens */
       th:nth-child(1),
       td:nth-child(1) {
         display: none;
@@ -412,15 +444,26 @@
           <div style="margin-top:0.5rem;">
             <label>IMAGES (REQUIRED, MAX 10, ≤ 2MB EACH)</label>
             <div class="actions-row" style="margin-top:0.25rem;">
-              <button type="button" id="add-image-btn" class="secondary small">
-                UPLOAD / CAPTURE
+              <button type="button" id="upload-image-btn" class="secondary small">
+                UPLOAD
+              </button>
+              <button type="button" id="capture-image-btn" class="secondary small">
+                CAPTURE
               </button>
               <span class="muted" id="image-status-text"></span>
             </div>
             <input
-              id="item-images-input"
+              id="item-images-upload-input"
               type="file"
               accept="image/*"
+              multiple
+              style="display:none;"
+            />
+            <input
+              id="item-images-capture-input"
+              type="file"
+              accept="image/*"
+              capture="environment"
               multiple
               style="display:none;"
             />
@@ -608,6 +651,37 @@
     </section>
   </main>
 
+  <!-- EDIT MODAL FOR ADMIN -->
+  <div id="edit-modal" class="modal-overlay">
+    <div class="modal">
+      <h3>EDIT ITEM</h3>
+      <div class="field-row" style="margin-bottom:0.4rem;">
+        <div>
+          <label for="modal-name">ITEM NAME *</label>
+          <input id="modal-name" class="upper" />
+        </div>
+        <div>
+          <label for="modal-qty">QTY *</label>
+          <input id="modal-qty" type="number" min="0" step="1" />
+        </div>
+      </div>
+      <div class="field-row" style="margin-bottom:0.4rem;">
+        <div>
+          <label for="modal-group">GROUP</label>
+          <input id="modal-group" class="upper" />
+        </div>
+      </div>
+      <div>
+        <label for="modal-details">DETAILS</label>
+        <textarea id="modal-details" class="upper"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="modal-cancel-btn" class="secondary small">CANCEL</button>
+        <button type="button" id="modal-save-btn" class="small">SAVE</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ===== CONFIG =====
     const BACKEND_URL = "https://inventory-backend-s4sv.onrender.com/get-token";
@@ -615,7 +689,7 @@
     const REPO_OWNER = "unique205";
     const REPO_NAME = "inventory-data";
     const FILE_PATH = "data/inventory.json";
-    const IMAGES_FILE_PATH = "images.json"; // <-- images.json at repo root
+    const IMAGES_FILE_PATH = "images.json";
     const BRANCH = "main";
     const ADMIN_PASSWORD = "admin123";
     const ADMIN_PHONE = "917588756668";
@@ -631,9 +705,9 @@
     let selectedBatchKey = null;
 
     // images
-    let imagesStore = []; // [{itemId, images:[{id,name,size,dataUrl}]}]
+    let imagesStore = [];
     let imagesSha = null;
-    let formImages = []; // current item images (for add/edit)
+    let formImages = [];
 
     // Search/filter
     let batchSearchName = "";
@@ -645,6 +719,9 @@
     let reportGroupFilter = "";
     let reportStatusFilter = "ALL";
     let reportBatchNameFilter = "";
+
+    // modal
+    let modalEditId = null;
 
     // ===== DOM =====
     const appTitle = document.getElementById("app-title");
@@ -667,8 +744,10 @@
     const nameInputWrapper = document.querySelector(".name-input-wrapper");
     const itemSuggestions = document.getElementById("item-suggestions");
 
-    const addImageBtn = document.getElementById("add-image-btn");
-    const imageInput = document.getElementById("item-images-input");
+    const uploadImageBtn = document.getElementById("upload-image-btn");
+    const captureImageBtn = document.getElementById("capture-image-btn");
+    const uploadImageInput = document.getElementById("item-images-upload-input");
+    const captureImageInput = document.getElementById("item-images-capture-input");
     const imageList = document.getElementById("item-images-list");
     const imageStatusText = document.getElementById("image-status-text");
 
@@ -710,6 +789,15 @@
     const reportGroupInput = document.getElementById("report-group");
     const reportStatusSelect = document.getElementById("report-status");
     const reportBatchInput = document.getElementById("report-batch");
+
+    // modal DOM
+    const editModal = document.getElementById("edit-modal");
+    const modalNameInput = document.getElementById("modal-name");
+    const modalQtyInput = document.getElementById("modal-qty");
+    const modalGroupInput = document.getElementById("modal-group");
+    const modalDetailsInput = document.getElementById("modal-details");
+    const modalCancelBtn = document.getElementById("modal-cancel-btn");
+    const modalSaveBtn = document.getElementById("modal-save-btn");
 
     // ===== UTILS =====
     function setStatus(msg) {
@@ -1027,7 +1115,7 @@
       }
     });
 
-    // ===== IMAGES LOAD/SAVE (SEPARATE FILE) =====
+    // ===== IMAGES LOAD/SAVE =====
     async function loadImages() {
       try {
         const data = await githubRequest(
@@ -1183,7 +1271,7 @@
       }
     });
 
-    // ===== IMAGE UI (FORM) =====
+    // ===== IMAGE UI & COMPRESSION =====
     function renderFormImages() {
       if (!imageList) return;
       if (!formImages.length) {
@@ -1208,9 +1296,12 @@
       imageStatusText.textContent = `${formImages.length} IMAGE(S)`;
     }
 
-    addImageBtn.addEventListener("click", () => {
-      if (!imageInput) return;
-      imageInput.click();
+    uploadImageBtn.addEventListener("click", () => {
+      uploadImageInput.click();
+    });
+
+    captureImageBtn.addEventListener("click", () => {
+      captureImageInput.click();
     });
 
     // Compress image to <= maxSizeBytes using canvas (JPEG)
@@ -1272,43 +1363,50 @@
       };
     }
 
-    imageInput.addEventListener("change", (e) => {
-      const files = Array.from(e.target.files || []);
+    async function processSelectedFiles(files) {
       if (!files.length) return;
 
       const maxImages = 10;
-      const maxSize = 2 * 1024 * 1024; // 2MB
+      const maxSize = 2 * 1024 * 1024;
       let rejectedTooMany = false;
       let rejectedSize = false;
 
-      (async () => {
-        for (const file of files) {
-          if (formImages.length >= maxImages) {
-            rejectedTooMany = true;
-            break;
-          }
-
-          const compressed = await compressImageFile(file, maxSize);
-          if (!compressed) {
-            rejectedSize = true;
-            continue;
-          }
-
-          formImages.push(compressed);
+      for (const file of files) {
+        if (formImages.length >= maxImages) {
+          rejectedTooMany = true;
+          break;
         }
 
-        renderFormImages();
-
-        if (rejectedTooMany) {
-          imageStatusText.textContent = "MAX 10 IMAGES REACHED.";
-        } else if (rejectedSize) {
-          imageStatusText.textContent = "SOME IMAGES COULD NOT BE COMPRESSED <= 2MB.";
-        } else {
-          imageStatusText.textContent = `${formImages.length} IMAGE(S)`;
+        const compressed = await compressImageFile(file, maxSize);
+        if (!compressed) {
+          rejectedSize = true;
+          continue;
         }
 
-        imageInput.value = "";
-      })();
+        formImages.push(compressed);
+      }
+
+      renderFormImages();
+
+      if (rejectedTooMany) {
+        imageStatusText.textContent = "MAX 10 IMAGES REACHED.";
+      } else if (rejectedSize) {
+        imageStatusText.textContent = "SOME IMAGES COULD NOT BE COMPRESSED <= 2MB.";
+      } else {
+        imageStatusText.textContent = `${formImages.length} IMAGE(S)`;
+      }
+    }
+
+    uploadImageInput.addEventListener("change", (e) => {
+      const files = Array.from(e.target.files || []);
+      processSelectedFiles(files);
+      uploadImageInput.value = "";
+    });
+
+    captureImageInput.addEventListener("change", (e) => {
+      const files = Array.from(e.target.files || []);
+      processSelectedFiles(files);
+      captureImageInput.value = "";
     });
 
     imageList.addEventListener("click", (e) => {
@@ -1746,7 +1844,80 @@
       if (!opened) alert("WHATSAPP MESSAGE (COPY & SEND):\n\n" + message);
     });
 
-    // ADMIN TABLE ACTIONS
+    // ===== MODAL (ADMIN EDIT POPUP) =====
+    function openEditModal(item) {
+      modalEditId = item.id;
+      modalNameInput.value = (item.name || "").toString().toUpperCase();
+      modalQtyInput.value = item.quantity ?? "";
+      modalGroupInput.value = (item.group || "").toString().toUpperCase();
+      modalDetailsInput.value = (item.details || "").toString().toUpperCase();
+      editModal.style.display = "flex";
+    }
+
+    function closeEditModal() {
+      modalEditId = null;
+      editModal.style.display = "none";
+    }
+
+    modalCancelBtn.addEventListener("click", () => {
+      closeEditModal();
+    });
+
+    editModal.addEventListener("click", (e) => {
+      if (e.target === editModal) {
+        closeEditModal();
+      }
+    });
+
+    modalSaveBtn.addEventListener("click", async () => {
+      if (!modalEditId) {
+        closeEditModal();
+        return;
+      }
+
+      const name = modalNameInput.value.trim().toUpperCase();
+      const qty = Number(modalQtyInput.value || 0);
+      const group = modalGroupInput.value.trim().toUpperCase();
+      const details = modalDetailsInput.value.trim().toUpperCase();
+
+      if (!name || Number.isNaN(qty)) {
+        alert("NAME AND QUANTITY ARE REQUIRED.");
+        return;
+      }
+
+      const now = new Date().toISOString();
+
+      try {
+        setStatus("UPDATING ITEM…");
+        await loadInventory();
+
+        const idx = inventory.findIndex((it) => it.id === modalEditId);
+        if (idx === -1) {
+          setStatus("ITEM NOT FOUND");
+          closeEditModal();
+          return;
+        }
+
+        inventory[idx] = {
+          ...inventory[idx],
+          name,
+          quantity: qty,
+          group,
+          details,
+          updatedAt: now
+        };
+
+        await saveInventory();
+        await loadInventory();
+        closeEditModal();
+        setStatus("ITEM UPDATED");
+      } catch (err) {
+        console.error("MODAL SAVE FAILED:", err);
+        setStatus("ERROR SAVING");
+      }
+    });
+
+    // ADMIN TABLE ACTIONS (now open modal)
     adminBatchBody.addEventListener("click", handleAdminTableClick);
     inventoryBody.addEventListener("click", handleAdminTableClick);
 
@@ -1761,22 +1932,7 @@
           setStatus("ITEM NOT FOUND");
           return;
         }
-
-        currentRole = "admin";
-        updateRoleUI();
-
-        adminEditId = id;
-        itemNameInput.value = (item.name || "").toString().toUpperCase();
-        itemQtyInput.value = item.quantity ?? "";
-        itemGroupInput.value = (item.group || "").toString().toUpperCase();
-        itemDetailsInput.value = (item.details || "").toString().toUpperCase();
-        formImages = getImagesForItem(id).map((img) => ({ ...img }));
-        renderFormImages();
-
-        submitBtn.textContent = "UPDATE BATCH ITEM";
-        cancelEditBtn.style.display = "inline-block";
-        formTitle.textContent = "EDIT ITEM (ADMIN)";
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        openEditModal(item);
       } else if (btn.dataset.action === "delete-item") {
         if (!confirm("DELETE THIS ITEM?")) return;
 
@@ -1806,7 +1962,7 @@
       }
     }
 
-    // FORM SUBMIT (staff + admin)
+    // FORM SUBMIT (staff + admin batch form)
     itemForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -1843,7 +1999,7 @@
       };
 
       if (currentRole === "admin" && adminEditId && batchEditIndex === null) {
-        // Editing uploaded item
+        // Editing uploaded item via top form (rare – kept for flexibility)
         try {
           setStatus("UPDATING ITEM…");
           await loadInventory();
@@ -1878,7 +2034,6 @@
         return;
       }
 
-      // BATCH ITEM
       const copyImages = formImages.map((img) => ({ ...img }));
 
       if (batchEditIndex === null) {
