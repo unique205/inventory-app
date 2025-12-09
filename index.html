@@ -1,831 +1,1309 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📦 Inventory System</title>
-    <style>
-        /* RESET */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        
-        /* SETUP SCREEN */
-        .setup-screen { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
-        .setup-screen h2 { color: #2c3e50; margin-bottom: 20px; }
-        
-        /* TOKEN BOX */
-        .token-box { background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0; text-align: left; }
-        .token-box input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 5px; font-size: 16px; }
-        
-        /* BUTTONS */
-        .btn { padding: 12px 24px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin: 5px; }
-        .btn-primary { background: #3498db; color: white; }
-        .btn-primary:hover { background: #2980b9; }
-        .btn-secondary { background: #95a5a6; color: white; }
-        .btn-success { background: #27ae60; color: white; }
-        .btn-warning { background: #f39c12; color: white; }
-        .btn-danger { background: #e74c3c; color: white; }
-        
-        /* LOGIN SCREEN */
-        .login-screen { text-align: center; padding: 40px; }
-        .login-buttons { display: flex; flex-direction: column; gap: 15px; max-width: 400px; margin: 30px auto; }
-        .login-btn { padding: 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; text-align: left; }
-        .staff-btn { background: #3498db; color: white; }
-        .admin-btn { background: #2c3e50; color: white; }
-        
-        /* STAFF FORM */
-        .staff-form { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #2c3e50; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        .form-row { display: flex; gap: 15px; }
-        .form-row .form-group { flex: 1; }
-        
-        /* SUGGESTIONS */
-        .suggestions { border: 1px solid #ddd; background: white; max-height: 200px; overflow-y: auto; margin-top: 5px; display: none; position: absolute; width: 100%; z-index: 100; }
-        .suggestion { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; }
-        .suggestion:hover { background: #f5f5f5; }
-        
-        /* MESSAGES */
-        .success { background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-top: 15px; text-align: center; }
-        .error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin: 10px 0; }
-        
-        /* ADMIN DASHBOARD LAYOUT */
-        .admin-dashboard { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
-        
-        /* BATCH MANAGEMENT */
-        .batch-section { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .batch-list { max-height: 500px; overflow-y: auto; margin-top: 15px; }
-        .batch-item { padding: 15px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        .batch-item.approved { border-left: 4px solid #27ae60; }
-        .batch-item.pending { border-left: 4px solid #f39c12; }
-        .batch-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .batch-actions { display: flex; gap: 5px; }
-        .batch-badge { padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-        .batch-approved { background: #27ae60; color: white; }
-        .batch-pending { background: #f39c12; color: white; }
-        
-        /* INVENTORY TABLE */
-        .inventory-section { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .inventory-table { margin-top: 20px; }
-        .table-header { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr 1fr; background: #34495e; color: white; padding: 15px; font-weight: bold; }
-        .table-row { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr 1fr; padding: 12px 15px; border-bottom: 1px solid #eee; align-items: center; }
-        .table-row:hover { background: #f9f9f9; }
-        .table-row.highlighted { background: #fffacd; }
-        .batch-info { font-size: 12px; color: #666; margin-top: 5px; }
-        
-        /* SEARCH & FILTERS */
-        .search-section { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .search-section input, .search-section select { flex: 1; min-width: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        
-        /* CONTROLS */
-        .admin-controls { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
-        
-        /* MODAL */
-        .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
-        
-        /* WHATSAPP MESSAGE */
-        .whatsapp-message { background: #25D366; color: white; padding: 15px; border-radius: 5px; margin-top: 20px; }
-        .whatsapp-text { background: white; color: #333; padding: 10px; border-radius: 3px; font-family: monospace; margin: 10px 0; white-space: pre-wrap; }
-        
-        /* UTILITY */
-        .hidden { display: none !important; }
-        .visible { display: block !important; }
-        .text-center { text-align: center; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>INVENTORY SYSTEM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #020617;
+      --border: #1f2937;
+      --accent: #4f46e5;
+      --accent-soft: #6366f1;
+      --danger: #b91c1c;
+      --danger-soft: #dc2626;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: #020617;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .badge {
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      border: 1px solid #4b5563;
+      background: #111827;
+    }
+
+    .badge-staff {
+      border-color: #3b82f6;
+      color: #bfdbfe;
+    }
+
+    .badge-admin {
+      border-color: #22c55e;
+      color: #bbf7d0;
+    }
+
+    main {
+      max-width: 1040px;
+      margin: 1rem auto 2rem;
+      padding: 0 0.75rem;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      padding: 0.9rem 0.9rem 1.1rem;
+      margin-bottom: 1rem;
+    }
+
+    .card h2 {
+      margin: 0 0 0.6rem;
+      font-size: 1rem;
+    }
+
+    label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+    }
+
+    input,
+    textarea,
+    button {
+      font: inherit;
+      border-radius: 0.4rem;
+      border: 1px solid #374151;
+      background: #020617;
+      color: var(--text-main);
+      padding: 0.4rem 0.55rem;
+    }
+
+    input.upper,
+    textarea.upper {
+      text-transform: uppercase;
+    }
+
+    textarea {
+      min-height: 50px;
+      resize: vertical;
+    }
+
+    button {
+      cursor: pointer;
+      background: var(--accent);
+      border-color: var(--accent);
+      font-weight: 500;
+      font-size: 0.85rem;
+    }
+
+    button:hover {
+      background: var(--accent-soft);
+    }
+
+    button.secondary {
+      background: #111827;
+      border-color: #4b5563;
+    }
+
+    button.secondary:hover {
+      background: #1f2937;
+    }
+
+    button.danger {
+      background: var(--danger);
+      border-color: var(--danger);
+    }
+
+    button.danger:hover {
+      background: var(--danger-soft);
+    }
+
+    button.small {
+      padding: 0.22rem 0.45rem;
+      font-size: 0.7rem;
+      margin-right: 0.25rem;
+    }
+
+    .actions-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
+    }
+
+    .actions-row > button {
+      flex: 0 0 auto;
+    }
+
+    .status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .muted {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .table-wrapper {
+      margin-top: 0.4rem;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    th,
+    td {
+      padding: 0.35rem 0.35rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #020617;
+    }
+
+    tr:hover td {
+      background: #020617;
+    }
+
+    .batch-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.45rem 0.5rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border);
+      margin-bottom: 0.4rem;
+      font-size: 0.78rem;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-row {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: #111827;
+      border-color: #4b5563;
+      font-size: 0.8rem;
+      padding: 0.3rem 0.6rem;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Highlight for searched items */
+    tr.highlight-row td {
+      background: #111827;
+      border-bottom-color: var(--accent-soft);
+    }
+
+    /* ===== SMALL SCREENS ===== */
+    @media (max-width: 640px) {
+      header {
+        gap: 0.5rem;
+      }
+
+      header h1 {
+        font-size: 1rem;
+      }
+
+      .actions-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .actions-row > button {
+        width: 100%;
+      }
+
+      button.small {
+        width: 100%;
+        margin-right: 0;
+      }
+
+      /* Hide ID column on narrow screens */
+      th:nth-child(1),
+      td:nth-child(1) {
+        display: none;
+      }
+
+      /* Actions column vertically stacked */
+      td.actions-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+    }
+
+    /* Wider screens: 2-column row for name/qty/group */
+    @media (min-width: 641px) {
+      .field-row {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- SETUP SCREEN -->
-        <div id="setupScreen" class="setup-screen">
-            <h2>🔐 One-Time Setup</h2>
-            <p><strong>Admin:</strong> Setup token once. Staff will use same token.</p>
-            
-            <div class="token-box">
-                <p><strong>Step 1: Generate Token</strong></p>
-                <ol style="margin: 15px 0 15px 20px;">
-                    <li>Go to: <a href="https://github.com/settings/tokens" target="_blank">GitHub Tokens</a></li>
-                    <li>Click "Generate new token" → "Generate new token (classic)"</li>
-                    <li>Token name: <code>inventory-system</code></li>
-                    <li>Expiration: <strong>No expiration</strong></li>
-                    <li>Select scopes: <strong>ONLY "repo"</strong></li>
-                    <li>Click "Generate token"</li>
-                    <li><strong>COPY THE TOKEN</strong> (starts with ghp_)</li>
-                </ol>
-                
-                <p><strong>Step 2: Enter Token Here</strong></p>
-                <input type="text" id="githubToken" placeholder="Paste token starting with ghp_...">
-            </div>
-            
-            <div>
-                <button class="btn btn-primary" onclick="saveToken()">✅ Save Token & Continue</button>
-            </div>
+  <header>
+    <h1 id="app-title">INVENTORY SYSTEM</h1>
+    <span id="role-badge" class="badge badge-staff">STAFF</span>
+  </header>
+
+  <main>
+    <!-- ADD / EDIT FORM -->
+    <section class="card">
+      <h2 id="form-title">ADD ITEM</h2>
+      <form id="item-form">
+        <div class="field-row">
+          <div>
+            <label for="item-name">ITEM NAME *</label>
+            <input id="item-name" class="upper" list="name-list" autocomplete="off" required />
+            <datalist id="name-list"></datalist>
+          </div>
+          <div>
+            <label for="item-qty">QUANTITY *</label>
+            <input id="item-qty" type="number" min="0" step="1" required />
+          </div>
+          <div>
+            <label for="item-group">GROUP</label>
+            <input id="item-group" class="upper" placeholder="E.G. RAW MATERIAL" />
+          </div>
+        </div>
+        <div>
+          <label for="item-details">DETAILS</label>
+          <textarea id="item-details" class="upper" placeholder="GRADE, BRAND, ETC."></textarea>
+        </div>
+        <div class="actions-row">
+          <button type="submit" id="submit-btn">ADD TO BATCH</button>
+          <button type="button" id="cancel-edit-btn" class="secondary" style="display:none;">CANCEL</button>
+          <div class="status">STATUS: <span id="status-text">IDLE</span></div>
+        </div>
+      </form>
+    </section>
+
+    <!-- CURRENT BATCH -->
+    <section class="card">
+      <h2>CURRENT BATCH (NOT UPLOADED)</h2>
+      <p class="muted" id="batch-info">
+        ADD ITEMS ABOVE. THEY WILL APPEAR HERE UNTIL YOU UPLOAD THE BATCH.
+      </p>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>NAME</th>
+              <th>QTY</th>
+              <th>GROUP</th>
+              <th>DETAILS</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="batch-body"></tbody>
+        </table>
+      </div>
+      <div class="actions-row" style="margin-top:0.6rem;">
+        <button type="button" id="upload-batch-btn" class="secondary">UPLOAD BATCH</button>
+        <span class="muted" id="batch-status"></span>
+      </div>
+    </section>
+
+    <!-- ADMIN PANEL -->
+    <section class="card" id="admin-card" style="display:none;">
+      <h2>ADMIN PANEL</h2>
+      <div class="tab-row">
+        <button type="button" class="tab-btn active" data-tab="batches">BATCHES</button>
+        <button type="button" class="tab-btn" data-tab="items">ALL ITEMS</button>
+      </div>
+
+      <!-- BATCH TAB -->
+      <div id="admin-batches-tab">
+        <div class="muted" id="batch-list-info">LOADING…</div>
+
+        <!-- Batch search controls -->
+        <div class="field-row" style="margin:0.4rem 0;">
+          <div>
+            <label for="batch-search-name">SEARCH BATCH BY NAME</label>
+            <input id="batch-search-name" placeholder="TYPE BATCH NAME…" />
+          </div>
+          <div>
+            <label for="batch-search-date">SEARCH BATCH BY DATE</label>
+            <input id="batch-search-date" type="date" />
+          </div>
+        </div>
+        <div class="actions-row" style="margin-top:0.2rem;">
+          <button type="button" id="batch-search-btn" class="secondary small">SEARCH</button>
+          <button type="button" id="batch-clear-search-btn" class="secondary small">CLEAR</button>
         </div>
 
-        <!-- LOGIN SCREEN -->
-        <div id="loginScreen" class="login-screen hidden">
-            <h1>📦 Inventory System</h1>
-            <p>Select your role:</p>
-            
-            <div class="login-buttons">
-                <button class="login-btn staff-btn" onclick="loginAsStaff()">
-                    <h3>👷 STAFF USER</h3>
-                    <p>• Add new items only<br>• Cannot view or delete<br>• Simple interface</p>
-                </button>
-                
-                <button class="login-btn admin-btn" onclick="loginAsAdmin()">
-                    <h3>👑 ADMIN USER</h3>
-                    <p>• View ALL inventory with batches<br>• Add/Edit/Delete items<br>• Manage batches<br>• WhatsApp notifications</p>
-                </button>
-            </div>
-            
-            <div style="margin-top: 30px;">
-                <button class="btn btn-secondary" onclick="resetApp()">🔄 Reset Token</button>
-            </div>
+        <div id="batch-list" style="margin-top:0.5rem;"></div>
+        <div id="batch-items-wrapper" style="margin-top:0.7rem; display:none;">
+          <div class="actions-row" style="margin-bottom:0.3rem;">
+            <span class="muted" id="selected-batch-label">NO BATCH SELECTED.</span>
+            <button type="button" id="approve-batch-btn" class="secondary">
+              APPROVE &amp; NOTIFY
+            </button>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>NAME</th>
+                  <th>QTY</th>
+                  <th>GROUP</th>
+                  <th>DETAILS</th>
+                  <th>UPDATED AT</th>
+                  <th>ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody id="admin-batch-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ITEMS TAB -->
+      <div id="admin-items-tab" style="display:none;">
+        <div class="muted" id="count-info">LOADING…</div>
+
+        <!-- Item search controls -->
+        <div class="field-row" style="margin-top:0.4rem;">
+          <div>
+            <label for="item-search-input">SEARCH ITEM (NAME)</label>
+            <input id="item-search-input" placeholder="TYPE ITEM NAME…" class="upper" />
+          </div>
+        </div>
+        <div class="actions-row" style="margin-top:0.2rem;">
+          <button type="button" id="item-search-btn" class="secondary small">SEARCH</button>
+          <button type="button" id="item-clear-search-btn" class="secondary small">CLEAR</button>
+          <span class="muted" id="item-search-result"></span>
         </div>
 
-        <!-- STAFF INTERFACE -->
-        <div id="staffInterface" class="hidden">
-            <div class="header">
-                <h1>➕ Add Inventory Item</h1>
-                <p>Staff Mode: Add items only. Admin reviews inventory.</p>
-            </div>
-            
-            <div id="staffError" class="error hidden"></div>
-            
-            <div class="staff-form">
-                <div class="form-row">
-                    <div class="form-group" style="position: relative;">
-                        <label>ITEM NAME *</label>
-                        <input type="text" id="itemName" placeholder="Type item name..." autocapitalize="characters">
-                        <div id="suggestionsBox" class="suggestions"></div>
-                    </div>
-                    <div class="form-group">
-                        <label>QUANTITY *</label>
-                        <input type="number" id="itemQuantity" placeholder="0" min="0">
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>GROUP *</label>
-                        <select id="itemGroup">
-                            <option value="">Select Group</option>
-                            <option value="RAW MATERIAL">RAW MATERIAL</option>
-                            <option value="FINISHED GOODS">FINISHED GOODS</option>
-                            <option value="TOOLS">TOOLS</option>
-                            <option value="CONSUMABLES">CONSUMABLES</option>
-                            <option value="PACKAGING">PACKAGING</option>
-                            <option value="SPARE PARTS">SPARE PARTS</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>DETAILS (Optional)</label>
-                        <input type="text" id="itemDetails" placeholder="Brand, size, etc..." autocapitalize="characters">
-                    </div>
-                </div>
-                
-                <button class="btn btn-primary" onclick="addItem()">➕ ADD ITEM</button>
-                
-                <div id="successMessage" class="success hidden">
-                    ✅ Item added successfully!
-                </div>
-            </div>
-            
-            <div style="text-align: center; margin-top: 30px;">
-                <button class="btn btn-secondary" onclick="logout()">← Back to Login</button>
-            </div>
+        <div class="table-wrapper" style="margin-top:0.4rem;">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>NAME</th>
+                <th>QTY</th>
+                <th>GROUP</th>
+                <th>DETAILS</th>
+                <th>BATCH TIME</th>
+                <th>UPDATED AT</th>
+                <th>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-body"></tbody>
+          </table>
         </div>
+      </div>
+    </section>
+  </main>
 
-        <!-- ADMIN INTERFACE -->
-        <div id="adminInterface" class="hidden">
-            <div class="admin-dashboard">
-                <!-- BATCH MANAGEMENT SECTION -->
-                <div class="batch-section">
-                    <h2>📋 Batch Management</h2>
-                    
-                    <div class="search-section">
-                        <input type="text" id="batchSearch" placeholder="🔍 Search batches..." oninput="filterBatches()">
-                        <input type="date" id="batchDate" onchange="filterBatchesByDate()">
-                    </div>
-                    
-                    <button class="btn btn-primary" onclick="showNewBatchModal()" style="width: 100%; margin-bottom: 15px;">
-                        ➕ Create New Batch
-                    </button>
-                    
-                    <div class="batch-list" id="batchList">
-                        <!-- Batches will be loaded here -->
-                    </div>
-                    
-                    <div id="whatsappSection" class="hidden">
-                        <div class="whatsapp-message">
-                            <h3>📱 WhatsApp Notification</h3>
-                            <p>Copy this message and send to: <strong>7588756658</strong></p>
-                            <div class="whatsapp-text" id="whatsappMessage"></div>
-                            <button class="btn btn-success" onclick="copyWhatsAppMessage()" style="width: 100%; margin-top: 10px;">
-                                📋 Copy Message
-                            </button>
-                            <a id="whatsappLink" target="_blank" style="display: block; margin-top: 10px; color: white; text-decoration: underline;">
-                                📱 Open WhatsApp
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- INVENTORY SECTION -->
-                <div class="inventory-section">
-                    <h2>📦 Inventory Items</h2>
-                    
-                    <div class="search-section">
-                        <input type="text" id="itemSearch" placeholder="🔍 Search items..." oninput="searchItems()">
-                        <select id="batchFilter" onchange="filterByBatch()">
-                            <option value="">All Batches</option>
-                        </select>
-                        <select id="groupFilter" onchange="filterByGroup()">
-                            <option value="">All Groups</option>
-                        </select>
-                    </div>
-                    
-                    <div class="admin-controls">
-                        <button class="btn btn-primary" onclick="loadInventory()">🔄 Refresh</button>
-                        <button class="btn btn-secondary" onclick="exportData()">📥 Export</button>
-                        <button class="btn btn-danger" onclick="showDeleteModal()">🗑️ Delete All</button>
-                        <button class="btn btn-secondary" onclick="logout()">← Logout</button>
-                    </div>
-                    
-                    <div id="adminError" class="error hidden"></div>
-                    
-                    <div class="inventory-table">
-                        <div class="table-header">
-                            <div>ITEM NAME</div>
-                            <div>QUANTITY</div>
-                            <div>GROUP</div>
-                            <div>DETAILS</div>
-                            <div>ACTION</div>
-                        </div>
-                        <div id="inventoryList">
-                            <div style="text-align: center; padding: 40px; color: #7f8c8d;">
-                                <p>Click "Refresh" to load inventory...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  <script>
+    // ===== CONFIG =====
+    const BACKEND_URL = "https://inventory-backend-s4sv.onrender.com/get-token";
+    const NOTIFY_URL = "https://inventory-backend-s4sv.onrender.com/notify-batch";
+    const REPO_OWNER = "unique205";
+    const REPO_NAME = "inventory-data";
+    const FILE_PATH = "data/inventory.json";
+    const BRANCH = "main";
+    const ADMIN_PASSWORD = "admin123";
+    const ADMIN_PHONE = "917588756668"; // +91 7588756668
+    const WHATSAPP_PHONE = ADMIN_PHONE; // used for wa.me
 
-    <!-- NEW BATCH MODAL -->
-    <div id="newBatchModal" class="modal">
-        <div class="modal-content">
-            <h3 style="color: #2c3e50; margin-bottom: 15px;">📦 Create New Batch</h3>
-            <div class="form-group">
-                <label>Batch Name *</label>
-                <input type="text" id="batchName" placeholder="e.g., JANUARY_2024_DELIVERY" style="width: 100%; padding: 10px; margin: 5px 0;">
-            </div>
-            <div class="form-group">
-                <label>Description (Optional)</label>
-                <textarea id="batchDescription" placeholder="Batch details..." style="width: 100%; padding: 10px; margin: 5px 0; height: 100px;"></textarea>
-            </div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="btn btn-primary" onclick="createBatch()">Create Batch</button>
-                <button class="btn btn-secondary" onclick="hideModal('newBatchModal')">Cancel</button>
-            </div>
-        </div>
-    </div>
+    // ===== STATE =====
+    let currentRole = "staff";
+    let inventory = [];
+    let currentSha = null;
+    let batchItems = [];
+    let batchEditIndex = null;
+    let adminEditId = null;
+    let selectedBatchKey = null;
 
-    <!-- DELETE MODAL -->
-    <div id="deleteModal" class="modal">
-        <div class="modal-content">
-            <h3 style="color: #c0392b; margin-bottom: 15px;">⚠️ Delete All Items?</h3>
-            <p>This will delete ALL inventory items permanently.</p>
-            <p>Type <strong>DELETE ALL</strong> to confirm:</p>
-            <input type="text" id="confirmDelete" placeholder="Type DELETE ALL" style="width: 100%; padding: 10px; margin: 10px 0; border: 2px solid #ddd; border-radius: 5px;">
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button id="confirmDeleteBtn" class="btn btn-danger" disabled onclick="deleteAllItems()">Delete Everything</button>
-                <button class="btn btn-secondary" onclick="hideModal('deleteModal')">Cancel</button>
-            </div>
-        </div>
-    </div>
+    // Search/filter state
+    let batchSearchName = "";
+    let batchSearchDate = "";
+    let itemSearchTerm = "";
 
-    <script>
-        // ============================================
-        // CONFIGURATION
-        // ============================================
-        const CONFIG = {
-            GITHUB_USERNAME: 'unique205',
-            REPO_NAME: 'inventory-data',
-            DATA_FILE: 'data/inventory.json',
-            BATCH_FILE: 'data/batches.json',
-            ADMIN_PASSWORD: 'admin123',
-            WHATSAPP_NUMBER: '7588756658'
-        };
+    // ===== DOM =====
+    const appTitle = document.getElementById("app-title");
+    const roleBadge = document.getElementById("role-badge");
 
-        // Application state
-        let currentUser = null;
-        let githubToken = null;
-        let allItems = [];
-        let allBatches = [];
-        let currentBatch = null;
-        let searchTerm = '';
+    const itemForm = document.getElementById("item-form");
+    const itemNameInput = document.getElementById("item-name");
+    const itemQtyInput = document.getElementById("item-qty");
+    const itemGroupInput = document.getElementById("item-group");
+    const itemDetailsInput = document.getElementById("item-details");
+    const submitBtn = document.getElementById("submit-btn");
+    const cancelEditBtn = document.getElementById("cancel-edit-btn");
+    const formTitle = document.getElementById("form-title");
+    const statusText = document.getElementById("status-text");
 
-        // ============================================
-        // INITIALIZATION
-        // ============================================
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Starting inventory system...');
-            
-            // Load token from localStorage
-            githubToken = localStorage.getItem('inventory_token');
-            
-            if (githubToken) {
-                showScreen('loginScreen');
-            } else {
-                showScreen('setupScreen');
+    const batchBody = document.getElementById("batch-body");
+    const uploadBatchBtn = document.getElementById("upload-batch-btn");
+    const batchStatus = document.getElementById("batch-status");
+    const nameList = document.getElementById("name-list");
+
+    const adminCard = document.getElementById("admin-card");
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const adminBatchesTab = document.getElementById("admin-batches-tab");
+    const adminItemsTab = document.getElementById("admin-items-tab");
+
+    const batchListInfo = document.getElementById("batch-list-info");
+    const batchList = document.getElementById("batch-list");
+    const batchItemsWrapper = document.getElementById("batch-items-wrapper");
+    const selectedBatchLabel = document.getElementById("selected-batch-label");
+    const approveBatchBtn = document.getElementById("approve-batch-btn");
+    const adminBatchBody = document.getElementById("admin-batch-body");
+
+    const countInfo = document.getElementById("count-info");
+    const inventoryBody = document.getElementById("inventory-body");
+
+    // Batch search DOM
+    const batchSearchNameInput = document.getElementById("batch-search-name");
+    const batchSearchDateInput = document.getElementById("batch-search-date");
+    const batchSearchBtn = document.getElementById("batch-search-btn");
+    const batchClearSearchBtn = document.getElementById("batch-clear-search-btn");
+
+    // Item search DOM
+    const itemSearchInput = document.getElementById("item-search-input");
+    const itemSearchBtn = document.getElementById("item-search-btn");
+    const itemClearSearchBtn = document.getElementById("item-clear-search-btn");
+    const itemSearchResult = document.getElementById("item-search-result");
+
+    // ===== UTILS =====
+    function setStatus(msg) {
+      statusText.textContent = msg.toUpperCase();
+    }
+
+    function generateId() {
+      const ts = Date.now();
+      const rand = Math.random().toString(36).substring(2, 8);
+      return `ITEM_${ts}_${rand.toUpperCase()}`;
+    }
+
+    function generateBatchId() {
+      const ts = Date.now();
+      const rand = Math.random().toString(36).substring(2, 8).toUpperCase();
+      return `BATCH_${ts}_${rand}`;
+    }
+
+    function formatDate(iso) {
+      if (!iso) return "-";
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return String(iso).toUpperCase();
+      return d.toLocaleString().toUpperCase();
+    }
+
+    function buildBatchWhatsAppMessage(batchTimeIso, items) {
+      const headerLines = [
+        "NEW INVENTORY BATCH",
+        "TIME: " + formatDate(batchTimeIso),
+        "",
+      ];
+
+      const itemLines = items.map((it, idx) => {
+        const parts = [
+          `${idx + 1}. ${it.name || ""}`,
+          `QTY: ${it.quantity ?? ""}`,
+        ];
+
+        if (it.group) parts.push(`GROUP: ${it.group}`);
+        if (it.details) parts.push(`DETAILS: ${it.details}`);
+
+        return parts.join(" | ");
+      });
+
+      return [...headerLines, ...itemLines].join("\n");
+    }
+
+    function openWhatsAppForBatch(message) {
+      const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`;
+
+      try {
+        const win = window.open(url, "_blank");
+        if (!win) {
+          console.warn("WHATSAPP WINDOW BLOCKED OR NOT OPENED");
+          return false;
+        }
+        return true;
+      } catch (err) {
+        console.error("FAILED TO OPEN WHATSAPP:", err);
+        return false;
+      }
+    }
+
+    function getBatchKeyForItem(item) {
+      return item.batchId || item.batchTime || item.timestamp || "UNKNOWN";
+    }
+
+    function getBatchTimeForItem(item) {
+      return item.batchTime || item.timestamp || null;
+    }
+
+    function getStatusDisplay(statusRaw) {
+      const s = (statusRaw || "PENDING").toUpperCase();
+      if (s === "APPROVED") return "✅ APPROVED";
+      return "🟡 PENDING";
+    }
+
+    function getBatchDisplayNameFromItems(batchKey, items) {
+      if (!items || !items.length) return formatDate(batchKey);
+      const first = items[0];
+      const batchName = (first.batchName || "").trim();
+      const batchTime = getBatchTimeForItem(first) || batchKey;
+      if (batchName) return batchName;
+      return formatDate(batchTime);
+    }
+
+    async function getBackendToken() {
+      try {
+        const res = await fetch(BACKEND_URL, { method: "POST" });
+        if (!res.ok) {
+          console.warn("BACKEND /get-token HTTP ERROR:", res.status);
+          return null;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (!data.token) {
+          console.warn("BACKEND /get-token RETURNED NO TOKEN");
+          return null;
+        }
+        return data.token;
+      } catch (err) {
+        console.error("BACKEND /get-token FAILED:", err);
+        return null;
+      }
+    }
+
+    async function githubRequest(path, options = {}) {
+      const token = await getBackendToken();
+      if (!token) {
+        throw new Error("BACKEND TOKEN REQUEST FAILED");
+      }
+
+      const res = await fetch(`https://api.github.com${path}`, {
+        ...options,
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/vnd.github+json",
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        }
+      });
+
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`GITHUB ERROR ${res.status}: ${text}`);
+      }
+      return res.json();
+    }
+
+    function resetForm() {
+      itemNameInput.value = "";
+      itemQtyInput.value = "";
+      itemGroupInput.value = "";
+      itemDetailsInput.value = "";
+      batchEditIndex = null;
+      adminEditId = null;
+
+      if (currentRole === "admin") {
+        submitBtn.textContent = "UPDATE ITEM";
+        formTitle.textContent = "EDIT ITEM (ADMIN)";
+      } else {
+        submitBtn.textContent = "ADD TO BATCH";
+        formTitle.textContent = "ADD ITEM";
+      }
+      cancelEditBtn.style.display = "none";
+    }
+
+    function updateRoleUI() {
+      if (currentRole === "admin") {
+        roleBadge.textContent = "ADMIN";
+        roleBadge.className = "badge badge-admin";
+        adminCard.style.display = "block";
+      } else {
+        roleBadge.textContent = "STAFF";
+        roleBadge.className = "badge badge-staff";
+        adminCard.style.display = "none";
+      }
+      renderBatch();
+      renderAdminViews();
+    }
+
+    // ===== LOAD / SAVE INVENTORY =====
+    async function loadInventory() {
+      try {
+        setStatus("LOADING FROM GITHUB…");
+        const data = await githubRequest(
+          `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(FILE_PATH)}?ref=${BRANCH}`
+        );
+
+        currentSha = data.sha;
+        const decoded = atob(data.content.replace(/\n/g, ""));
+        inventory = decoded.trim() ? JSON.parse(decoded) : [];
+
+        populateNameList();
+        renderAdminViews();
+        setStatus("LOADED");
+      } catch (err) {
+        console.error("ERROR LOADING INVENTORY:", err);
+        inventory = [];
+        currentSha = null;
+        populateNameList();
+        renderAdminViews();
+        setStatus("WORKING OFFLINE (INVENTORY NOT LOADED)");
+      }
+    }
+
+    async function saveInventory() {
+      const content = btoa(JSON.stringify(inventory, null, 2));
+      const body = {
+        message: "UPDATE INVENTORY.JSON FROM INVENTORY-APP",
+        content,
+        branch: BRANCH
+      };
+      if (currentSha) body.sha = currentSha;
+
+      const data = await githubRequest(
+        `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(FILE_PATH)}`,
+        { method: "PUT", body: JSON.stringify(body) }
+      );
+
+      currentSha = data.content.sha;
+    }
+
+    function populateNameList() {
+      const names = new Set();
+      inventory.forEach((it) => {
+        if (it.name) names.add(String(it.name).toUpperCase());
+      });
+      nameList.innerHTML = "";
+      names.forEach((name) => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        nameList.appendChild(opt);
+      });
+    }
+
+    // ===== BATCH (STAFF) =====
+    function renderBatch() {
+      batchBody.innerHTML = "";
+
+      if (!batchItems.length) {
+        batchBody.innerHTML =
+          '<tr><td colspan="6" class="muted">NO ITEMS IN BATCH.</td></tr>';
+        batchStatus.textContent = "";
+        return;
+      }
+
+      batchItems.forEach((item, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${item.id}</td>
+          <td>${item.name}</td>
+          <td>${item.quantity}</td>
+          <td>${item.group || ""}</td>
+          <td>${item.details || ""}</td>
+          <td class="actions-cell">
+            <button class="small secondary" data-action="edit-batch" data-index="${index}">EDIT</button>
+            <button class="small danger" data-action="remove-batch" data-index="${index}">REMOVE</button>
+          </td>`;
+        batchBody.appendChild(tr);
+      });
+    }
+
+    batchBody.addEventListener("click", (e) => {
+      const btn = e.target;
+      if (!btn.dataset.action) return;
+      const idx = Number(btn.dataset.index);
+
+      if (btn.dataset.action === "edit-batch") {
+        const item = batchItems[idx];
+        batchEditIndex = idx;
+        itemNameInput.value = item.name;
+        itemQtyInput.value = item.quantity;
+        itemGroupInput.value = item.group || "";
+        itemDetailsInput.value = item.details || "";
+        submitBtn.textContent = "UPDATE BATCH ITEM";
+        cancelEditBtn.style.display = "inline-block";
+        formTitle.textContent = "EDIT BATCH ITEM";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (btn.dataset.action === "remove-batch") {
+        batchItems.splice(idx, 1);
+        renderBatch();
+      }
+    });
+
+    uploadBatchBtn.addEventListener("click", async () => {
+      if (!batchItems.length) {
+        batchStatus.textContent = "NO ITEMS IN BATCH.";
+        return;
+      }
+
+      try {
+        setStatus("UPLOADING BATCH…");
+        batchStatus.textContent = "UPLOADING…";
+
+        const batchTime = new Date().toISOString();
+        const batchId = generateBatchId();
+
+        await loadInventory();
+
+        const enriched = batchItems.map((item) => ({
+          ...item,
+          batchId,
+          batchTime,
+          batchStatus: "PENDING",
+          batchName: item.batchName || ""
+        }));
+
+        inventory = inventory.concat(enriched);
+        await saveInventory();
+        await loadInventory();
+
+        // WhatsApp message for this batch
+        const message = buildBatchWhatsAppMessage(batchTime, enriched);
+        const opened = openWhatsAppForBatch(message);
+        if (!opened) {
+          alert("WHATSAPP MESSAGE (COPY & SEND):\n\n" + message);
+        }
+
+        batchItems = [];
+        renderBatch();
+        batchStatus.textContent =
+          "BATCH UPLOADED AT " + formatDate(batchTime);
+        setStatus("BATCH UPLOADED");
+      } catch (err) {
+        console.error("BATCH UPLOAD FAILED:", err);
+        batchStatus.textContent = "ERROR UPLOADING BATCH.";
+        setStatus("ERROR UPLOADING");
+      }
+    });
+
+    // ===== ADMIN VIEWS =====
+    function groupByBatch() {
+      const groups = {};
+      inventory.forEach((item) => {
+        const key = getBatchKeyForItem(item);
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(item);
+      });
+      return groups;
+    }
+
+    function renderAdminViews() {
+      if (currentRole !== "admin") return;
+
+      const groups = groupByBatch();
+      const keys = Object.keys(groups).sort((a, b) => {
+        const ia = groups[a][0];
+        const ib = groups[b][0];
+        const ta = getBatchTimeForItem(ia) || "";
+        const tb = getBatchTimeForItem(ib) || "";
+        const da = new Date(ta);
+        const db = new Date(tb);
+        if (isNaN(da) || isNaN(db)) return 0;
+        return db - da;
+      });
+
+      // BATCH LIST TAB
+      batchList.innerHTML = "";
+      let shownCount = 0;
+
+      keys.forEach((k) => {
+        const items = groups[k];
+        const first = items[0];
+        const batchTime = getBatchTimeForItem(first) || k;
+        const batchName = (first.batchName || "").trim();
+        const displayName = batchName || formatDate(batchTime);
+        const statusRaw = first.batchStatus || "PENDING";
+        const statusDisplay = getStatusDisplay(statusRaw);
+
+        // Filter by search
+        const nameFilter = batchSearchName;
+        const dateFilter = batchSearchDate;
+        const dateStr = (() => {
+          const d = new Date(batchTime);
+          if (isNaN(d)) return "";
+          return d.toISOString().slice(0, 10);
+        })();
+
+        if (nameFilter && !displayName.toUpperCase().includes(nameFilter)) {
+          return;
+        }
+        if (dateFilter && dateStr !== dateFilter) {
+          return;
+        }
+
+        const div = document.createElement("div");
+        div.className = "batch-header";
+        div.innerHTML = `
+          <span>BATCH: ${displayName}</span>
+          <span>DATE: ${formatDate(batchTime)}</span>
+          <span>ITEMS: ${items.length}</span>
+          <span>STATUS: ${statusDisplay}</span>
+          <span>
+            <button class="small secondary" data-action="view-batch" data-key="${k}">VIEW</button>
+            <button class="small secondary" data-action="rename-batch" data-key="${k}">RENAME</button>
+          </span>`;
+        batchList.appendChild(div);
+        shownCount++;
+      });
+
+      if (!keys.length) {
+        batchListInfo.textContent = "NO BATCHES FOUND.";
+      } else if (shownCount === keys.length && !batchSearchName && !batchSearchDate) {
+        batchListInfo.textContent = `${keys.length} BATCH(ES)`;
+      } else {
+        batchListInfo.textContent = `${shownCount} BATCH(ES) SHOWN (FILTERED)`;
+      }
+
+      // ALL ITEMS TAB
+      inventoryBody.innerHTML = "";
+      if (!inventory.length) {
+        countInfo.textContent = "NO ITEMS IN INVENTORY.";
+        inventoryBody.innerHTML =
+          '<tr><td colspan="8" class="muted">NO ITEMS.</td></tr>';
+        itemSearchResult.textContent = "";
+      } else {
+        countInfo.textContent = `${inventory.length} ITEMS`;
+
+        let matchCount = 0;
+        let firstMatchInfo = null;
+
+        inventory.forEach((item) => {
+          const nameStr = (item.name || "").toString().toUpperCase();
+          const matches = itemSearchTerm && nameStr.includes(itemSearchTerm);
+
+          if (matches) {
+            matchCount++;
+            if (!firstMatchInfo) {
+              const batchKey = getBatchKeyForItem(item);
+              const batchTime = getBatchTimeForItem(item) || batchKey;
+              const batchLabel = (item.batchName && item.batchName.trim())
+                ? item.batchName
+                : formatDate(batchTime);
+              const statusRaw = item.batchStatus || "PENDING";
+              const statusDisplay = getStatusDisplay(statusRaw);
+              firstMatchInfo = {
+                name: item.name,
+                batchLabel,
+                statusDisplay
+              };
             }
-            
-            // Setup event listeners
-            setupEventListeners();
+          }
+
+          const tr = document.createElement("tr");
+          if (matches) {
+            tr.classList.add("highlight-row");
+          }
+          tr.innerHTML = `
+            <td>${item.id || "-"}</td>
+            <td>${item.name || ""}</td>
+            <td>${item.quantity ?? ""}</td>
+            <td>${item.group || ""}</td>
+            <td>${item.details || ""}</td>
+            <td>${formatDate(item.batchTime || item.timestamp)}</td>
+            <td>${formatDate(item.updatedAt || item.timestamp)}</td>
+            <td class="actions-cell">
+              <button class="small secondary" data-action="edit-item" data-id="${item.id}">EDIT</button>
+              <button class="small danger" data-action="delete-item" data-id="${item.id}">DELETE</button>
+            </td>`;
+          inventoryBody.appendChild(tr);
         });
 
-        function setupEventListeners() {
-            // Suggestions typing
-            document.getElementById('itemName')?.addEventListener('input', showSuggestions);
-            
-            // Delete confirmation input
-            document.getElementById('confirmDelete')?.addEventListener('input', function() {
-                const deleteBtn = document.getElementById('confirmDeleteBtn');
-                deleteBtn.disabled = this.value !== 'DELETE ALL';
-            });
-            
-            // Click outside suggestions
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.form-group')) {
-                    document.getElementById('suggestionsBox').style.display = 'none';
-                }
-            });
+        if (itemSearchTerm && matchCount > 0 && firstMatchInfo) {
+          itemSearchResult.textContent =
+            `'${firstMatchInfo.name}' FOUND IN BATCH: ${firstMatchInfo.batchLabel} • STATUS: ${firstMatchInfo.statusDisplay}`;
+        } else if (itemSearchTerm) {
+          itemSearchResult.textContent = "NO ITEMS FOUND FOR SEARCH.";
+        } else {
+          itemSearchResult.textContent = "";
+        }
+      }
+
+      if (selectedBatchKey && groups[selectedBatchKey]) {
+        renderSelectedBatchItems(selectedBatchKey, groups[selectedBatchKey]);
+      } else {
+        batchItemsWrapper.style.display = "none";
+        selectedBatchLabel.textContent = "NO BATCH SELECTED.";
+      }
+    }
+
+    batchList.addEventListener("click", async (e) => {
+      const btn = e.target;
+      const action = btn.dataset.action;
+      const key = btn.dataset.key;
+      if (!action || !key) return;
+
+      const groups = groupByBatch();
+
+      if (action === "view-batch") {
+        if (!groups[key]) return;
+        selectedBatchKey = key;
+        renderSelectedBatchItems(key, groups[key]);
+      } else if (action === "rename-batch") {
+        if (!groups[key]) return;
+        const items = groups[key];
+        const currentName = (items[0].batchName || "").trim();
+        const newName = prompt("ENTER BATCH NAME:", currentName);
+        if (newName === null) return;
+
+        const trimmed = newName.trim().toUpperCase();
+        try {
+          setStatus("UPDATING BATCH NAME…");
+          await loadInventory();
+          const freshGroups = groupByBatch();
+          const freshItems = freshGroups[key] || [];
+          freshItems.forEach((it) => {
+            it.batchName = trimmed;
+          });
+          await saveInventory();
+          await loadInventory();
+          setStatus("BATCH NAME UPDATED");
+        } catch (err) {
+          console.error("RENAME BATCH FAILED:", err);
+          setStatus("ERROR RENAMING BATCH");
+        }
+      }
+    });
+
+    function renderSelectedBatchItems(batchKey, items) {
+      batchItemsWrapper.style.display = "block";
+      const first = items[0];
+      const batchTime = getBatchTimeForItem(first) || batchKey;
+      const batchName = (first.batchName || "").trim();
+      const displayName = batchName || formatDate(batchTime);
+      const statusRaw = first.batchStatus || "PENDING";
+      const statusDisplay = getStatusDisplay(statusRaw);
+
+      selectedBatchLabel.textContent = `BATCH: ${displayName} • DATE: ${formatDate(
+        batchTime
+      )} • ${items.length} ITEM(S) • STATUS: ${statusDisplay}`;
+
+      adminBatchBody.innerHTML = "";
+      items.forEach((item) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${item.id || "-"}</td>
+          <td>${item.name || ""}</td>
+          <td>${item.quantity ?? ""}</td>
+          <td>${item.group || ""}</td>
+          <td>${item.details || ""}</td>
+          <td>${formatDate(item.updatedAt || item.timestamp)}</td>
+          <td class="actions-cell">
+            <button class="small secondary" data-action="edit-item" data-id="${item.id}">EDIT</button>
+            <button class="small danger" data-action="delete-item" data-id="${item.id}">DELETE</button>
+          </td>`;
+        adminBatchBody.appendChild(tr);
+      });
+    }
+
+    // APPROVE & NOTIFY
+    approveBatchBtn.addEventListener("click", async () => {
+      if (!selectedBatchKey) {
+        alert("NO BATCH SELECTED.");
+        return;
+      }
+
+      const groups = groupByBatch();
+      const items = groups[selectedBatchKey];
+      if (!items || !items.length) {
+        alert("BATCH HAS NO ITEMS.");
+        return;
+      }
+
+      try {
+        setStatus("APPROVING BATCH…");
+
+        inventory.forEach((it) => {
+          if (getBatchKeyForItem(it) === selectedBatchKey) it.batchStatus = "APPROVED";
+        });
+        await saveInventory();
+        await loadInventory();
+
+        const freshGroups = groupByBatch();
+        const freshItems = freshGroups[selectedBatchKey] || [];
+        const payload = {
+          phone: ADMIN_PHONE,
+          batchTime: getBatchTimeForItem(freshItems[0]) || selectedBatchKey,
+          items: freshItems.map((it) => ({
+            name: it.name,
+            quantity: it.quantity,
+            group: it.group,
+            details: it.details
+          }))
+        };
+
+        // Backend stub – no popup if it fails
+        fetch(NOTIFY_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        }).catch((err) => console.error("NOTIFY FAILED:", err));
+
+        setStatus("BATCH APPROVED (NOTIFICATION STUB)");
+      } catch (err) {
+        console.error("APPROVE/NOTIFY FAILED:", err);
+        setStatus("ERROR APPROVING BATCH");
+      }
+    });
+
+    // ADMIN TABLE ACTIONS
+    adminBatchBody.addEventListener("click", handleAdminTableClick);
+    inventoryBody.addEventListener("click", handleAdminTableClick);
+
+    async function handleAdminTableClick(e) {
+      const btn = e.target;
+      const id = btn.dataset.id;
+      if (!btn.dataset.action || !id) return;
+
+      if (btn.dataset.action === "edit-item") {
+        const item = inventory.find((it) => it.id === id);
+        if (!item) {
+          setStatus("ITEM NOT FOUND");
+          return;
         }
 
-        // ============================================
-        // SCREEN MANAGEMENT
-        // ============================================
-        function showScreen(screenId) {
-            const screens = ['setupScreen', 'loginScreen', 'staffInterface', 'adminInterface'];
-            screens.forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-            document.getElementById(screenId).classList.remove('hidden');
-            
-            // Clear messages
-            clearMessages();
+        currentRole = "admin";
+        updateRoleUI();
+
+        adminEditId = id;
+        itemNameInput.value = (item.name || "").toUpperCase();
+        itemQtyInput.value = item.quantity ?? "";
+        itemGroupInput.value = (item.group || "").toUpperCase();
+        itemDetailsInput.value = (item.details || "").toUpperCase();
+        submitBtn.textContent = "UPDATE ITEM";
+        cancelEditBtn.style.display = "inline-block";
+        formTitle.textContent = "EDIT ITEM (ADMIN)";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (btn.dataset.action === "delete-item") {
+        if (!confirm("DELETE THIS ITEM?")) return;
+
+        try {
+          setStatus("DELETING ITEM…");
+          await loadInventory();
+
+          const idx = inventory.findIndex((it) => it.id === id);
+          if (idx === -1) {
+            setStatus("ITEM NOT FOUND");
+            return;
+          }
+
+          inventory.splice(idx, 1);
+          await saveInventory();
+          await loadInventory();
+          setStatus("ITEM DELETED");
+        } catch (err) {
+          console.error("DELETE FAILED:", err);
+          setStatus("ERROR DELETING");
+        }
+      }
+    }
+
+    // FORM SUBMIT
+    itemForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = itemNameInput.value.trim().toUpperCase();
+      const qty = Number(itemQtyInput.value || 0);
+      const group = itemGroupInput.value.trim().toUpperCase();
+      const details = itemDetailsInput.value.trim().toUpperCase();
+
+      if (!name || Number.isNaN(qty)) {
+        alert("NAME AND QUANTITY ARE REQUIRED.");
+        return;
+      }
+
+      const now = new Date().toISOString();
+
+      if (currentRole === "staff") {
+        const baseItem = {
+          id:
+            batchEditIndex === null
+              ? generateId()
+              : batchItems[batchEditIndex].id,
+          name,
+          quantity: qty,
+          group,
+          details,
+          timestamp:
+            batchEditIndex === null
+              ? now
+              : batchItems[batchEditIndex].timestamp || now,
+          updatedAt: now
+        };
+
+        if (batchEditIndex === null) {
+          batchItems.push(baseItem);
+          setStatus("ITEM ADDED TO BATCH");
+        } else {
+          batchItems[batchEditIndex] = baseItem;
+          setStatus("BATCH ITEM UPDATED");
         }
 
-        function clearMessages() {
-            document.getElementById('staffError').classList.add('hidden');
-            document.getElementById('adminError').classList.add('hidden');
-            document.getElementById('successMessage').classList.add('hidden');
+        renderBatch();
+        resetForm();
+        return;
+      }
+
+      if (currentRole === "admin") {
+        if (!adminEditId) {
+          setStatus("SELECT AN ITEM FROM ADMIN TABLE");
+          return;
         }
 
-        // ============================================
-        // TOKEN MANAGEMENT
-        // ============================================
-        function saveToken() {
-            const tokenInput = document.getElementById('githubToken');
-            const token = tokenInput.value.trim();
-            
-            if (!token) {
-                alert('Please enter a token');
-                return;
-            }
-            
-            if (!token.startsWith('ghp_')) {
-                if (!confirm('Token should start with "ghp_". Continue anyway?')) {
-                    return;
-                }
-            }
-            
-            // Save token
-            localStorage.setItem('inventory_token', token);
-            githubToken = token;
-            
-            // Test connection
-            testConnection();
-        }
+        try {
+          setStatus("UPDATING ITEM…");
+          await loadInventory();
 
-        function resetApp() {
-            if (confirm('Reset token? You will need to enter it again.')) {
-                localStorage.removeItem('inventory_token');
-                localStorage.removeItem('current_batch');
-                githubToken = null;
-                currentBatch = null;
-                showScreen('setupScreen');
-            }
-        }
+          const idx = inventory.findIndex((it) => it.id === adminEditId);
+          if (idx === -1) {
+            setStatus("ITEM NOT FOUND");
+            return;
+          }
 
-        async function testConnection() {
-            try {
-                const url = `https://api.github.com/repos/${CONFIG.GITHUB_USERNAME}/${CONFIG.REPO_NAME}`;
-                const response = await fetch(url, {
-                    headers: {
-                        'Authorization': `token ${githubToken}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                
-                if (response.ok) {
-                    showScreen('loginScreen');
-                    showMessage('info', '✅ Connected to GitHub!');
-                } else {
-                    alert('Error: ' + response.status + '\n\n1. Check token is valid\n2. Repository exists: unique205/inventory-data');
-                }
-            } catch (error) {
-                alert('Connection failed. Check internet.');
-            }
-        }
+          inventory[idx] = {
+            ...inventory[idx],
+            name,
+            quantity: qty,
+            group,
+            details,
+            updatedAt: now
+          };
 
-        // ============================================
-        // LOGIN FUNCTIONS
-        // ============================================
-        function loginAsStaff() {
-            currentUser = 'staff';
-            showScreen('staffInterface');
-            loadItemsForSuggestions();
+          await saveInventory();
+          await loadInventory();
+          resetForm();
+          setStatus("ITEM UPDATED");
+        } catch (err) {
+          console.error("SAVE FAILED:", err);
+          setStatus("ERROR SAVING");
         }
+      }
+    });
 
-        function loginAsAdmin() {
-            const password = prompt('Enter admin password:');
-            if (password === CONFIG.ADMIN_PASSWORD) {
-                currentUser = 'admin';
-                showScreen('adminInterface');
-                loadInventory();
-                loadBatches();
-            } else {
-                alert('Incorrect password');
-            }
+    cancelEditBtn.addEventListener("click", () => resetForm());
+
+    // ADMIN LOGIN VIA TITLE
+    appTitle.addEventListener("click", () => {
+      if (currentRole === "admin") {
+        currentRole = "staff";
+        resetForm();
+        updateRoleUI();
+        return;
+      }
+
+      const pwd = prompt("ENTER ADMIN PASSWORD:");
+      if (!pwd) return;
+      if (pwd !== ADMIN_PASSWORD) {
+        alert("WRONG PASSWORD.");
+        return;
+      }
+
+      currentRole = "admin";
+      updateRoleUI();
+      loadInventory();
+    });
+
+    // TABS
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        tabButtons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        const tab = btn.dataset.tab;
+        if (tab === "batches") {
+          adminBatchesTab.style.display = "block";
+          adminItemsTab.style.display = "none";
+        } else {
+          adminBatchesTab.style.display = "none";
+          adminItemsTab.style.display = "block";
         }
+      });
+    });
 
-        function logout() {
-            currentUser = null;
-            showScreen('loginScreen');
-        }
+    // BATCH SEARCH EVENTS
+    batchSearchBtn.addEventListener("click", () => {
+      batchSearchName = (batchSearchNameInput.value || "").trim().toUpperCase();
+      batchSearchDate = batchSearchDateInput.value || "";
+      renderAdminViews();
+    });
 
-        // ============================================
-        // STAFF FUNCTIONS
-        // ============================================
-        async function addItem() {
-            const name = document.getElementById('itemName').value.trim().toUpperCase();
-            const quantity = parseInt(document.getElementById('itemQuantity').value) || 0;
-            const group = document.getElementById('itemGroup').value;
-            const details = document.getElementById('itemDetails').value.trim().toUpperCase();
-            
-            // Validation
-            if (!name) {
-                showStaffError('Please enter item name');
-                return;
-            }
-            if (!quantity || quantity < 0) {
-                showStaffError('Please enter valid quantity');
-                return;
-            }
-            if (!group) {
-                showStaffError('Please select a group');
-                return;
-            }
-            
-            // Create item
-            const newItem = {
-                id: 'item_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                name: name,
-                quantity: quantity,
-                group: group,
-                details: details,
-                addedBy: 'staff',
-                timestamp: new Date().toISOString(),
-                batchId: currentBatch
-            };
-            
-            try {
-                await saveItemToGitHub(newItem);
-                
-                // Success
-                showSuccess(`✅ ${name} added to inventory!`);
-                
-                // Clear form
-                document.getElementById('itemName').value = '';
-                document.getElementById('itemQuantity').value = '';
-                document.getElementById('itemDetails').value = '';
-                document.getElementById('itemGroup').value = '';
-                document.getElementById('itemName').focus();
-                document.getElementById('suggestionsBox').style.display = 'none';
-                
-            } catch (error) {
-                console.error('Error:', error);
-                showStaffError('Failed to save. Please try again.');
-            }
-        }
+    batchClearSearchBtn.addEventListener("click", () => {
+      batchSearchNameInput.value = "";
+      batchSearchDateInput.value = "";
+      batchSearchName = "";
+      batchSearchDate = "";
+      renderAdminViews();
+    });
 
-        // ============================================
-        // SUGGESTIONS
-        // ============================================
-        async function loadItemsForSuggestions() {
-            try {
-                const data = await readFromGitHub(CONFIG.DATA_FILE);
-                allItems = data;
-            } catch (error) {
-                allItems = [];
-            }
-        }
+    // ITEM SEARCH EVENTS
+    itemSearchBtn.addEventListener("click", () => {
+      itemSearchTerm = (itemSearchInput.value || "").trim().toUpperCase();
+      renderAdminViews();
+    });
 
-        function showSuggestions() {
-            const search = document.getElementById('itemName').value.toUpperCase();
-            const box = document.getElementById('suggestionsBox');
-            
-            if (search.length < 2) {
-                box.style.display = 'none';
-                return;
-            }
-            
-            const matches = allItems.filter(item => 
-                item.name.includes(search)
-            ).slice(0, 5);
-            
-            if (matches.length === 0) {
-                box.style.display = 'none';
-                return;
-            }
-            
-            box.innerHTML = matches.map(item => `
-                <div class="suggestion" onclick="selectSuggestion('${escapeString(item.name)}', '${item.group}', '${escapeString(item.details || '')}')">
-                    <strong>${item.name}</strong><br>
-                    <small>Group: ${item.group} | Last: ${item.quantity}</small>
-                </div>
-            `).join('');
-            
-            box.style.display = 'block';
-        }
+    itemClearSearchBtn.addEventListener("click", () => {
+      itemSearchInput.value = "";
+      itemSearchTerm = "";
+      itemSearchResult.textContent = "";
+      renderAdminViews();
+    });
 
-        function escapeString(str) {
-            return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
-        }
-
-        function selectSuggestion(name, group, details) {
-            document.getElementById('itemName').value = name;
-            document.getElementById('itemGroup').value = group;
-            document.getElementById('itemDetails').value = details || '';
-            document.getElementById('suggestionsBox').style.display = 'none';
-            document.getElementById('itemQuantity').focus();
-        }
-
-        // ============================================
-        // BATCH MANAGEMENT
-        // ============================================
-        async function loadBatches() {
-            try {
-                const data = await readFromGitHub(CONFIG.BATCH_FILE);
-                allBatches = data;
-                displayBatches();
-                updateBatchFilter();
-            } catch (error) {
-                allBatches = [];
-                // Create default batch if none exists
-                if (allBatches.length === 0) {
-                    const defaultBatch = {
-                        id: 'batch_default',
-                        name: 'DEFAULT BATCH',
-                        description: 'Default batch for items without specific batch',
-                        status: 'approved',
-                        createdAt: new Date().toISOString(),
-                        itemCount: 0
-                    };
-                    allBatches.push(defaultBatch);
-                    await writeToGitHub(CONFIG.BATCH_FILE, allBatches);
-                }
-            }
-        }
-
-        function displayBatches() {
-            const container = document.getElementById('batchList');
-            
-            if (allBatches.length === 0) {
-                container.innerHTML = '<p style="color: #7f8c8d; text-align: center;">No batches created yet.</p>';
-                return;
-            }
-            
-            // Sort by newest first
-            const sorted = [...allBatches].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            
-            container.innerHTML = sorted.map(batch => `
-                <div class="batch-item ${batch.status}">
-                    <div class="batch-header">
-                        <div>
-                            <strong>${batch.name}</strong>
-                            <span class="batch-badge batch-${batch.status}">
-                                ${batch.status === 'approved' ? '✅ Approved' : '⏳ Pending'}
-                            </span>
-                        </div>
-                        <div class="batch-actions">
-                            ${batch.status === 'pending' ? 
-                                `<button class="btn btn-success btn-small" onclick="approveBatch('${batch.id}')">✅</button>` : ''}
-                            <button class="btn btn-warning btn-small" onclick="editBatch('${batch.id}')">✏️</button>
-                            <button class="btn btn-danger btn-small" onclick="deleteBatch('${batch.id}')">🗑️</button>
-                        </div>
-                    </div>
-                    <p style="margin: 5px 0; color: #666;">${batch.description || 'No description'}</p>
-                    <div style="font-size: 12px; color: #999;">
-                        Created: ${formatDate(batch.createdAt)} | 
-                        Items: ${batch.itemCount || 0}
-                    </div>
-                    <div style="margin-top: 10px;">
-                        <button class="btn btn-primary btn-small" onclick="selectBatch('${batch.id}')" style="width: 100%;">
-                            ${currentBatch === batch.id ? '✓ Selected' : 'Select for Items'}
-                        </button>
-                        ${batch.status === 'approved' ? 
-                            `<button class="btn btn-success btn-small" onclick="generateWhatsAppMessage('${batch.id}')" style="width: 100%; margin-top: 5px;">
-                                📱 Generate WhatsApp
-                            </button>` : ''}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function filterBatches() {
-            const search = document.getElementById('batchSearch').value.toLowerCase();
-            const batches = document.querySelectorAll('.batch-item');
-            
-            batches.forEach(batch => {
-                const name = batch.querySelector('strong').textContent.toLowerCase();
-                batch.style.display = name.includes(search) ? 'block' : 'none';
-            });
-        }
-
-        function filterBatchesByDate() {
-            const date = document.getElementById('batchDate').value;
-            if (!date) {
-                filterBatches();
-                return;
-            }
-            
-            const batches = document.querySelectorAll('.batch-item');
-            const selectedDate = new Date(date).toDateString();
-            
-            batches.forEach(batch => {
-                const dateText = batch.querySelector('div[style*="font-size: 12px"]').textContent;
-                const batchDate = new Date(dateText.split('Created: ')[1].split(' |')[0]).toDateString();
-                batch.style.display = batchDate === selectedDate ? 'block' : 'none';
-            });
-        }
-
-        function showNewBatchModal() {
-            document.getElementById('batchName').value = '';
-            document.getElementById('batchDescription').value = '';
-            showModal('newBatchModal');
-        }
-
-        async function createBatch() {
-            const name = document.getElementById('batchName').value.trim().toUpperCase();
-            const description = document.getElementById('batchDescription').value.trim();
-            
-            if (!name) {
-                alert('Please enter batch name');
-                return;
-            }
-            
-            const newBatch = {
-                id: 'batch_' + Date.now(),
-                name: name,
-                description: description,
-                status: 'pending',
-                createdAt: new Date().toISOString(),
-                itemCount: 0
-            };
-            
-            allBatches.push(newBatch);
-            await writeToGitHub(CONFIG.BATCH_FILE, allBatches);
-            displayBatches();
-            updateBatchFilter();
-            hideModal('newBatchModal');
-            showAdminMessage(`✅ Batch "${name}" created!`);
-        }
-
-        async function approveBatch(batchId) {
-            const batch = allBatches.find(b => b.id === batchId);
-            if (!batch) return;
-            
-            batch.status = 'approved';
-            batch.approvedAt = new Date().toISOString();
-            
-            await writeToGitHub(CONFIG.BATCH_FILE, allBatches);
-            displayBatches();
-            showAdminMessage(`✅ Batch "${batch.name}" approved!`);
-            
-            // Generate WhatsApp message automatically
-            generateWhatsAppMessage(batchId);
-        }
-
-        function selectBatch(batchId) {
-            currentBatch = batchId;
-            localStorage.setItem('current_batch', batchId);
-            displayBatches();
-            showAdminMessage(`✅ Batch selected for new items`);
-        }
-
-        function generateWhatsAppMessage(batchId) {
-            const batch = allBatches.find(b => b.id === batchId);
-            if (!batch) return;
-            
-            // Get items for this batch
-            const batchItems = allItems.filter(item => item.batchId === batchId);
-            
-            let message = `*INVENTORY BATCH: ${batch.name}*\n`;
-            message += `Date: ${formatDate(batch.createdAt)}\n`;
-            message += `Status: ${batch.status === 'approved' ? '✅ APPROVED' : '⏳ PENDING'}\n`;
-            message += `Items Count: ${batchItems.length}\n\n`;
-            message += `*ITEMS LIST:*\n`;
-            
-            if (batchItems.length === 0) {
-                message += `No items in this batch.\n`;
-            } else {
-                batchItems.forEach((item, index) => {
-                    message += `${index + 1}. ${item.name} - ${item.quantity} units\n`;
-                    if (item.details) {
-                        message += `   📝 ${item.details}\n`;
-                    }
-                });
-            }
-            
-            message += `\n*TOTAL ITEMS:* ${batchItems.length}\n`;
-            message += `*APPROVED BY:* Admin\n`;
-            message += `\nPlease review and confirm.`;
-            
-            // Display message
-            document.getElementById('whatsappMessage').textContent = message;
-            document.getElementById('whatsappSection').classList.remove('hidden');
-            
-            // Create WhatsApp link
-            const whatsappLink = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-            document.getElementById('whatsappLink').href = whatsappLink;
-        }
-
-        function copyWhatsAppMessage() {
-            const message = document.getElementById('whatsappMessage').textContent;
-            navigator.clipboard.writeText(message).then(() => {
-                alert('✅ Message copied to clipboard! Ready to paste in WhatsApp.');
-            });
-        }
-
-        // ============================================
-        // INVENTORY MANAGEMENT
-        // ============================================
-        async function loadInventory() {
-            try {
-                const data = await readFromGitHub(CONFIG.DATA_FILE);
-                allItems = data;
-                displayInventory(allItems);
-                updateBatchFilter();
-                updateGroupFilter();
-                showAdminMessage(`✅ Loaded ${data.length} items`);
-            } catch (error) {
-                console.error('Error:', error);
-                showAdminError('Failed to load inventory.');
-            }
-        }
-
-        function displayInventory(items) {
-            const container = document.getElementById('inventoryList');
-            
-            if (items.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #7f8c8d;">
-                        <p>No inventory items yet.</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Filter by search term if any
-            let filtered = items;
-            if (searchTerm) {
-                filtered = items.filter(item => 
-                    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    (item.details && item.details.toLowerCase().includes(searchTerm.toLowerCase()))
-                );
-            }
-            
-            // Apply batch filter
-            const batchFilter = document.getElementById('batchFilter').value;
-            if (batchFilter) {
-                filtered = filtered.filter(item => item.batchId === batchFilter);
-            }
-            
-            // Apply group filter
-            const groupFilter = document.getElementById('groupFilter').value;
-            if (groupFilter) {
-                filtered = filtered.filter(item => item.group === groupFilter);
-            }
-            
-            // Newest first
-            const sorted = [...filtered].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
-            container.innerHTML = sorted.map(item => {
-                const batch = allBatches.find(b => b.id === item.batch
+    // INIT
+    (async function init() {
+      updateRoleUI();
+      renderBatch();
+      await loadInventory();
+    })();
+  </script>
+</body>
+</html>
