@@ -1,6 +1,3 @@
-Here’s the **updated full single HTML file** with the image viewer fixed so the image shows properly in large view (staff + admin):
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -241,13 +238,11 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       border-color: var(--accent);
     }
 
-    /* Highlight searched rows */
     tr.highlight-row td {
       background: #111827;
       border-bottom-color: var(--accent-soft);
     }
 
-    /* Name suggestions */
     .name-input-wrapper {
       position: relative;
     }
@@ -280,7 +275,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       background: #111827;
     }
 
-    /* Image thumbnails */
     .image-thumbs {
       display: flex;
       flex-wrap: wrap;
@@ -315,7 +309,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       border-radius: 999px;
     }
 
-    /* Bell animation */
     #pending-badge.bell-alert {
       border-color: #f97316;
       color: #fecaca;
@@ -332,7 +325,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       100% { transform: translateX(0) rotate(0); }
     }
 
-    /* Modal */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -365,7 +357,7 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       margin-top: 0.6rem;
     }
 
-    /* IMAGE VIEWER (full screen) */
+    /* IMAGE VIEWER */
     #image-viewer {
       position: fixed;
       inset: 0;
@@ -420,10 +412,12 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
 
     .viewer-image-wrapper {
       position: relative;
-      flex: 1;
+      flex: 1 0 auto;
+      width: 90vw;
       max-width: 90vw;
+      height: 70vh;
       max-height: 75vh;
-      min-height: 40vh;             /* ensure visible height */
+      min-height: 40vh;
       overflow: hidden;
       touch-action: none;
       display: flex;
@@ -435,11 +429,11 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
     }
 
     #viewer-image {
+      width: 100%;
+      height: 100%;
       max-width: 100%;
       max-height: 100%;
-      width: auto;
-      height: auto;
-      object-fit: contain;          /* show full image */
+      object-fit: contain;
       transform-origin: center center;
       user-select: none;
       -webkit-user-drag: none;
@@ -548,7 +542,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
             <textarea id="item-details" class="upper" placeholder="GRADE, BRAND, ETC."></textarea>
           </div>
 
-          <!-- IMAGES -->
           <div style="margin-top:0.5rem;">
             <label>IMAGES (REQUIRED, MAX 10, ≤ 2MB EACH)</label>
             <div class="actions-row" style="margin-top:0.25rem;">
@@ -623,27 +616,22 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
         <span id="pending-badge" class="badge">🔔 0</span>
       </h2>
 
-      <!-- MAIN ADMIN TABS -->
       <div class="tab-row">
         <button type="button" class="tab-btn admin-main-tab" data-tab="add">ADD ITEMS</button>
         <button type="button" class="tab-btn admin-main-tab active" data-tab="batches">BATCHES</button>
         <button type="button" class="tab-btn admin-main-tab" data-tab="items">ALL ITEMS</button>
       </div>
 
-      <!-- ADMIN ADD ITEMS TAB (reuses staff UI) -->
       <div id="admin-add-tab" style="display:none;">
         <div id="admin-add-container"></div>
       </div>
 
-      <!-- ADMIN BATCHES TAB -->
       <div id="admin-batches-tab">
-        <!-- Pending / Approved mini-tabs -->
         <div class="tab-row" id="batch-status-tabs" style="margin-bottom:0.4rem;">
           <button type="button" class="tab-btn small batch-filter-tab active" data-batch-view="pending">PENDING</button>
           <button type="button" class="tab-btn small batch-filter-tab" data-batch-view="approved">APPROVED</button>
         </div>
 
-        <!-- Selected batch details -->
         <div id="batch-items-wrapper" style="margin-top:0.3rem; display:none;">
           <div class="actions-row" style="margin-bottom:0.3rem;">
             <span class="muted" id="selected-batch-label">NO BATCH SELECTED.</span>
@@ -672,10 +660,8 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
           </div>
         </div>
 
-        <!-- Batch list -->
         <div class="muted" id="batch-list-info" style="margin-top:0.6rem;">LOADING…</div>
 
-        <!-- Batch search controls -->
         <div class="field-row" style="margin:0.4rem 0;">
           <div>
             <label for="batch-search-name">SEARCH BATCH BY NAME</label>
@@ -694,7 +680,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
         <div id="batch-list" style="margin-top:0.4rem;"></div>
       </div>
 
-      <!-- ADMIN ALL ITEMS TAB -->
       <div id="admin-items-tab" style="display:none;">
         <div class="muted" id="count-info">LOADING…</div>
 
@@ -759,7 +744,7 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
     </section>
   </main>
 
-  <!-- EDIT MODAL FOR ADMIN (WITH IMAGES) -->
+  <!-- EDIT MODAL -->
   <div id="edit-modal" class="modal-overlay">
     <div class="modal">
       <h3>EDIT ITEM</h3>
@@ -784,7 +769,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
         <textarea id="modal-details" class="upper"></textarea>
       </div>
 
-      <!-- ADMIN IMAGES -->
       <div style="margin-top:0.6rem;">
         <label>IMAGES (ADMIN CAN ADD / REMOVE)</label>
         <div class="actions-row" style="margin-top:0.25rem;">
@@ -819,7 +803,7 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
     </div>
   </div>
 
-  <!-- FULL-SCREEN IMAGE VIEWER (STAFF + ADMIN) -->
+  <!-- IMAGE VIEWER -->
   <div id="image-viewer">
     <div class="image-viewer-inner">
       <div class="viewer-top-row">
@@ -840,7 +824,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
   </div>
 
   <script>
-    // ===== CONFIG =====
     const BACKEND_URL = "https://inventory-backend-s4sv.onrender.com/get-token";
     const NOTIFY_URL = "https://inventory-backend-s4sv.onrender.com/notify-batch";
     const REPO_OWNER = "unique205";
@@ -852,7 +835,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
     const ADMIN_PHONE = "917588756668";
     const WHATSAPP_PHONE = ADMIN_PHONE;
 
-    // ===== STATE =====
     let currentRole = "staff";
     let inventory = [];
     let currentSha = null;
@@ -878,22 +860,19 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
 
     let modalEditId = null;
 
-    // IMAGE VIEWER STATE
     const viewerState = {
-      source: null, // "form" | "modal"
+      source: null,
       images: [],
       index: 0,
       deletable: false,
-      onChange: null // callback(newImagesArray)
+      onChange: null
     };
 
-    // ===== DOM =====
     const appTitle = document.getElementById("app-title");
     const roleBadge = document.getElementById("role-badge");
     const mainEl = document.querySelector("main");
     const staffBatchWrapper = document.getElementById("staff-batch-wrapper");
 
-    // staff form
     const itemForm = document.getElementById("item-form");
     const itemNameInput = document.getElementById("item-name");
     const itemQtyInput = document.getElementById("item-qty");
@@ -918,7 +897,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
     const uploadBatchBtn = document.getElementById("upload-batch-btn");
     const batchStatus = document.getElementById("batch-status");
 
-    // admin
     const adminCard = document.getElementById("admin-card");
     const pendingBadge = document.getElementById("pending-badge");
     const adminAddTab = document.getElementById("admin-add-tab");
@@ -952,7 +930,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
     const reportStatusSelect = document.getElementById("report-status");
     const reportBatchInput = document.getElementById("report-batch");
 
-    // admin edit modal DOM
     const editModal = document.getElementById("edit-modal");
     const modalNameInput = document.getElementById("modal-name");
     const modalQtyInput = document.getElementById("modal-qty");
@@ -967,7 +944,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
     const modalImagesList = document.getElementById("modal-images-list");
     const modalImageStatus = document.getElementById("modal-image-status");
 
-    // image viewer DOM
     const imageViewer = document.getElementById("image-viewer");
     const viewerCloseBtn = document.getElementById("viewer-close-btn");
     const viewerPrevBtn = document.getElementById("viewer-prev-btn");
@@ -977,7 +953,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
     const viewerCounter = document.getElementById("viewer-counter");
     const viewerWrapper = document.getElementById("viewer-wrapper");
 
-    // ===== UTILS =====
     function setStatus(msg) {
       statusText.textContent = msg.toUpperCase();
     }
@@ -1125,7 +1100,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       } catch {}
     }
 
-    // ===== LOAD/SAVE INVENTORY =====
     async function loadInventory() {
       try {
         setStatus("LOADING FROM GITHUB…");
@@ -1163,7 +1137,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       currentSha = data.content.sha;
     }
 
-    // ===== LOAD/SAVE IMAGES =====
     async function loadImages() {
       try {
         const data = await githubRequest(
@@ -1208,7 +1181,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       else imagesStore[idx] = payload;
     }
 
-    // ===== BATCH (STAFF) =====
     function renderBatch() {
       batchBody.innerHTML = "";
 
@@ -1307,7 +1279,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       }
     });
 
-    // ===== IMAGE THUMBS (FORM) =====
     function renderFormImages() {
       if (!imageList) return;
       if (!formImages.length) {
@@ -1454,7 +1425,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       renderFormImages();
     });
 
-    // ===== NAME SUGGESTIONS =====
     function clearSuggestions() {
       if (!itemSuggestions) return;
       itemSuggestions.innerHTML = "";
@@ -1532,7 +1502,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       }
     });
 
-    // ===== GROUPING =====
     function groupByBatch() {
       const groups = {};
       inventory.forEach((item) => {
@@ -1543,7 +1512,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       return groups;
     }
 
-    // ===== ADMIN RENDER =====
     function renderAdminViews() {
       if (currentRole !== "admin") return;
 
@@ -1621,7 +1589,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
         batchListInfo.textContent = `${pendingCount} PENDING • ${approvedCount} APPROVED (VIEW: ${currentBatchFilter.toUpperCase()}, SHOWING ${shownCount})`;
       }
 
-      // ALL ITEMS (REPORTS)
       inventoryBody.innerHTML = "";
       if (!inventory.length) {
         countInfo.textContent = "NO ITEMS IN INVENTORY.";
@@ -1782,7 +1749,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       });
     }
 
-    // APPROVE & WHATSAPP
     approveBatchBtn.addEventListener("click", async () => {
       if (!selectedBatchKey) {
         alert("NO BATCH SELECTED.");
@@ -1878,7 +1844,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       if (!opened) alert("WHATSAPP MESSAGE (COPY & SEND):\n\n" + message);
     });
 
-    // ===== MODAL IMAGES (ADMIN) =====
     function renderModalImages() {
       if (!modalImagesList) return;
       if (!modalImages.length) {
@@ -2009,7 +1974,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       }
     });
 
-    // ADMIN TABLE ACTIONS
     adminBatchBody.addEventListener("click", handleAdminTableClick);
     inventoryBody.addEventListener("click", handleAdminTableClick);
 
@@ -2055,7 +2019,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       }
     }
 
-    // ===== FORM SUBMIT (STAFF + ADMIN ADD ITEMS TAB) =====
     itemForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -2142,7 +2105,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
 
     cancelEditBtn.addEventListener("click", () => resetForm());
 
-    // ADMIN LOGIN
     appTitle.addEventListener("click", () => {
       if (currentRole === "admin") {
         currentRole = "staff";
@@ -2163,14 +2125,12 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       Promise.all([loadInventory(), loadImages()]);
     });
 
-    // ADMIN MAIN TABS
     tabButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
         setAdminMainTab(btn.dataset.tab);
       });
     });
 
-    // BATCH FILTER TABS
     batchFilterButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
         currentBatchFilter = btn.dataset.batchView || "pending";
@@ -2180,7 +2140,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       });
     });
 
-    // BATCH SEARCH
     batchSearchBtn.addEventListener("click", () => {
       batchSearchName = (batchSearchNameInput.value || "").trim().toUpperCase();
       batchSearchDate = batchSearchDateInput.value || "";
@@ -2195,7 +2154,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       renderAdminViews();
     });
 
-    // REPORT FILTERS
     itemSearchBtn.addEventListener("click", () => {
       itemSearchTerm = (itemSearchInput.value || "").trim().toUpperCase();
       reportDateFrom = reportDateFromInput.value || "";
@@ -2223,7 +2181,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       renderAdminViews();
     });
 
-    // BELL CLICK
     pendingBadge.addEventListener("click", () => {
       if (currentRole !== "admin") return;
       setAdminMainTab("batches");
@@ -2236,7 +2193,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       playBellSound();
     });
 
-    // ===== IMAGE VIEWER (SIMPLE) =====
     let viewerScale = 1;
     let viewerTranslateX = 0;
     let viewerTranslateY = 0;
@@ -2289,7 +2245,7 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       if (i >= viewerState.images.length) i = viewerState.images.length - 1;
       viewerState.index = i;
       const img = viewerState.images[i];
-      viewerImage.style.display = "block";        // ensure visible
+      viewerImage.style.display = "block";
       viewerImage.src = img.dataUrl;
       viewerCounter.textContent = `${i + 1} / ${viewerState.images.length}`;
       resetViewerTransform();
@@ -2316,7 +2272,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
     viewerDeleteBtn.addEventListener("click", () => {
       if (!viewerState.deletable || !viewerState.images.length) return;
       const idx = viewerState.index;
-      const img = viewerState.images[idx];
       const newArr = viewerState.images.filter((_, i) => i !== idx);
       viewerState.images = newArr;
       if (viewerState.onChange) viewerState.onChange(newArr);
@@ -2328,14 +2283,12 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       showViewerImage(newIndex);
     });
 
-    // click outside image to close
     imageViewer.addEventListener("click", (e) => {
       if (e.target === imageViewer) {
         closeImageViewer();
       }
     });
 
-    // keyboard: ESC close, X delete
     document.addEventListener("keydown", (e) => {
       if (imageViewer.style.display !== "flex") return;
       if (e.key === "Escape") {
@@ -2349,7 +2302,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       }
     });
 
-    // pinch + pan using pointer events
     viewerWrapper.addEventListener("pointerdown", (e) => {
       viewerWrapper.setPointerCapture(e.pointerId);
       viewerPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -2371,7 +2323,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       viewerPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
       if (viewerPointers.size === 1) {
-        // pan
         const dx = e.clientX - viewerLastX;
         const dy = e.clientY - viewerLastY;
         viewerLastX = e.clientX;
@@ -2380,7 +2331,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
         viewerTranslateY += dy;
         applyViewerTransform();
       } else if (viewerPointers.size === 2) {
-        // pinch
         const arr = Array.from(viewerPointers.values());
         const dx = arr[1].x - arr[0].x;
         const dy = arr[1].y - arr[0].y;
@@ -2409,7 +2359,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       viewerPointers.delete(e.pointerId);
     });
 
-    // swipe with touch (horizontal)
     let touchStartX = 0;
     let touchStartY = 0;
     imageViewer.addEventListener("touchstart", (e) => {
@@ -2429,7 +2378,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       }
     });
 
-    // open viewer from any thumb image (staff form + admin modal)
     document.addEventListener("click", (e) => {
       const imgEl = e.target.closest("img[data-view-source]");
       if (!imgEl) return;
@@ -2458,7 +2406,6 @@ Here’s the **updated full single HTML file** with the image viewer fixed so th
       }
     });
 
-    // ===== INIT =====
     (async function init() {
       updateRoleUI();
       renderBatch();
