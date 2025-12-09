@@ -345,7 +345,7 @@
       border: 1px solid var(--border);
       padding: 0.9rem 1rem 1rem;
       width: 100%;
-      max-width: 420px;
+      max-width: 480px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
     }
 
@@ -651,7 +651,7 @@
     </section>
   </main>
 
-  <!-- EDIT MODAL FOR ADMIN -->
+  <!-- EDIT MODAL FOR ADMIN (WITH IMAGES) -->
   <div id="edit-modal" class="modal-overlay">
     <div class="modal">
       <h3>EDIT ITEM</h3>
@@ -675,6 +675,35 @@
         <label for="modal-details">DETAILS</label>
         <textarea id="modal-details" class="upper"></textarea>
       </div>
+
+      <!-- ADMIN IMAGE CONTROL -->
+      <div style="margin-top:0.6rem;">
+        <label>IMAGES (ADMIN CAN ADD / REMOVE)</label>
+        <div class="actions-row" style="margin-top:0.25rem;">
+          <button type="button" id="modal-upload-btn" class="secondary small">UPLOAD</button>
+          <button type="button" id="modal-capture-btn" class="secondary small">CAPTURE</button>
+          <span class="muted" id="modal-image-status"></span>
+        </div>
+        <input
+          id="modal-upload-input"
+          type="file"
+          accept="image/*"
+          multiple
+          style="display:none;"
+        />
+        <input
+          id="modal-capture-input"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          multiple
+          style="display:none;"
+        />
+        <div id="modal-images-list">
+          <p class="muted">NO IMAGES.</p>
+        </div>
+      </div>
+
       <div class="modal-footer">
         <button type="button" id="modal-cancel-btn" class="secondary small">CANCEL</button>
         <button type="button" id="modal-save-btn" class="small">SAVE</button>
@@ -708,6 +737,7 @@
     let imagesStore = [];
     let imagesSha = null;
     let formImages = [];
+    let modalImages = [];
 
     // Search/filter
     let batchSearchName = "";
@@ -798,6 +828,12 @@
     const modalDetailsInput = document.getElementById("modal-details");
     const modalCancelBtn = document.getElementById("modal-cancel-btn");
     const modalSaveBtn = document.getElementById("modal-save-btn");
+    const modalUploadBtn = document.getElementById("modal-upload-btn");
+    const modalCaptureBtn = document.getElementById("modal-capture-btn");
+    const modalUploadInput = document.getElementById("modal-upload-input");
+    const modalCaptureInput = document.getElementById("modal-capture-input");
+    const modalImagesList = document.getElementById("modal-images-list");
+    const modalImageStatus = document.getElementById("modal-image-status");
 
     // ===== UTILS =====
     function setStatus(msg) {
@@ -1271,7 +1307,7 @@
       }
     });
 
-    // ===== IMAGE UI & COMPRESSION =====
+    // ===== IMAGE UI & COMPRESSION (STAFF FORM) =====
     function renderFormImages() {
       if (!imageList) return;
       if (!formImages.length) {
@@ -1363,7 +1399,7 @@
       };
     }
 
-    async function processSelectedFiles(files) {
+    async function processSelectedFiles(files, targetArray, statusEl, renderFn) {
       if (!files.length) return;
 
       const maxImages = 10;
@@ -1372,7 +1408,7 @@
       let rejectedSize = false;
 
       for (const file of files) {
-        if (formImages.length >= maxImages) {
+        if (targetArray.length >= maxImages) {
           rejectedTooMany = true;
           break;
         }
@@ -1383,29 +1419,31 @@
           continue;
         }
 
-        formImages.push(compressed);
+        targetArray.push(compressed);
       }
 
-      renderFormImages();
+      renderFn();
 
-      if (rejectedTooMany) {
-        imageStatusText.textContent = "MAX 10 IMAGES REACHED.";
-      } else if (rejectedSize) {
-        imageStatusText.textContent = "SOME IMAGES COULD NOT BE COMPRESSED <= 2MB.";
-      } else {
-        imageStatusText.textContent = `${formImages.length} IMAGE(S)`;
+      if (statusEl) {
+        if (rejectedTooMany) {
+          statusEl.textContent = "MAX 10 IMAGES REACHED.";
+        } else if (rejectedSize) {
+          statusEl.textContent = "SOME IMAGES COULD NOT BE COMPRESSED <= 2MB.";
+        } else {
+          statusEl.textContent = `${targetArray.length} IMAGE(S)`;
+        }
       }
     }
 
     uploadImageInput.addEventListener("change", (e) => {
       const files = Array.from(e.target.files || []);
-      processSelectedFiles(files);
+      processSelectedFiles(files, formImages, imageStatusText, renderFormImages);
       uploadImageInput.value = "";
     });
 
     captureImageInput.addEventListener("change", (e) => {
       const files = Array.from(e.target.files || []);
-      processSelectedFiles(files);
+      processSelectedFiles(files, formImages, imageStatusText, renderFormImages);
       captureImageInput.value = "";
     });
 
@@ -1844,13 +1882,39 @@
       if (!opened) alert("WHATSAPP MESSAGE (COPY & SEND):\n\n" + message);
     });
 
-    // ===== MODAL (ADMIN EDIT POPUP) =====
+    // ===== MODAL (ADMIN EDIT POPUP + IMAGES) =====
+    function renderModalImages() {
+      if (!modalImagesList) return;
+      if (!modalImages.length) {
+        modalImagesList.innerHTML = '<p class="muted">NO IMAGES.</p>';
+        modalImageStatus.textContent = "";
+        return;
+      }
+
+      const wrap = document.createElement("div");
+      wrap.className = "image-thumbs";
+      modalImages.forEach((img) => {
+        const div = document.createElement("div");
+        div.className = "image-thumb";
+        div.innerHTML = `
+          <img src="${img.dataUrl}" alt="">
+          <button type="button" class="danger small" data-modal-img-id="${img.id}">X</button>
+        `;
+        wrap.appendChild(div);
+      });
+      modalImagesList.innerHTML = "";
+      modalImagesList.appendChild(wrap);
+      modalImageStatus.textContent = `${modalImages.length} IMAGE(S)`;
+    }
+
     function openEditModal(item) {
       modalEditId = item.id;
       modalNameInput.value = (item.name || "").toString().toUpperCase();
       modalQtyInput.value = item.quantity ?? "";
       modalGroupInput.value = (item.group || "").toString().toUpperCase();
       modalDetailsInput.value = (item.details || "").toString().toUpperCase();
+      modalImages = getImagesForItem(item.id).map((img) => ({ ...img }));
+      renderModalImages();
       editModal.style.display = "flex";
     }
 
@@ -1867,6 +1931,34 @@
       if (e.target === editModal) {
         closeEditModal();
       }
+    });
+
+    modalUploadBtn.addEventListener("click", () => {
+      modalUploadInput.click();
+    });
+
+    modalCaptureBtn.addEventListener("click", () => {
+      modalCaptureInput.click();
+    });
+
+    modalUploadInput.addEventListener("change", (e) => {
+      const files = Array.from(e.target.files || []);
+      processSelectedFiles(files, modalImages, modalImageStatus, renderModalImages);
+      modalUploadInput.value = "";
+    });
+
+    modalCaptureInput.addEventListener("change", (e) => {
+      const files = Array.from(e.target.files || []);
+      processSelectedFiles(files, modalImages, modalImageStatus, renderModalImages);
+      modalCaptureInput.value = "";
+    });
+
+    modalImagesList.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-modal-img-id]");
+      if (!btn) return;
+      const id = btn.dataset.modalImgId;
+      modalImages = modalImages.filter((img) => img.id !== id);
+      renderModalImages();
     });
 
     modalSaveBtn.addEventListener("click", async () => {
@@ -1890,6 +1982,7 @@
       try {
         setStatus("UPDATING ITEM…");
         await loadInventory();
+        await loadImages();
 
         const idx = inventory.findIndex((it) => it.id === modalEditId);
         if (idx === -1) {
@@ -1906,9 +1999,12 @@
           details,
           updatedAt: now
         };
+        setImagesForItem(modalEditId, modalImages.map((img) => ({ ...img })));
 
         await saveInventory();
+        await saveImages();
         await loadInventory();
+        await loadImages();
         closeEditModal();
         setStatus("ITEM UPDATED");
       } catch (err) {
@@ -1917,7 +2013,7 @@
       }
     });
 
-    // ADMIN TABLE ACTIONS (now open modal)
+    // ADMIN TABLE ACTIONS
     adminBatchBody.addEventListener("click", handleAdminTableClick);
     inventoryBody.addEventListener("click", handleAdminTableClick);
 
@@ -1927,6 +2023,7 @@
       if (!btn.dataset.action || !id) return;
 
       if (btn.dataset.action === "edit-item") {
+        await loadImages();
         const item = inventory.find((it) => it.id === id);
         if (!item) {
           setStatus("ITEM NOT FOUND");
@@ -1999,7 +2096,7 @@
       };
 
       if (currentRole === "admin" && adminEditId && batchEditIndex === null) {
-        // Editing uploaded item via top form (rare – kept for flexibility)
+        // editing uploaded item from top form (not usual, but allowed)
         try {
           setStatus("UPDATING ITEM…");
           await loadInventory();
