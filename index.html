@@ -4,6 +4,15 @@
   <meta charset="UTF-8" />
   <title>INVENTORY SYSTEM</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- PWA basics + RC icon -->
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="manifest" href="manifest.json" />
+  <link
+    rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230f172a'/%3E%3Ctext x='50' y='58' text-anchor='middle' font-size='42' fill='%23ffffff' font-family='system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif'%3ERC%3C/text%3E%3C/svg%3E"
+  />
+
   <style>
     :root {
       --bg: #0f172a;
@@ -630,6 +639,7 @@
         <div class="tab-row" id="batch-status-tabs" style="margin-bottom:0.4rem;">
           <button type="button" class="tab-btn small batch-filter-tab active" data-batch-view="pending">PENDING</button>
           <button type="button" class="tab-btn small batch-filter-tab" data-batch-view="approved">APPROVED</button>
+          <button type="button" class="tab-btn small batch-filter-tab" data-batch-view="rejected">REJECTED</button>
         </div>
 
         <div id="batch-items-wrapper" style="margin-top:0.3rem; display:none;">
@@ -637,6 +647,9 @@
             <span class="muted" id="selected-batch-label">NO BATCH SELECTED.</span>
             <button type="button" id="approve-batch-btn" class="secondary">
               APPROVE
+            </button>
+            <button type="button" id="reject-batch-btn" class="danger">
+              REJECT
             </button>
             <button type="button" id="send-whatsapp-btn" class="secondary">
               SEND WHATSAPP
@@ -709,6 +722,7 @@
               <option value="ALL">ALL</option>
               <option value="PENDING">PENDING</option>
               <option value="APPROVED">APPROVED</option>
+              <option value="REJECTED">REJECTED</option>
             </select>
           </div>
           <div>
@@ -910,6 +924,7 @@
     const batchItemsWrapper = document.getElementById("batch-items-wrapper");
     const selectedBatchLabel = document.getElementById("selected-batch-label");
     const approveBatchBtn = document.getElementById("approve-batch-btn");
+    const rejectBatchBtn = document.getElementById("reject-batch-btn");
     const sendWhatsAppBtn = document.getElementById("send-whatsapp-btn");
     const adminBatchBody = document.getElementById("admin-batch-body");
     const batchSearchNameInput = document.getElementById("batch-search-name");
@@ -993,6 +1008,7 @@
     function getStatusDisplay(statusRaw) {
       const s = (statusRaw || "PENDING").toUpperCase();
       if (s === "APPROVED") return "✅ APPROVED";
+      if (s === "REJECTED") return "❌ REJECTED";
       return "🟡 PENDING";
     }
 
@@ -1529,10 +1545,12 @@
 
       let pendingCount = 0;
       let approvedCount = 0;
+      let rejectedCount = 0;
       keys.forEach((k) => {
         const first = groups[k][0];
         const statusRaw = (first.batchStatus || "PENDING").toUpperCase();
         if (statusRaw === "APPROVED") approvedCount++;
+        else if (statusRaw === "REJECTED") rejectedCount++;
         else pendingCount++;
       });
 
@@ -1554,8 +1572,9 @@
         const statusRaw = (first.batchStatus || "PENDING").toUpperCase();
         const statusDisplay = getStatusDisplay(statusRaw);
 
-        if (currentBatchFilter === "pending" && statusRaw === "APPROVED") return;
+        if (currentBatchFilter === "pending" && statusRaw !== "PENDING") return;
         if (currentBatchFilter === "approved" && statusRaw !== "APPROVED") return;
+        if (currentBatchFilter === "rejected" && statusRaw !== "REJECTED") return;
 
         const nameFilter = batchSearchName;
         const dateFilter = batchSearchDate;
@@ -1586,7 +1605,8 @@
       if (!keys.length) {
         batchListInfo.textContent = "NO BATCHES FOUND.";
       } else {
-        batchListInfo.textContent = `${pendingCount} PENDING • ${approvedCount} APPROVED (VIEW: ${currentBatchFilter.toUpperCase()}, SHOWING ${shownCount})`;
+        batchListInfo.textContent =
+          `${pendingCount} PENDING • ${approvedCount} APPROVED • ${rejectedCount} REJECTED (VIEW: ${currentBatchFilter.toUpperCase()}, SHOWING ${shownCount})`;
       }
 
       inventoryBody.innerHTML = "";
@@ -1794,6 +1814,36 @@
       } catch (err) {
         console.error("APPROVE FAILED:", err);
         setStatus("ERROR APPROVING BATCH");
+      }
+    });
+
+    rejectBatchBtn.addEventListener("click", async () => {
+      if (!selectedBatchKey) {
+        alert("NO BATCH SELECTED.");
+        return;
+      }
+
+      const groups = groupByBatch();
+      const items = groups[selectedBatchKey];
+      if (!items || !items.length) {
+        alert("BATCH HAS NO ITEMS.");
+        return;
+      }
+
+      if (!confirm("REJECT THIS BATCH?")) return;
+
+      try {
+        setStatus("REJECTING BATCH…");
+
+        inventory.forEach((it) => {
+          if (getBatchKeyForItem(it) === selectedBatchKey) it.batchStatus = "REJECTED";
+        });
+        await saveInventory();
+        await loadInventory();
+        setStatus("BATCH REJECTED");
+      } catch (err) {
+        console.error("REJECT FAILED:", err);
+        setStatus("ERROR REJECTING BATCH");
       }
     });
 
