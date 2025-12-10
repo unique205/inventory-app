@@ -4,15 +4,6 @@
   <meta charset="UTF-8" />
   <title>INVENTORY SYSTEM</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- PWA basics + RC icon -->
-  <meta name="theme-color" content="#0f172a" />
-  <link rel="manifest" href="manifest.json" />
-  <link
-    rel="icon"
-    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230f172a'/%3E%3Ctext x='50' y='58' text-anchor='middle' font-size='42' fill='%23ffffff' font-family='system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif'%3ERC%3C/text%3E%3C/svg%3E"
-  />
-
   <style>
     :root {
       --bg: #0f172a;
@@ -109,8 +100,7 @@
 
     input,
     textarea,
-    button,
-    select {
+    button {
       font: inherit;
       border-radius: 0.4rem;
       border: 1px solid #374151;
@@ -247,11 +237,13 @@
       border-color: var(--accent);
     }
 
+    /* Highlight for searched items */
     tr.highlight-row td {
       background: #111827;
       border-bottom-color: var(--accent-soft);
     }
 
+    /* Item name suggestions (staff/admin add form) */
     .name-input-wrapper {
       position: relative;
     }
@@ -284,40 +276,7 @@
       background: #111827;
     }
 
-    .image-thumbs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-top: 0.25rem;
-    }
-
-    .image-thumb {
-      position: relative;
-      width: 70px;
-      height: 70px;
-      border-radius: 0.4rem;
-      overflow: hidden;
-      border: 1px solid #374151;
-      background: #020617;
-    }
-
-    .image-thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      cursor: zoom-in;
-    }
-
-    .image-thumb button {
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      padding: 0 4px;
-      font-size: 0.6rem;
-      border-radius: 999px;
-    }
-
+    /* Bell animation */
     #pending-badge.bell-alert {
       border-color: #f97316;
       color: #fecaca;
@@ -330,140 +289,11 @@
       20% { transform: translateX(-1px) rotate(-5deg); }
       40% { transform: translateX(1px) rotate(5deg); }
       60% { transform: translateX(-1px) rotate(-5deg); }
-      80% { transform: translateX(1px) rotate(0); }
+      80% { transform: translateX(1px) rotate(5deg); }
       100% { transform: translateX(0) rotate(0); }
     }
 
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.9);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 50;
-    }
-
-    .modal {
-      background: var(--card);
-      border-radius: 0.75rem;
-      border: 1px solid var(--border);
-      padding: 0.9rem 1rem 1rem;
-      width: 100%;
-      max-width: 480px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-    }
-
-    .modal h3 {
-      margin: 0 0 0.6rem;
-      font-size: 0.95rem;
-    }
-
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.4rem;
-      margin-top: 0.6rem;
-    }
-
-    /* IMAGE VIEWER */
-    #image-viewer {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.95);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 70;
-      color: #e5e7eb;
-    }
-
-    .image-viewer-inner {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      max-width: 100vw;
-      max-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0.5rem;
-      box-sizing: border-box;
-    }
-
-    .viewer-top-row {
-      width: 100%;
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 0.3rem;
-    }
-
-    .viewer-close {
-      font-size: 1.1rem;
-      line-height: 1;
-      padding: 0.25rem 0.6rem;
-    }
-
-    .viewer-main {
-      flex: 1;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-
-    .viewer-nav {
-      height: 38px;
-      min-width: 38px;
-      font-size: 1.2rem;
-    }
-
-    .viewer-image-wrapper {
-      position: relative;
-      flex: 1 0 auto;
-      width: 90vw;
-      max-width: 90vw;
-      height: 70vh;
-      max-height: 75vh;
-      min-height: 40vh;
-      overflow: hidden;
-      touch-action: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #020617;
-      border-radius: 0.5rem;
-      border: 1px solid #374151;
-    }
-
-    #viewer-image {
-      width: 100%;
-      height: 100%;
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      transform-origin: center center;
-      user-select: none;
-      -webkit-user-drag: none;
-      display: block;
-    }
-
-    .viewer-footer {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 0.4rem;
-      font-size: 0.8rem;
-    }
-
-    #viewer-delete-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
+    /* ===== SMALL SCREENS ===== */
     @media (max-width: 640px) {
       header {
         gap: 0.5rem;
@@ -487,27 +317,21 @@
         margin-right: 0;
       }
 
+      /* Hide ID column on narrow screens */
       th:nth-child(1),
       td:nth-child(1) {
         display: none;
       }
 
+      /* Actions column vertically stacked */
       td.actions-cell {
         display: flex;
         flex-direction: column;
         gap: 0.25rem;
       }
-
-      .viewer-main {
-        gap: 0.25rem;
-      }
-
-      .viewer-nav {
-        min-width: 32px;
-        height: 32px;
-      }
     }
 
+    /* Wider screens: 2-column row for name/qty/group */
     @media (min-width: 641px) {
       .field-row {
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -522,7 +346,7 @@
   </header>
 
   <main>
-    <!-- STAFF ADD + BATCH -->
+    <!-- STAFF ADD + BATCH (this will move into admin panel when admin logs in) -->
     <div id="staff-batch-wrapper">
       <!-- ADD / EDIT FORM -->
       <section class="card">
@@ -545,44 +369,11 @@
               <input id="item-group" class="upper" placeholder="E.G. RAW MATERIAL" />
             </div>
           </div>
-
           <div>
             <label for="item-details">DETAILS</label>
             <textarea id="item-details" class="upper" placeholder="GRADE, BRAND, ETC."></textarea>
           </div>
-
-          <div style="margin-top:0.5rem;">
-            <label>IMAGES (REQUIRED, MAX 10, ≤ 2MB EACH)</label>
-            <div class="actions-row" style="margin-top:0.25rem;">
-              <button type="button" id="upload-image-btn" class="secondary small">
-                UPLOAD
-              </button>
-              <button type="button" id="capture-image-btn" class="secondary small">
-                CAPTURE
-              </button>
-              <span class="muted" id="image-status-text"></span>
-            </div>
-            <input
-              id="item-images-upload-input"
-              type="file"
-              accept="image/*"
-              multiple
-              style="display:none;"
-            />
-            <input
-              id="item-images-capture-input"
-              type="file"
-              accept="image/*"
-              capture="environment"
-              multiple
-              style="display:none;"
-            />
-            <div id="item-images-list">
-              <p class="muted">NO IMAGES ADDED.</p>
-            </div>
-          </div>
-
-          <div class="actions-row" style="margin-top:0.6rem;">
+          <div class="actions-row">
             <button type="submit" id="submit-btn">ADD TO BATCH</button>
             <button type="button" id="cancel-edit-btn" class="secondary" style="display:none;">CANCEL</button>
             <div class="status">STATUS: <span id="status-text">IDLE</span></div>
@@ -625,31 +416,32 @@
         <span id="pending-badge" class="badge">🔔 0</span>
       </h2>
 
+      <!-- MAIN ADMIN TABS -->
       <div class="tab-row">
         <button type="button" class="tab-btn admin-main-tab" data-tab="add">ADD ITEMS</button>
         <button type="button" class="tab-btn admin-main-tab active" data-tab="batches">BATCHES</button>
         <button type="button" class="tab-btn admin-main-tab" data-tab="items">ALL ITEMS</button>
       </div>
 
+      <!-- ADMIN ADD ITEMS TAB (reuses staff add+batch UI) -->
       <div id="admin-add-tab" style="display:none;">
         <div id="admin-add-container"></div>
       </div>
 
+      <!-- ADMIN BATCHES TAB -->
       <div id="admin-batches-tab">
+        <!-- Pending / Approved mini-tabs -->
         <div class="tab-row" id="batch-status-tabs" style="margin-bottom:0.4rem;">
           <button type="button" class="tab-btn small batch-filter-tab active" data-batch-view="pending">PENDING</button>
           <button type="button" class="tab-btn small batch-filter-tab" data-batch-view="approved">APPROVED</button>
-          <button type="button" class="tab-btn small batch-filter-tab" data-batch-view="rejected">REJECTED</button>
         </div>
 
+        <!-- Selected batch details (opens above list) -->
         <div id="batch-items-wrapper" style="margin-top:0.3rem; display:none;">
           <div class="actions-row" style="margin-bottom:0.3rem;">
             <span class="muted" id="selected-batch-label">NO BATCH SELECTED.</span>
             <button type="button" id="approve-batch-btn" class="secondary">
               APPROVE
-            </button>
-            <button type="button" id="reject-batch-btn" class="danger">
-              REJECT
             </button>
             <button type="button" id="send-whatsapp-btn" class="secondary">
               SEND WHATSAPP
@@ -673,8 +465,10 @@
           </div>
         </div>
 
+        <!-- Batch list -->
         <div class="muted" id="batch-list-info" style="margin-top:0.6rem;">LOADING…</div>
 
+        <!-- Batch search controls -->
         <div class="field-row" style="margin:0.4rem 0;">
           <div>
             <label for="batch-search-name">SEARCH BATCH BY NAME</label>
@@ -693,47 +487,20 @@
         <div id="batch-list" style="margin-top:0.4rem;"></div>
       </div>
 
+      <!-- ADMIN ALL ITEMS TAB -->
       <div id="admin-items-tab" style="display:none;">
         <div class="muted" id="count-info">LOADING…</div>
 
+        <!-- Item search controls -->
         <div class="field-row" style="margin-top:0.4rem;">
           <div>
-            <label for="item-search-input">ITEM NAME</label>
+            <label for="item-search-input">SEARCH ITEM (NAME)</label>
             <input id="item-search-input" placeholder="TYPE ITEM NAME…" class="upper" />
           </div>
-          <div>
-            <label for="report-date-from">DATE FROM (BATCH)</label>
-            <input id="report-date-from" type="date" />
-          </div>
-          <div>
-            <label for="report-date-to">DATE TO (BATCH)</label>
-            <input id="report-date-to" type="date" />
-          </div>
         </div>
-
-        <div class="field-row" style="margin-top:0.4rem;">
-          <div>
-            <label for="report-group">GROUP</label>
-            <input id="report-group" class="upper" placeholder="E.G. RAW MATERIAL" />
-          </div>
-          <div>
-            <label for="report-status">STATUS</label>
-            <select id="report-status">
-              <option value="ALL">ALL</option>
-              <option value="PENDING">PENDING</option>
-              <option value="APPROVED">APPROVED</option>
-              <option value="REJECTED">REJECTED</option>
-            </select>
-          </div>
-          <div>
-            <label for="report-batch">BATCH NAME</label>
-            <input id="report-batch" class="upper" placeholder="TYPE BATCH NAME…" />
-          </div>
-        </div>
-
         <div class="actions-row" style="margin-top:0.2rem;">
-          <button type="button" id="item-search-btn" class="secondary small">APPLY FILTERS</button>
-          <button type="button" id="item-clear-search-btn" class="secondary small">CLEAR FILTERS</button>
+          <button type="button" id="item-search-btn" class="secondary small">SEARCH</button>
+          <button type="button" id="item-clear-search-btn" class="secondary small">CLEAR</button>
           <span class="muted" id="item-search-result"></span>
         </div>
 
@@ -758,97 +525,19 @@
     </section>
   </main>
 
-  <!-- EDIT MODAL -->
-  <div id="edit-modal" class="modal-overlay">
-    <div class="modal">
-      <h3>EDIT ITEM</h3>
-      <div class="field-row" style="margin-bottom:0.4rem;">
-        <div>
-          <label for="modal-name">ITEM NAME *</label>
-          <input id="modal-name" class="upper" />
-        </div>
-        <div>
-          <label for="modal-qty">QTY *</label>
-          <input id="modal-qty" type="number" min="0" step="1" />
-        </div>
-      </div>
-      <div class="field-row" style="margin-bottom:0.4rem;">
-        <div>
-          <label for="modal-group">GROUP</label>
-          <input id="modal-group" class="upper" />
-        </div>
-      </div>
-      <div>
-        <label for="modal-details">DETAILS</label>
-        <textarea id="modal-details" class="upper"></textarea>
-      </div>
-
-      <div style="margin-top:0.6rem;">
-        <label>IMAGES (ADMIN CAN ADD / REMOVE)</label>
-        <div class="actions-row" style="margin-top:0.25rem;">
-          <button type="button" id="modal-upload-btn" class="secondary small">UPLOAD</button>
-          <button type="button" id="modal-capture-btn" class="secondary small">CAPTURE</button>
-          <span class="muted" id="modal-image-status"></span>
-        </div>
-        <input
-          id="modal-upload-input"
-          type="file"
-          accept="image/*"
-          multiple
-          style="display:none;"
-        />
-        <input
-          id="modal-capture-input"
-          type="file"
-          accept="image/*"
-          capture="environment"
-          multiple
-          style="display:none;"
-        />
-        <div id="modal-images-list">
-          <p class="muted">NO IMAGES.</p>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" id="modal-cancel-btn" class="secondary small">CANCEL</button>
-        <button type="button" id="modal-save-btn" class="small">SAVE</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- IMAGE VIEWER -->
-  <div id="image-viewer">
-    <div class="image-viewer-inner">
-      <div class="viewer-top-row">
-        <button type="button" id="viewer-close-btn" class="secondary small viewer-close">&times;</button>
-      </div>
-      <div class="viewer-main">
-        <button type="button" id="viewer-prev-btn" class="secondary small viewer-nav">&#8249;</button>
-        <div class="viewer-image-wrapper" id="viewer-wrapper">
-          <img id="viewer-image" src="" alt="IMAGE" />
-        </div>
-        <button type="button" id="viewer-next-btn" class="secondary small viewer-nav">&#8250;</button>
-      </div>
-      <div class="viewer-footer">
-        <span id="viewer-counter" class="muted"></span>
-        <button type="button" id="viewer-delete-btn" class="danger small">DELETE (X)</button>
-      </div>
-    </div>
-  </div>
-
   <script>
+    // ===== CONFIG =====
     const BACKEND_URL = "https://inventory-backend-s4sv.onrender.com/get-token";
     const NOTIFY_URL = "https://inventory-backend-s4sv.onrender.com/notify-batch";
     const REPO_OWNER = "unique205";
     const REPO_NAME = "inventory-data";
     const FILE_PATH = "data/inventory.json";
-    const IMAGES_FILE_PATH = "images.json";
     const BRANCH = "main";
     const ADMIN_PASSWORD = "admin123";
-    const ADMIN_PHONE = "917588756668";
-    const WHATSAPP_PHONE = ADMIN_PHONE;
+    const ADMIN_PHONE = "917588756668"; // +91 7588756668
+    const WHATSAPP_PHONE = ADMIN_PHONE; // used for wa.me
 
+    // ===== STATE =====
     let currentRole = "staff";
     let inventory = [];
     let currentSha = null;
@@ -857,36 +546,20 @@
     let adminEditId = null;
     let selectedBatchKey = null;
 
-    let imagesStore = [];
-    let imagesSha = null;
-    let formImages = [];
-    let modalImages = [];
-
+    // Search/filter state
     let batchSearchName = "";
     let batchSearchDate = "";
     let itemSearchTerm = "";
-    let currentBatchFilter = "pending";
-    let reportDateFrom = "";
-    let reportDateTo = "";
-    let reportGroupFilter = "";
-    let reportStatusFilter = "ALL";
-    let reportBatchNameFilter = "";
+    let currentBatchFilter = "pending"; // "pending" or "approved"
 
-    let modalEditId = null;
-
-    const viewerState = {
-      source: null,
-      images: [],
-      index: 0,
-      deletable: false,
-      onChange: null
-    };
-
+    // ===== DOM =====
     const appTitle = document.getElementById("app-title");
     const roleBadge = document.getElementById("role-badge");
+
     const mainEl = document.querySelector("main");
     const staffBatchWrapper = document.getElementById("staff-batch-wrapper");
 
+    // Staff/admin shared add form
     const itemForm = document.getElementById("item-form");
     const itemNameInput = document.getElementById("item-name");
     const itemQtyInput = document.getElementById("item-qty");
@@ -900,17 +573,12 @@
     const nameInputWrapper = document.querySelector(".name-input-wrapper");
     const itemSuggestions = document.getElementById("item-suggestions");
 
-    const uploadImageBtn = document.getElementById("upload-image-btn");
-    const captureImageBtn = document.getElementById("capture-image-btn");
-    const uploadImageInput = document.getElementById("item-images-upload-input");
-    const captureImageInput = document.getElementById("item-images-capture-input");
-    const imageList = document.getElementById("item-images-list");
-    const imageStatusText = document.getElementById("image-status-text");
-
+    // Shared batch view (used by staff & admin ADD tab)
     const batchBody = document.getElementById("batch-body");
     const uploadBatchBtn = document.getElementById("upload-batch-btn");
     const batchStatus = document.getElementById("batch-status");
 
+    // Admin general
     const adminCard = document.getElementById("admin-card");
     const pendingBadge = document.getElementById("pending-badge");
     const adminAddTab = document.getElementById("admin-add-tab");
@@ -919,12 +587,12 @@
     const adminItemsTab = document.getElementById("admin-items-tab");
     const tabButtons = document.querySelectorAll(".admin-main-tab");
 
+    // Admin batches
     const batchListInfo = document.getElementById("batch-list-info");
     const batchList = document.getElementById("batch-list");
     const batchItemsWrapper = document.getElementById("batch-items-wrapper");
     const selectedBatchLabel = document.getElementById("selected-batch-label");
     const approveBatchBtn = document.getElementById("approve-batch-btn");
-    const rejectBatchBtn = document.getElementById("reject-batch-btn");
     const sendWhatsAppBtn = document.getElementById("send-whatsapp-btn");
     const adminBatchBody = document.getElementById("admin-batch-body");
     const batchSearchNameInput = document.getElementById("batch-search-name");
@@ -933,41 +601,15 @@
     const batchClearSearchBtn = document.getElementById("batch-clear-search-btn");
     const batchFilterButtons = document.querySelectorAll(".batch-filter-tab");
 
+    // Admin items
     const countInfo = document.getElementById("count-info");
     const inventoryBody = document.getElementById("inventory-body");
     const itemSearchInput = document.getElementById("item-search-input");
     const itemSearchBtn = document.getElementById("item-search-btn");
     const itemClearSearchBtn = document.getElementById("item-clear-search-btn");
     const itemSearchResult = document.getElementById("item-search-result");
-    const reportDateFromInput = document.getElementById("report-date-from");
-    const reportDateToInput = document.getElementById("report-date-to");
-    const reportGroupInput = document.getElementById("report-group");
-    const reportStatusSelect = document.getElementById("report-status");
-    const reportBatchInput = document.getElementById("report-batch");
 
-    const editModal = document.getElementById("edit-modal");
-    const modalNameInput = document.getElementById("modal-name");
-    const modalQtyInput = document.getElementById("modal-qty");
-    const modalGroupInput = document.getElementById("modal-group");
-    const modalDetailsInput = document.getElementById("modal-details");
-    const modalCancelBtn = document.getElementById("modal-cancel-btn");
-    const modalSaveBtn = document.getElementById("modal-save-btn");
-    const modalUploadBtn = document.getElementById("modal-upload-btn");
-    const modalCaptureBtn = document.getElementById("modal-capture-btn");
-    const modalUploadInput = document.getElementById("modal-upload-input");
-    const modalCaptureInput = document.getElementById("modal-capture-input");
-    const modalImagesList = document.getElementById("modal-images-list");
-    const modalImageStatus = document.getElementById("modal-image-status");
-
-    const imageViewer = document.getElementById("image-viewer");
-    const viewerCloseBtn = document.getElementById("viewer-close-btn");
-    const viewerPrevBtn = document.getElementById("viewer-prev-btn");
-    const viewerNextBtn = document.getElementById("viewer-next-btn");
-    const viewerDeleteBtn = document.getElementById("viewer-delete-btn");
-    const viewerImage = document.getElementById("viewer-image");
-    const viewerCounter = document.getElementById("viewer-counter");
-    const viewerWrapper = document.getElementById("viewer-wrapper");
-
+    // ===== UTILS =====
     function setStatus(msg) {
       statusText.textContent = msg.toUpperCase();
     }
@@ -984,17 +626,40 @@
       return `BATCH_${ts}_${rand}`;
     }
 
-    function generateImageId() {
-      const ts = Date.now();
-      const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
-      return `IMG_${ts}_${rand}`;
-    }
-
     function formatDate(iso) {
       if (!iso) return "-";
       const d = new Date(iso);
       if (Number.isNaN(d.getTime())) return String(iso).toUpperCase();
       return d.toLocaleString().toUpperCase();
+    }
+
+    // WhatsApp message: pure "NAME, QTY, GROUP" per line, no caption
+    function buildBatchWhatsAppMessage(batchTimeIso, items) {
+      const itemLines = items.map((it) => {
+        const parts = [
+          (it.name || "").toString().toUpperCase(),
+          String(it.quantity ?? ""),
+          (it.group || "").toString().toUpperCase()
+        ];
+        return parts.join(", ");
+      });
+      return itemLines.join("\n");
+    }
+
+    function openWhatsAppForBatch(message) {
+      const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`;
+
+      try {
+        const win = window.open(url, "_blank");
+        if (!win) {
+          console.warn("WHATSAPP WINDOW BLOCKED OR NOT OPENED");
+          return false;
+        }
+        return true;
+      } catch (err) {
+        console.error("FAILED TO OPEN WHATSAPP:", err);
+        return false;
+      }
     }
 
     function getBatchKeyForItem(item) {
@@ -1008,24 +673,42 @@
     function getStatusDisplay(statusRaw) {
       const s = (statusRaw || "PENDING").toUpperCase();
       if (s === "APPROVED") return "✅ APPROVED";
-      if (s === "REJECTED") return "❌ REJECTED";
       return "🟡 PENDING";
+    }
+
+    function getBatchDisplayNameFromItems(batchKey, items) {
+      if (!items || !items.length) return formatDate(batchKey);
+      const first = items[0];
+      const batchName = (first.batchName || "").trim();
+      const batchTime = getBatchTimeForItem(first) || batchKey;
+      if (batchName) return batchName;
+      return formatDate(batchTime);
     }
 
     async function getBackendToken() {
       try {
         const res = await fetch(BACKEND_URL, { method: "POST" });
-        if (!res.ok) return null;
+        if (!res.ok) {
+          console.warn("BACKEND /get-token HTTP ERROR:", res.status);
+          return null;
+        }
         const data = await res.json().catch(() => ({}));
-        return data.token || null;
-      } catch {
+        if (!data.token) {
+          console.warn("BACKEND /get-token RETURNED NO TOKEN");
+          return null;
+        }
+        return data.token;
+      } catch (err) {
+        console.error("BACKEND /get-token FAILED:", err);
         return null;
       }
     }
 
     async function githubRequest(path, options = {}) {
       const token = await getBackendToken();
-      if (!token) throw new Error("BACKEND TOKEN REQUEST FAILED");
+      if (!token) {
+        throw new Error("BACKEND TOKEN REQUEST FAILED");
+      }
 
       const res = await fetch(`https://api.github.com${path}`, {
         ...options,
@@ -1051,21 +734,26 @@
       itemDetailsInput.value = "";
       batchEditIndex = null;
       adminEditId = null;
-      formImages = [];
-      renderFormImages();
 
-      submitBtn.textContent = "ADD TO BATCH";
-      formTitle.textContent = currentRole === "admin" ? "ADD ITEM (ADMIN)" : "ADD ITEM";
+      if (currentRole === "admin") {
+        submitBtn.textContent = "UPDATE ITEM";
+        formTitle.textContent = "EDIT ITEM (ADMIN)";
+      } else {
+        submitBtn.textContent = "ADD TO BATCH";
+        formTitle.textContent = "ADD ITEM";
+      }
       cancelEditBtn.style.display = "none";
     }
 
     function moveStaffUIForRole() {
       if (!staffBatchWrapper || !adminCard || !mainEl || !adminAddContainer) return;
       if (currentRole === "admin") {
+        // Move staff UI into admin ADD tab
         if (staffBatchWrapper.parentNode !== adminAddContainer) {
           adminAddContainer.appendChild(staffBatchWrapper);
         }
       } else {
+        // Move staff UI back above admin panel
         if (staffBatchWrapper.parentNode !== mainEl) {
           mainEl.insertBefore(staffBatchWrapper, adminCard);
         }
@@ -1098,6 +786,7 @@
       renderAdminViews();
     }
 
+    // Simple "ding" sound when clicking bell (needs user interaction)
     function playBellSound() {
       try {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -1113,18 +802,23 @@
         gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
         osc.start(now);
         osc.stop(now + 0.6);
-      } catch {}
+      } catch (e) {
+        console.warn("Audio not available:", e);
+      }
     }
 
+    // ===== LOAD / SAVE INVENTORY =====
     async function loadInventory() {
       try {
         setStatus("LOADING FROM GITHUB…");
         const data = await githubRequest(
           `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(FILE_PATH)}?ref=${BRANCH}`
         );
+
         currentSha = data.sha;
         const decoded = atob(data.content.replace(/\n/g, ""));
         inventory = decoded.trim() ? JSON.parse(decoded) : [];
+
         renderAdminViews();
         setStatus("LOADED");
       } catch (err) {
@@ -1132,13 +826,12 @@
         inventory = [];
         currentSha = null;
         renderAdminViews();
-        setStatus("WORKING OFFLINE");
+        setStatus("WORKING OFFLINE (INVENTORY NOT LOADED)");
       }
     }
 
     async function saveInventory() {
-      const snapshot = JSON.stringify(inventory, null, 2);
-      const content = btoa(snapshot);
+      const content = btoa(JSON.stringify(inventory, null, 2));
       const body = {
         message: "UPDATE INVENTORY.JSON FROM INVENTORY-APP",
         content,
@@ -1150,76 +843,33 @@
         `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(FILE_PATH)}`,
         { method: "PUT", body: JSON.stringify(body) }
       );
+
       currentSha = data.content.sha;
     }
 
-    async function loadImages() {
-      try {
-        const data = await githubRequest(
-          `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(IMAGES_FILE_PATH)}?ref=${BRANCH}`
-        );
-        imagesSha = data.sha;
-        const decoded = atob(data.content.replace(/\n/g, ""));
-        imagesStore = decoded.trim() ? JSON.parse(decoded) : [];
-      } catch (err) {
-        console.warn("LOAD IMAGES FAILED:", err);
-        imagesStore = [];
-        imagesSha = null;
-      }
-    }
-
-    async function saveImages() {
-      const snapshot = JSON.stringify(imagesStore, null, 2);
-      const content = btoa(snapshot);
-      const body = {
-        message: "UPDATE IMAGES.JSON FROM INVENTORY-APP",
-        content,
-        branch: BRANCH
-      };
-      if (imagesSha) body.sha = imagesSha;
-
-      const data = await githubRequest(
-        `/repos/${REPO_OWNER}/${REPO_NAME}/contents/${encodeURIComponent(IMAGES_FILE_PATH)}`,
-        { method: "PUT", body: JSON.stringify(body) }
-      );
-      imagesSha = data.content.sha;
-    }
-
-    function getImagesForItem(itemId) {
-      const entry = imagesStore.find((e) => e.itemId === itemId);
-      return entry ? entry.images || [] : [];
-    }
-
-    function setImagesForItem(itemId, images) {
-      const idx = imagesStore.findIndex((e) => e.itemId === itemId);
-      const payload = { itemId, images };
-      if (idx === -1) imagesStore.push(payload);
-      else imagesStore[idx] = payload;
-    }
-
+    // ===== STAFF/ADMIN BATCH UI =====
     function renderBatch() {
       batchBody.innerHTML = "";
 
       if (!batchItems.length) {
         batchBody.innerHTML =
           '<tr><td colspan="6" class="muted">NO ITEMS IN BATCH.</td></tr>';
-        return;
+      } else {
+        batchItems.forEach((item, index) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${item.id}</td>
+            <td>${item.name}</td>
+            <td>${item.quantity}</td>
+            <td>${item.group || ""}</td>
+            <td>${item.details || ""}</td>
+            <td class="actions-cell">
+              <button class="small secondary" data-action="edit-batch" data-index="${index}">EDIT</button>
+              <button class="small danger" data-action="remove-batch" data-index="${index}">REMOVE</button>
+            </td>`;
+          batchBody.appendChild(tr);
+        });
       }
-
-      batchItems.forEach((item, index) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${item.id}</td>
-          <td>${item.name}</td>
-          <td>${item.quantity}</td>
-          <td>${item.group || ""}</td>
-          <td>${item.details || ""}</td>
-          <td class="actions-cell">
-            <button class="small secondary" data-action="edit-batch" data-index="${index}">EDIT</button>
-            <button class="small danger" data-action="remove-batch" data-index="${index}">REMOVE</button>
-          </td>`;
-        batchBody.appendChild(tr);
-      });
     }
 
     batchBody.addEventListener("click", (e) => {
@@ -1234,10 +884,7 @@
         itemQtyInput.value = item.quantity;
         itemGroupInput.value = item.group || "";
         itemDetailsInput.value = item.details || "";
-        formImages = (item.images || []).map((img) => ({ ...img }));
-        renderFormImages();
-
-        submitBtn.textContent = "UPDATE BATCH ITEM";
+        submitBtn.textContent = currentRole === "admin" ? "UPDATE ITEM" : "UPDATE BATCH ITEM";
         cancelEditBtn.style.display = "inline-block";
         formTitle.textContent = currentRole === "admin" ? "EDIT ITEM (ADMIN)" : "EDIT BATCH ITEM";
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1261,7 +908,6 @@
         const batchId = generateBatchId();
 
         await loadInventory();
-        await loadImages();
 
         const enriched = batchItems.map((item) => ({
           ...item,
@@ -1272,16 +918,8 @@
         }));
 
         inventory = inventory.concat(enriched);
-
-        enriched.forEach((item) => {
-          const imgs = item.images || [];
-          setImagesForItem(item.id, imgs);
-        });
-
         await saveInventory();
-        await saveImages();
         await loadInventory();
-        await loadImages();
 
         batchItems = [];
         renderBatch();
@@ -1295,152 +933,7 @@
       }
     });
 
-    function renderFormImages() {
-      if (!imageList) return;
-      if (!formImages.length) {
-        imageList.innerHTML = '<p class="muted">NO IMAGES ADDED.</p>';
-        imageStatusText.textContent = "";
-        return;
-      }
-
-      const wrap = document.createElement("div");
-      wrap.className = "image-thumbs";
-      formImages.forEach((img, index) => {
-        const div = document.createElement("div");
-        div.className = "image-thumb";
-        div.innerHTML = `
-          <img src="${img.dataUrl}" alt="" data-view-source="form" data-view-index="${index}">
-          <button type="button" class="danger small" data-img-id="${img.id}">X</button>
-        `;
-        wrap.appendChild(div);
-      });
-      imageList.innerHTML = "";
-      imageList.appendChild(wrap);
-      imageStatusText.textContent = `${formImages.length} IMAGE(S)`;
-    }
-
-    uploadImageBtn.addEventListener("click", () => {
-      uploadImageInput.click();
-    });
-
-    captureImageBtn.addEventListener("click", () => {
-      captureImageInput.click();
-    });
-
-    async function compressImageFile(file, maxSizeBytes) {
-      const dataUrl = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-
-            const maxDim = 1280;
-            let width = img.width;
-            let height = img.height;
-
-            if (width > height && width > maxDim) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            } else if (height >= width && height > maxDim) {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-            ctx.drawImage(img, 0, 0, width, height);
-
-            let quality = 0.9;
-            let out = canvas.toDataURL("image/jpeg", quality);
-
-            const calcSize = (d) => Math.round((d.length * 3) / 4);
-
-            while (calcSize(out) > maxSizeBytes && quality > 0.3) {
-              quality -= 0.1;
-              out = canvas.toDataURL("image/jpeg", quality);
-            }
-
-            if (calcSize(out) > maxSizeBytes) {
-              resolve(null);
-            } else {
-              resolve(out);
-            }
-          };
-          img.onerror = reject;
-          img.src = e.target.result;
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      }).catch(() => null);
-
-      if (!dataUrl) return null;
-
-      return {
-        id: generateImageId(),
-        name: file.name,
-        size: Math.round((dataUrl.length * 3) / 4),
-        dataUrl
-      };
-    }
-
-    async function processSelectedFiles(files, targetArray, statusEl, renderFn) {
-      if (!files.length) return;
-
-      const maxImages = 10;
-      const maxSize = 2 * 1024 * 1024;
-      let rejectedTooMany = false;
-      let rejectedSize = false;
-
-      for (const file of files) {
-        if (targetArray.length >= maxImages) {
-          rejectedTooMany = true;
-          break;
-        }
-
-        const compressed = await compressImageFile(file, maxSize);
-        if (!compressed) {
-          rejectedSize = true;
-          continue;
-        }
-
-        targetArray.push(compressed);
-      }
-
-      renderFn();
-
-      if (statusEl) {
-        if (rejectedTooMany) {
-          statusEl.textContent = "MAX 10 IMAGES REACHED.";
-        } else if (rejectedSize) {
-          statusEl.textContent = "SOME IMAGES COULD NOT BE COMPRESSED <= 2MB.";
-        } else {
-          statusEl.textContent = `${targetArray.length} IMAGE(S)`;
-        }
-      }
-    }
-
-    uploadImageInput.addEventListener("change", (e) => {
-      const files = Array.from(e.target.files || []);
-      processSelectedFiles(files, formImages, imageStatusText, renderFormImages);
-      uploadImageInput.value = "";
-    });
-
-    captureImageInput.addEventListener("change", (e) => {
-      const files = Array.from(e.target.files || []);
-      processSelectedFiles(files, formImages, imageStatusText, renderFormImages);
-      captureImageInput.value = "";
-    });
-
-    imageList.addEventListener("click", (e) => {
-      const btn = e.target.closest("button[data-img-id]");
-      if (!btn) return;
-      const id = btn.dataset.imgId;
-      formImages = formImages.filter((img) => img.id !== id);
-      renderFormImages();
-    });
-
+    // ===== ITEM NAME SUGGESTIONS =====
     function clearSuggestions() {
       if (!itemSuggestions) return;
       itemSuggestions.innerHTML = "";
@@ -1507,8 +1000,6 @@
       if (match.quantity != null) itemQtyInput.value = match.quantity;
       itemGroupInput.value = (match.group || "").toString().toUpperCase();
       itemDetailsInput.value = (match.details || "").toString().toUpperCase();
-      formImages = getImagesForItem(match.id).map((img) => ({ ...img }));
-      renderFormImages();
       clearSuggestions();
     });
 
@@ -1518,6 +1009,7 @@
       }
     });
 
+    // ===== ADMIN: GROUPING =====
     function groupByBatch() {
       const groups = {};
       inventory.forEach((item) => {
@@ -1528,6 +1020,7 @@
       return groups;
     }
 
+    // ===== ADMIN: RENDER VIEWS =====
     function renderAdminViews() {
       if (currentRole !== "admin") return;
 
@@ -1543,23 +1036,26 @@
         return db - da;
       });
 
+      // Count pending / approved batches
       let pendingCount = 0;
       let approvedCount = 0;
-      let rejectedCount = 0;
       keys.forEach((k) => {
         const first = groups[k][0];
         const statusRaw = (first.batchStatus || "PENDING").toUpperCase();
         if (statusRaw === "APPROVED") approvedCount++;
-        else if (statusRaw === "REJECTED") rejectedCount++;
         else pendingCount++;
       });
 
       if (pendingBadge) {
         pendingBadge.textContent = `🔔 ${pendingCount}`;
-        if (pendingCount > 0) pendingBadge.classList.add("bell-alert");
-        else pendingBadge.classList.remove("bell-alert");
+        if (pendingCount > 0) {
+          pendingBadge.classList.add("bell-alert");
+        } else {
+          pendingBadge.classList.remove("bell-alert");
+        }
       }
 
+      // BATCH LIST TAB
       batchList.innerHTML = "";
       let shownCount = 0;
 
@@ -1572,10 +1068,11 @@
         const statusRaw = (first.batchStatus || "PENDING").toUpperCase();
         const statusDisplay = getStatusDisplay(statusRaw);
 
-        if (currentBatchFilter === "pending" && statusRaw !== "PENDING") return;
+        // Filter by pending/approved tab
+        if (currentBatchFilter === "pending" && statusRaw === "APPROVED") return;
         if (currentBatchFilter === "approved" && statusRaw !== "APPROVED") return;
-        if (currentBatchFilter === "rejected" && statusRaw !== "REJECTED") return;
 
+        // Filter by search
         const nameFilter = batchSearchName;
         const dateFilter = batchSearchDate;
         const dateStr = (() => {
@@ -1584,8 +1081,12 @@
           return d.toISOString().slice(0, 10);
         })();
 
-        if (nameFilter && !displayName.toUpperCase().includes(nameFilter)) return;
-        if (dateFilter && dateStr !== dateFilter) return;
+        if (nameFilter && !displayName.toUpperCase().includes(nameFilter)) {
+          return;
+        }
+        if (dateFilter && dateStr !== dateFilter) {
+          return;
+        }
 
         const div = document.createElement("div");
         div.className = "batch-header";
@@ -1605,10 +1106,10 @@
       if (!keys.length) {
         batchListInfo.textContent = "NO BATCHES FOUND.";
       } else {
-        batchListInfo.textContent =
-          `${pendingCount} PENDING • ${approvedCount} APPROVED • ${rejectedCount} REJECTED (VIEW: ${currentBatchFilter.toUpperCase()}, SHOWING ${shownCount})`;
+        batchListInfo.textContent = `${pendingCount} PENDING • ${approvedCount} APPROVED (VIEW: ${currentBatchFilter.toUpperCase()}, SHOWING ${shownCount})`;
       }
 
+      // ALL ITEMS TAB
       inventoryBody.innerHTML = "";
       if (!inventory.length) {
         countInfo.textContent = "NO ITEMS IN INVENTORY.";
@@ -1616,39 +1117,24 @@
           '<tr><td colspan="8" class="muted">NO ITEMS.</td></tr>';
         itemSearchResult.textContent = "";
       } else {
-        let filteredCount = 0;
+        countInfo.textContent = `${inventory.length} ITEMS`;
+
         let matchCount = 0;
         let firstMatchInfo = null;
 
         inventory.forEach((item) => {
-          const nameUpper = (item.name || "").toString().toUpperCase();
-          const groupUpper = (item.group || "").toString().toUpperCase();
-          const statusRaw = (item.batchStatus || "PENDING").toUpperCase();
-          const batchNameUpper = (item.batchName || "").toString().toUpperCase();
-          const batchKey = getBatchKeyForItem(item);
-          const batchTime = getBatchTimeForItem(item) || batchKey;
-          const batchDateStr = (() => {
-            const d = new Date(batchTime);
-            if (isNaN(d)) return "";
-            return d.toISOString().slice(0, 10);
-          })();
+          const nameStr = (item.name || "").toString().toUpperCase();
+          const matches = itemSearchTerm && nameStr.includes(itemSearchTerm);
 
-          if (itemSearchTerm && !nameUpper.includes(itemSearchTerm)) return;
-          if (reportGroupFilter && !groupUpper.includes(reportGroupFilter)) return;
-          if (reportStatusFilter !== "ALL" && statusRaw !== reportStatusFilter) return;
-          if (reportBatchNameFilter && !batchNameUpper.includes(reportBatchNameFilter)) return;
-          if (reportDateFrom && batchDateStr && batchDateStr < reportDateFrom) return;
-          if (reportDateTo && batchDateStr && batchDateStr > reportDateTo) return;
-
-          filteredCount++;
-
-          const matchesName = itemSearchTerm && nameUpper.includes(itemSearchTerm);
-          if (matchesName) {
+          if (matches) {
             matchCount++;
             if (!firstMatchInfo) {
-              const batchLabel = batchNameUpper
+              const batchKey = getBatchKeyForItem(item);
+              const batchTime = getBatchTimeForItem(item) || batchKey;
+              const batchLabel = (item.batchName && item.batchName.trim())
                 ? item.batchName
                 : formatDate(batchTime);
+              const statusRaw = item.batchStatus || "PENDING";
               const statusDisplay = getStatusDisplay(statusRaw);
               firstMatchInfo = {
                 name: item.name,
@@ -1659,7 +1145,9 @@
           }
 
           const tr = document.createElement("tr");
-          if (matchesName) tr.classList.add("highlight-row");
+          if (matches) {
+            tr.classList.add("highlight-row");
+          }
           tr.innerHTML = `
             <td>${item.id || "-"}</td>
             <td>${item.name || ""}</td>
@@ -1675,23 +1163,17 @@
           inventoryBody.appendChild(tr);
         });
 
-        if (!filteredCount) {
-          inventoryBody.innerHTML =
-            '<tr><td colspan="8" class="muted">NO ITEMS MATCH FILTERS.</td></tr>';
-        }
-
-        countInfo.textContent = `${filteredCount} ITEMS (FILTERED FROM ${inventory.length})`;
-
         if (itemSearchTerm && matchCount > 0 && firstMatchInfo) {
           itemSearchResult.textContent =
             `'${firstMatchInfo.name}' FOUND IN BATCH: ${firstMatchInfo.batchLabel} • STATUS: ${firstMatchInfo.statusDisplay}`;
-        } else if (itemSearchTerm && filteredCount === 0) {
+        } else if (itemSearchTerm) {
           itemSearchResult.textContent = "NO ITEMS FOUND FOR SEARCH.";
         } else {
           itemSearchResult.textContent = "";
         }
       }
 
+      // Selected batch details (if any)
       if (selectedBatchKey && groups[selectedBatchKey]) {
         renderSelectedBatchItems(selectedBatchKey, groups[selectedBatchKey]);
       } else {
@@ -1700,6 +1182,7 @@
       }
     }
 
+    // BATCH LIST CLICK (VIEW / RENAME)
     batchList.addEventListener("click", async (e) => {
       const btn = e.target;
       const action = btn.dataset.action;
@@ -1769,6 +1252,7 @@
       });
     }
 
+    // APPROVE (ADMIN ONLY)
     approveBatchBtn.addEventListener("click", async () => {
       if (!selectedBatchKey) {
         alert("NO BATCH SELECTED.");
@@ -1817,58 +1301,7 @@
       }
     });
 
-    rejectBatchBtn.addEventListener("click", async () => {
-      if (!selectedBatchKey) {
-        alert("NO BATCH SELECTED.");
-        return;
-      }
-
-      const groups = groupByBatch();
-      const items = groups[selectedBatchKey];
-      if (!items || !items.length) {
-        alert("BATCH HAS NO ITEMS.");
-        return;
-      }
-
-      if (!confirm("REJECT THIS BATCH?")) return;
-
-      try {
-        setStatus("REJECTING BATCH…");
-
-        inventory.forEach((it) => {
-          if (getBatchKeyForItem(it) === selectedBatchKey) it.batchStatus = "REJECTED";
-        });
-        await saveInventory();
-        await loadInventory();
-        setStatus("BATCH REJECTED");
-      } catch (err) {
-        console.error("REJECT FAILED:", err);
-        setStatus("ERROR REJECTING BATCH");
-      }
-    });
-
-    function buildBatchWhatsAppMessage(items) {
-      const lines = items.map((it) => {
-        const parts = [
-          (it.name || "").toString().toUpperCase(),
-          String(it.quantity ?? ""),
-          (it.group || "").toString().toUpperCase()
-        ];
-        return parts.join(", ");
-      });
-      return lines.join("\n");
-    }
-
-    function openWhatsAppForBatch(message) {
-      const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(message)}`;
-      try {
-        const win = window.open(url, "_blank");
-        return !!win;
-      } catch {
-        return false;
-      }
-    }
-
+    // SEND WHATSAPP (ADMIN ONLY, AFTER APPROVAL)
     sendWhatsAppBtn.addEventListener("click", () => {
       if (!selectedBatchKey) {
         alert("NO BATCH SELECTED.");
@@ -1889,141 +1322,15 @@
         return;
       }
 
-      const message = buildBatchWhatsAppMessage(items);
+      const batchTime = getBatchTimeForItem(first) || selectedBatchKey;
+      const message = buildBatchWhatsAppMessage(batchTime, items);
       const opened = openWhatsAppForBatch(message);
-      if (!opened) alert("WHATSAPP MESSAGE (COPY & SEND):\n\n" + message);
-    });
-
-    function renderModalImages() {
-      if (!modalImagesList) return;
-      if (!modalImages.length) {
-        modalImagesList.innerHTML = '<p class="muted">NO IMAGES.</p>';
-        modalImageStatus.textContent = "";
-        return;
-      }
-
-      const wrap = document.createElement("div");
-      wrap.className = "image-thumbs";
-      modalImages.forEach((img, index) => {
-        const div = document.createElement("div");
-        div.className = "image-thumb";
-        div.innerHTML = `
-          <img src="${img.dataUrl}" alt="" data-view-source="modal" data-view-index="${index}">
-          <button type="button" class="danger small" data-modal-img-id="${img.id}">X</button>
-        `;
-        wrap.appendChild(div);
-      });
-      modalImagesList.innerHTML = "";
-      modalImagesList.appendChild(wrap);
-      modalImageStatus.textContent = `${modalImages.length} IMAGE(S)`;
-    }
-
-    function openEditModal(item) {
-      modalEditId = item.id;
-      modalNameInput.value = (item.name || "").toString().toUpperCase();
-      modalQtyInput.value = item.quantity ?? "";
-      modalGroupInput.value = (item.group || "").toString().toUpperCase();
-      modalDetailsInput.value = (item.details || "").toString().toUpperCase();
-      modalImages = getImagesForItem(item.id).map((img) => ({ ...img }));
-      renderModalImages();
-      editModal.style.display = "flex";
-    }
-
-    function closeEditModal() {
-      modalEditId = null;
-      editModal.style.display = "none";
-    }
-
-    modalCancelBtn.addEventListener("click", () => {
-      closeEditModal();
-    });
-
-    editModal.addEventListener("click", (e) => {
-      if (e.target === editModal) {
-        closeEditModal();
+      if (!opened) {
+        alert("WHATSAPP MESSAGE (COPY & SEND):\n\n" + message);
       }
     });
 
-    modalUploadBtn.addEventListener("click", () => {
-      modalUploadInput.click();
-    });
-
-    modalCaptureBtn.addEventListener("click", () => {
-      modalCaptureInput.click();
-    });
-
-    modalUploadInput.addEventListener("change", (e) => {
-      const files = Array.from(e.target.files || []);
-      processSelectedFiles(files, modalImages, modalImageStatus, renderModalImages);
-      modalUploadInput.value = "";
-    });
-
-    modalCaptureInput.addEventListener("change", (e) => {
-      const files = Array.from(e.target.files || []);
-      processSelectedFiles(files, modalImages, modalImageStatus, renderModalImages);
-      modalCaptureInput.value = "";
-    });
-
-    modalImagesList.addEventListener("click", (e) => {
-      const btn = e.target.closest("button[data-modal-img-id]");
-      if (!btn) return;
-      const id = btn.dataset.modalImgId;
-      modalImages = modalImages.filter((img) => img.id !== id);
-      renderModalImages();
-    });
-
-    modalSaveBtn.addEventListener("click", async () => {
-      if (!modalEditId) {
-        closeEditModal();
-        return;
-      }
-
-      const name = modalNameInput.value.trim().toUpperCase();
-      const qty = Number(modalQtyInput.value || 0);
-      const group = modalGroupInput.value.trim().toUpperCase();
-      const details = modalDetailsInput.value.trim().toUpperCase();
-
-      if (!name || Number.isNaN(qty)) {
-        alert("NAME AND QUANTITY ARE REQUIRED.");
-        return;
-      }
-
-      const now = new Date().toISOString();
-
-      try {
-        setStatus("UPDATING ITEM…");
-        await loadInventory();
-        await loadImages();
-
-        const idx = inventory.findIndex((it) => it.id === modalEditId);
-        if (idx === -1) {
-          setStatus("ITEM NOT FOUND");
-          closeEditModal();
-          return;
-        }
-
-        inventory[idx] = {
-          ...inventory[idx],
-          name,
-          quantity: qty,
-          group,
-          details,
-          updatedAt: now
-        };
-        setImagesForItem(modalEditId, modalImages.map((img) => ({ ...img })));
-
-        await saveInventory();
-        await saveImages();
-        await loadInventory();
-        await loadImages();
-        closeEditModal();
-        setStatus("ITEM UPDATED");
-      } catch (err) {
-        console.error("MODAL SAVE FAILED:", err);
-        setStatus("ERROR SAVING");
-      }
-    });
-
+    // ADMIN TABLE ACTIONS (EDIT / DELETE)
     adminBatchBody.addEventListener("click", handleAdminTableClick);
     inventoryBody.addEventListener("click", handleAdminTableClick);
 
@@ -2033,20 +1340,30 @@
       if (!btn.dataset.action || !id) return;
 
       if (btn.dataset.action === "edit-item") {
-        await loadImages();
         const item = inventory.find((it) => it.id === id);
         if (!item) {
           setStatus("ITEM NOT FOUND");
           return;
         }
-        openEditModal(item);
+
+        currentRole = "admin";
+        updateRoleUI();
+
+        adminEditId = id;
+        itemNameInput.value = (item.name || "").toString().toUpperCase();
+        itemQtyInput.value = item.quantity ?? "";
+        itemGroupInput.value = (item.group || "").toString().toUpperCase();
+        itemDetailsInput.value = (item.details || "").toString().toUpperCase();
+        submitBtn.textContent = "UPDATE ITEM";
+        cancelEditBtn.style.display = "inline-block";
+        formTitle.textContent = "EDIT ITEM (ADMIN)";
+        window.scrollTo({ top: 0, behavior: "smooth" });
       } else if (btn.dataset.action === "delete-item") {
         if (!confirm("DELETE THIS ITEM?")) return;
 
         try {
           setStatus("DELETING ITEM…");
           await loadInventory();
-          await loadImages();
 
           const idx = inventory.findIndex((it) => it.id === id);
           if (idx === -1) {
@@ -2055,12 +1372,8 @@
           }
 
           inventory.splice(idx, 1);
-          imagesStore = imagesStore.filter((e) => e.itemId !== id);
-
           await saveInventory();
-          await saveImages();
           await loadInventory();
-          await loadImages();
           setStatus("ITEM DELETED");
         } catch (err) {
           console.error("DELETE FAILED:", err);
@@ -2069,6 +1382,7 @@
       }
     }
 
+    // STAFF/ADMIN FORM SUBMIT
     itemForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
@@ -2081,17 +1395,14 @@
         alert("NAME AND QUANTITY ARE REQUIRED.");
         return;
       }
-      if (!formImages.length) {
-        alert("AT LEAST 1 IMAGE IS REQUIRED.");
-        return;
-      }
 
       const now = new Date().toISOString();
 
+      // Both staff and admin use same batch mechanism here
       const baseItem = {
         id:
           batchEditIndex === null
-            ? adminEditId || generateId()
+            ? generateId()
             : batchItems[batchEditIndex].id,
         name,
         quantity: qty,
@@ -2104,48 +1415,11 @@
         updatedAt: now
       };
 
-      if (currentRole === "admin" && adminEditId && batchEditIndex === null) {
-        try {
-          setStatus("UPDATING ITEM…");
-          await loadInventory();
-          await loadImages();
-
-          const idx = inventory.findIndex((it) => it.id === adminEditId);
-          if (idx === -1) {
-            setStatus("ITEM NOT FOUND");
-            return;
-          }
-
-          inventory[idx] = {
-            ...inventory[idx],
-            name,
-            quantity: qty,
-            group,
-            details,
-            updatedAt: now
-          };
-          setImagesForItem(adminEditId, formImages.map((img) => ({ ...img })));
-
-          await saveInventory();
-          await saveImages();
-          await loadInventory();
-          await loadImages();
-          resetForm();
-          setStatus("ITEM UPDATED");
-        } catch (err) {
-          console.error("SAVE FAILED:", err);
-          setStatus("ERROR SAVING");
-        }
-        return;
-      }
-
-      const copyImages = formImages.map((img) => ({ ...img }));
-
       if (batchEditIndex === null) {
-        batchItems.push({ ...baseItem, images: copyImages });
+        batchItems.push(baseItem);
         setStatus("ITEM ADDED TO BATCH");
       } else {
-        batchItems[batchEditIndex] = { ...baseItem, images: copyImages };
+        batchItems[batchEditIndex] = baseItem;
         setStatus("BATCH ITEM UPDATED");
       }
 
@@ -2155,6 +1429,7 @@
 
     cancelEditBtn.addEventListener("click", () => resetForm());
 
+    // ADMIN LOGIN VIA TITLE
     appTitle.addEventListener("click", () => {
       if (currentRole === "admin") {
         currentRole = "staff";
@@ -2172,15 +1447,17 @@
 
       currentRole = "admin";
       updateRoleUI();
-      Promise.all([loadInventory(), loadImages()]);
+      loadInventory();
     });
 
+    // ADMIN MAIN TABS (ADD / BATCHES / ITEMS)
     tabButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
         setAdminMainTab(btn.dataset.tab);
       });
     });
 
+    // BATCH PENDING / APPROVED FILTER TABS
     batchFilterButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
         currentBatchFilter = btn.dataset.batchView || "pending";
@@ -2190,6 +1467,7 @@
       });
     });
 
+    // BATCH SEARCH EVENTS
     batchSearchBtn.addEventListener("click", () => {
       batchSearchName = (batchSearchNameInput.value || "").trim().toUpperCase();
       batchSearchDate = batchSearchDateInput.value || "";
@@ -2204,33 +1482,20 @@
       renderAdminViews();
     });
 
+    // ITEM SEARCH EVENTS
     itemSearchBtn.addEventListener("click", () => {
       itemSearchTerm = (itemSearchInput.value || "").trim().toUpperCase();
-      reportDateFrom = reportDateFromInput.value || "";
-      reportDateTo = reportDateToInput.value || "";
-      reportGroupFilter = (reportGroupInput.value || "").trim().toUpperCase();
-      reportStatusFilter = (reportStatusSelect.value || "ALL").toUpperCase();
-      reportBatchNameFilter = (reportBatchInput.value || "").trim().toUpperCase();
       renderAdminViews();
     });
 
     itemClearSearchBtn.addEventListener("click", () => {
       itemSearchInput.value = "";
-      reportDateFromInput.value = "";
-      reportDateToInput.value = "";
-      reportGroupInput.value = "";
-      reportStatusSelect.value = "ALL";
-      reportBatchInput.value = "";
       itemSearchTerm = "";
-      reportDateFrom = "";
-      reportDateTo = "";
-      reportGroupFilter = "";
-      reportStatusFilter = "ALL";
-      reportBatchNameFilter = "";
       itemSearchResult.textContent = "";
       renderAdminViews();
     });
 
+    // BELL CLICK: go to batches → pending + ding + scroll
     pendingBadge.addEventListener("click", () => {
       if (currentRole !== "admin") return;
       setAdminMainTab("batches");
@@ -2243,224 +1508,11 @@
       playBellSound();
     });
 
-    let viewerScale = 1;
-    let viewerTranslateX = 0;
-    let viewerTranslateY = 0;
-    let viewerPointers = new Map();
-    let viewerInitialDistance = 0;
-    let viewerInitialScale = 1;
-    let viewerLastX = 0;
-    let viewerLastY = 0;
-
-    function applyViewerTransform() {
-      viewerImage.style.transform =
-        `translate(${viewerTranslateX}px, ${viewerTranslateY}px) scale(${viewerScale})`;
-    }
-
-    function resetViewerTransform() {
-      viewerScale = 1;
-      viewerTranslateX = 0;
-      viewerTranslateY = 0;
-      applyViewerTransform();
-    }
-
-    function openImageViewer(imagesArray, startIndex, options) {
-      if (!imagesArray || !imagesArray.length) return;
-      viewerState.source = options.source || null;
-      viewerState.images = imagesArray;
-      viewerState.index = startIndex || 0;
-      viewerState.deletable = !!options.deletable;
-      viewerState.onChange = options.onChange || null;
-
-      viewerDeleteBtn.style.display = viewerState.deletable ? "inline-flex" : "none";
-
-      showViewerImage(viewerState.index);
-      resetViewerTransform();
-      imageViewer.style.display = "flex";
-    }
-
-    function closeImageViewer() {
-      imageViewer.style.display = "none";
-      viewerState.source = null;
-      viewerState.images = [];
-      viewerState.index = 0;
-      viewerState.deletable = false;
-      viewerState.onChange = null;
-      resetViewerTransform();
-    }
-
-    function showViewerImage(i) {
-      if (!viewerState.images.length) return;
-      if (i < 0) i = 0;
-      if (i >= viewerState.images.length) i = viewerState.images.length - 1;
-      viewerState.index = i;
-      const img = viewerState.images[i];
-      viewerImage.style.display = "block";
-      viewerImage.src = img.dataUrl;
-      viewerCounter.textContent = `${i + 1} / ${viewerState.images.length}`;
-      resetViewerTransform();
-    }
-
-    function nextViewerImage() {
-      if (!viewerState.images.length) return;
-      const i = (viewerState.index + 1) % viewerState.images.length;
-      showViewerImage(i);
-    }
-
-    function prevViewerImage() {
-      if (!viewerState.images.length) return;
-      const i =
-        (viewerState.index - 1 + viewerState.images.length) %
-        viewerState.images.length;
-      showViewerImage(i);
-    }
-
-    viewerCloseBtn.addEventListener("click", closeImageViewer);
-    viewerPrevBtn.addEventListener("click", prevViewerImage);
-    viewerNextBtn.addEventListener("click", nextViewerImage);
-
-    viewerDeleteBtn.addEventListener("click", () => {
-      if (!viewerState.deletable || !viewerState.images.length) return;
-      const idx = viewerState.index;
-      const newArr = viewerState.images.filter((_, i) => i !== idx);
-      viewerState.images = newArr;
-      if (viewerState.onChange) viewerState.onChange(newArr);
-      if (!newArr.length) {
-        closeImageViewer();
-        return;
-      }
-      const newIndex = Math.min(idx, newArr.length - 1);
-      showViewerImage(newIndex);
-    });
-
-    imageViewer.addEventListener("click", (e) => {
-      if (e.target === imageViewer) {
-        closeImageViewer();
-      }
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (imageViewer.style.display !== "flex") return;
-      if (e.key === "Escape") {
-        closeImageViewer();
-      } else if ((e.key === "x" || e.key === "X") && viewerState.deletable) {
-        viewerDeleteBtn.click();
-      } else if (e.key === "ArrowRight") {
-        nextViewerImage();
-      } else if (e.key === "ArrowLeft") {
-        prevViewerImage();
-      }
-    });
-
-    viewerWrapper.addEventListener("pointerdown", (e) => {
-      viewerWrapper.setPointerCapture(e.pointerId);
-      viewerPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-
-      if (viewerPointers.size === 1) {
-        viewerLastX = e.clientX;
-        viewerLastY = e.clientY;
-      } else if (viewerPointers.size === 2) {
-        const arr = Array.from(viewerPointers.values());
-        const dx = arr[1].x - arr[0].x;
-        const dy = arr[1].y - arr[0].y;
-        viewerInitialDistance = Math.hypot(dx, dy);
-        viewerInitialScale = viewerScale;
-      }
-    });
-
-    viewerWrapper.addEventListener("pointermove", (e) => {
-      if (!viewerPointers.has(e.pointerId)) return;
-      viewerPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-
-      if (viewerPointers.size === 1) {
-        const dx = e.clientX - viewerLastX;
-        const dy = e.clientY - viewerLastY;
-        viewerLastX = e.clientX;
-        viewerLastY = e.clientY;
-        viewerTranslateX += dx;
-        viewerTranslateY += dy;
-        applyViewerTransform();
-      } else if (viewerPointers.size === 2) {
-        const arr = Array.from(viewerPointers.values());
-        const dx = arr[1].x - arr[0].x;
-        const dy = arr[1].y - arr[0].y;
-        const dist = Math.hypot(dx, dy);
-        if (viewerInitialDistance > 0) {
-          let newScale = viewerInitialScale * (dist / viewerInitialDistance);
-          newScale = Math.max(1, Math.min(4, newScale));
-          viewerScale = newScale;
-          applyViewerTransform();
-        }
-      }
-    });
-
-    viewerWrapper.addEventListener("pointerup", (e) => {
-      viewerWrapper.releasePointerCapture(e.pointerId);
-      viewerPointers.delete(e.pointerId);
-      if (viewerPointers.size === 1) {
-        const remaining = Array.from(viewerPointers.values())[0];
-        viewerLastX = remaining.x;
-        viewerLastY = remaining.y;
-      }
-    });
-
-    viewerWrapper.addEventListener("pointercancel", (e) => {
-      viewerWrapper.releasePointerCapture(e.pointerId);
-      viewerPointers.delete(e.pointerId);
-    });
-
-    let touchStartX = 0;
-    let touchStartY = 0;
-    imageViewer.addEventListener("touchstart", (e) => {
-      if (e.touches.length === 1) {
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-      }
-    });
-
-    imageViewer.addEventListener("touchend", (e) => {
-      if (e.changedTouches.length === 0) return;
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      const dy = e.changedTouches[0].clientY - touchStartY;
-      if (Math.abs(dx) > 50 && Math.abs(dy) < 40 && viewerScale === 1) {
-        if (dx < 0) nextViewerImage();
-        else prevViewerImage();
-      }
-    });
-
-    document.addEventListener("click", (e) => {
-      const imgEl = e.target.closest("img[data-view-source]");
-      if (!imgEl) return;
-
-      const source = imgEl.dataset.viewSource;
-      const index = Number(imgEl.dataset.viewIndex || 0);
-
-      if (source === "form") {
-        openImageViewer(formImages, index, {
-          source: "form",
-          deletable: true,
-          onChange: (newArr) => {
-            formImages = newArr;
-            renderFormImages();
-          }
-        });
-      } else if (source === "modal") {
-        openImageViewer(modalImages, index, {
-          source: "modal",
-          deletable: true,
-          onChange: (newArr) => {
-            modalImages = newArr;
-            renderModalImages();
-          }
-        });
-      }
-    });
-
+    // INIT
     (async function init() {
       updateRoleUI();
       renderBatch();
       await loadInventory();
-      await loadImages();
     })();
   </script>
 </body>
